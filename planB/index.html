@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+
+<body>
+  <h1>Juego sobre Celiaquía</h1>
+  <div class="instructions">
+    <h2>Instrucciones</h2>
+    <p>¡Ayuda a Clara y Santiago a seleccionar los alimentos correctos!</p>
+    <p>- Alimentos verdes: Sin TACC y saludables (máxima puntuación)</p>
+    <p>- Alimentos amarillos: Sin TACC pero no saludables (puntuación media)</p>
+    <p>- Alimentos rojos: Con TACC (restan puntos y dañan la salud)</p>
+    <p>Mueve tus manos para "agarrar" los alimentos que aparecen en pantalla.</p>
+  </div>
+
+  <div class="controls">
+    <button id="b-start-webcam">Iniciar Cámara</button>
+    <button id="b-start-game">Iniciar Juego</button>
+    <button id="b-stop-webcam">Detener Cámara</button>
+    <!--agtregar botom detener juego-->
+  </div>
+
+  <div>FPS: <span id="fps"></span></div>
+
+  <br>
+
+  <div id="game-container">
+    <video width="640" height="480" autoplay hidden></video>
+    <canvas width="640" height="480" style="transform: scaleX(-1);"></canvas>
+    <!-- el -1 hace qu equede como espejo, sacarlo y dejarlo para cuando tengamos que probar con el proyector -->
+  </div>
+
+  <!-- Require the peer dependencies of pose-detection and hand-pose-detection. -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+
+  <!-- You must explicitly require a TF.js backend if you're not using the TF.js union bundle. -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose-detection"></script>
+
+  <script type="module" src="JuegoCeliaquia.js"></script>
+</body>
+
+</html>
