@@ -13,7 +13,7 @@ Este proyecto se desarrolla en el marco de juegos serios para la educación en s
 ## Créditos 👨‍💻
 Este proyecto está basado en el modelo de reconocimiento desarrollado por:
 - **Ing. Oscar A. Stanchi** 
-- Repositorio base: [recognition-model-js](https://github.com/indirivacua/recognition-model-js)
+- Repositorio base: https://github.com/indirivacua/recognition-model-js
 
 ## Licencia ⚖️
 Este proyecto es una adaptación con fines educativos y de investigación en el campo de la salud.
