@@ -47,10 +47,13 @@ async function runInference(canvas, camera) {
   const image = camera.getVideo();
 
   try {
+    // Detectar tanto poses como manos
     const hands = await rec.estimateHands(image, {
       flipHorizontal: false,
       staticImageMode: false,
     });
+    
+    const poses = await rec.estimatePoses(image);
 
     canvas.drawCameraFrame(camera);
     
@@ -58,7 +61,8 @@ async function runInference(canvas, camera) {
     gameManager.update(Date.now(), hands);
     gameManager.draw();
     
-    // Dibuja detecciones
+    // Dibuja todas las detecciones
+    canvas.drawResultsPoses(poses);
     canvas.drawResultsHands(hands);
 
     updateFPS();
