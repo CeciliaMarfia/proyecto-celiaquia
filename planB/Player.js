@@ -16,12 +16,12 @@ export class Player {
 
   collectFood(foodType) {
     switch(foodType) {
-      case 1: // food1_* (saludable)
+      case 1: // food1* (saludable)
         this.score += 10; // 10 puntos por comida tipo food1
         this.vitalEnergy = Math.min(100, this.vitalEnergy + 5);
         this.foodsCollected.healthy++;
         break;
-      case 2: // food2_* (no saludable)
+      case 2: // food2* (no saludable)
         this.score += 5; // 5 puntos por comida tipo food2
         this.vitalEnergy = Math.max(0, this.vitalEnergy - 5);
         this.foodsCollected.unhealthy++;

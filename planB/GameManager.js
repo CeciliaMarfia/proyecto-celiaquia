@@ -17,7 +17,9 @@ export class GameManager {
       daily: { speed: 1, foodRatio: [0.6, 0.3, 0.1] },
       birthday: { speed: 1.3, foodRatio: [0.4, 0.3, 0.3] },
       travel: { speed: 1.6, foodRatio: [0.5, 0.2, 0.3] }
-    };
+    }
+    this.isPaused = false // Para controlar el estado de pausa del juego; es para nosotras, no para el juego
+    this.pauseStartTime = 0; // Para guardar el momento en que se pausa el juego
 
     // Agregar listener para redimensionamiento
     window.addEventListener('resize', () => {
@@ -29,11 +31,11 @@ export class GameManager {
     const container = document.getElementById('game-container');
     const width = container.clientWidth;
     const height = container.clientHeight;
-    
+
     // Actualizar dimensiones del canvas
     this.canvas.canvas.width = width;
     this.canvas.canvas.height = height;
-    
+
     // Redibujar el estado actual
     this.draw();
   }
@@ -44,38 +46,130 @@ export class GameManager {
 
   startGame() {
     this.gameStarted = true;
+    this.isPaused = false;
     this.gameStartTime = Date.now();
+    this.pauseStartTime = 0;
     this.allFoodItems = [];
     this.players.forEach(p => p.reset());
+
+    // Actualiza estados de los botones
     document.getElementById('b-start-game').disabled = true;
+    document.getElementById('b-pause-game').disabled = false;
+    document.getElementById('b-resume-game').disabled = true;
+    document.getElementById('b-end-game').disabled = false;
+    document.getElementById('b-restart-game').disabled = false;
   }
 
   endGame() {
     this.gameStarted = false;
+    this.isPaused = false;
+    this.hidePauseMessage();
+
+    // Apaga la cámara
+    if (typeof camera !== 'undefined') {
+      camera.stop();
+      document.getElementById('b-stop-webcam').disabled = true;
+      document.getElementById('b-start-webcam').disabled = true;
+    }
+
     this.showResults();
+
+    // Actualiza estados de los botones
     document.getElementById('b-start-game').disabled = false;
+    document.getElementById('b-pause-game').disabled = true;
+    document.getElementById('b-resume-game').disabled = true;
+    document.getElementById('b-end-game').disabled = true;
+    document.getElementById('b-restart-game').disabled = false;
   }
 
+  // queda en pausa hasta que se toca el boton de reanudar o el boton de salir del juego
+  pauseGame() {
+    this.isPaused = true;
+    this.pauseStartTime = Date.now(); // Guarda el momento en que se pausa
+
+    // Deshabilita botón de pausa y botones de cámara, y habilita el de continuar (resume) y el de salir del juego
+    document.getElementById('b-pause-game').disabled = true;
+    document.getElementById('b-start-webcam').disabled = true;
+    document.getElementById('b-stop-webcam').disabled = true;
+    document.getElementById('b-resume-game').disabled = false;
+    document.getElementById('b-end-game').disabled = false;
+    document.getElementById('b-restart-game').disabled = false;
+
+    // Muestra mensaje de pausa
+    this.showPauseMessage();
+  }
+
+  resumeGame() {
+    if (!this.isPaused) return; // Si no está pausado, no hacer nada
+
+    // Calcula tiempo de pausa
+    const pauseDuration = Date.now() - this.pauseStartTime;
+
+    // Ajustar los tiempos de los alimentos
+    this.allFoodItems.forEach(food => {
+      food.spawnTime += pauseDuration;
+    });
+
+    // Ajustar tiempos del juego
+    this.gameStartTime += pauseDuration;
+    this.lastFoodSpawn += pauseDuration;
+
+    this.isPaused = false;
+    this.hidePauseMessage();
+
+    // Actualiza botones
+    document.getElementById('b-pause-game').disabled = false;
+    document.getElementById('b-resume-game').disabled = true;
+    document.getElementById('b-start-webcam').disabled = false;
+    document.getElementById('b-stop-webcam').disabled = false;
+    document.getElementById('b-restart-game').disabled = false;
+  }
+
+  restartGame() {
+  // Limpia todo el estado del juego
+  this.gameStarted = false;
+  this.isPaused = false;
+  this.allFoodItems = [];
+  this.players.forEach(p => p.reset());
+  
+  // Oculta resultados si están visibles
+  //const resultsDiv = document.querySelector('.game-results');
+  //if (resultsDiv) resultsDiv.remove();
+  
+  // Reseteo botones al estado inicial
+  document.getElementById('b-start-webcam').disabled = false;
+  document.getElementById('b-stop-webcam').disabled = true;
+  document.getElementById('b-start-game').disabled = true;
+  document.getElementById('b-pause-game').disabled = true;
+  document.getElementById('b-resume-game').disabled = true;
+  document.getElementById('b-end-game').disabled = true;
+  document.getElementById('b-restart-game').disabled = true;
+  
+  camera.stop();
+}
+
   update(currentTime, poses) {
+    if (!this.gameStarted || this.isPaused) return;
+
     if (!this.gameStarted) return;
 
-    // Verificar fin del juego
+    // Verifica fin del juego
     if (currentTime - this.gameStartTime > this.gameDuration) {
       this.endGame();
       return;
     }
 
-    // Generar nuevos alimentos
+    // Genera nuevos alimentos
     if (currentTime - this.lastFoodSpawn > this.foodSpawnInterval) {
       this.spawnFood();
       this.lastFoodSpawn = currentTime;
     }
 
-    // Actualizar alimentos y filtrar inactivos
+    // Actualiza alimentos y filtra inactivos
     this.allFoodItems.forEach(food => food.update(currentTime));
     this.allFoodItems = this.allFoodItems.filter(food => food.isActive);
 
-    // Detectar colisiones si hay jugadores
+    // Detecta colisiones si hay 4 manos (2 jugadores)
     if (poses && poses.length >= 4) {
       this.detectCollisions(poses);
     }
@@ -101,9 +195,9 @@ export class GameManager {
 
   getRandomFoodImage(type) {
     const foodImages = {
-      1: ['apple.png', 'banana.png','avocado.png','carrot.png','lettuce.png','nut.png','pepper.png','strawberry.png'],
-      2: ['drink.png','friepotatoes.png'],
-      3: ['bread.png', 'pizza.png','cookie.png','donut.png']
+      1: ['apple.png', 'banana.png', 'avocado.png', 'carrot.png', 'lettuce.png', 'nut.png', 'pepper.png', 'strawberry.png'],
+      2: ['drink.png', 'friepotatoes.png'],
+      3: ['bread.png', 'pizza.png', 'cookie.png', 'donut.png']
     };
 
     const images = foodImages[type];
@@ -115,10 +209,10 @@ export class GameManager {
   detectCollisions(hands) {
     if (!hands || hands.length === 0) return;
 
-    // Procesar las manos del jugador 1 (primeras dos manos detectadas)
+    // Procesa las manos del jugador 1 (primeras dos manos detectadas)
     const player1Hands = hands.slice(0, 2);
     player1Hands.forEach(hand => {
-      if (hand.score > 0.7) { // Solo considerar detecciones con alta confianza
+      if (hand.score > 0.7) { // Solo considera detecciones con alta confianza
         const handX = hand.keypoints[0].x;
         const handY = hand.keypoints[0].y;
         this.activeFoods.forEach(food => {
@@ -131,10 +225,10 @@ export class GameManager {
       }
     });
 
-    // Procesar las manos del jugador 2 (siguientes dos manos detectadas)
+    // Procesa las manos del jugador 2 (siguientes dos manos detectadas)
     const player2Hands = hands.slice(2, 4);
     player2Hands.forEach(hand => {
-      if (hand.score > 0.7) { // Solo considerar detecciones con alta confianza
+      if (hand.score > 0.7) { // Solo considera detecciones con alta confianza
         const handX = hand.keypoints[0].x;
         const handY = hand.keypoints[0].y;
         this.activeFoods.forEach(food => {
@@ -260,5 +354,25 @@ export class GameManager {
     document.getElementById('b-close-results').addEventListener('click', () => {
       resultsDiv.remove();
     });
+  }
+
+  showPauseMessage() {
+    // Crea o actualiza el mensaje de pausa
+    let pauseMsg = document.getElementById('pause-message');
+    if (!pauseMsg) {
+      pauseMsg = document.createElement('div');
+      pauseMsg.id = 'pause-message';
+      pauseMsg.className = 'game-pause-message';
+      pauseMsg.innerHTML = '<h1>JUEGO EN PAUSA</h1>';
+      document.getElementById('game-container').appendChild(pauseMsg);
+    }
+    pauseMsg.style.display = 'block';
+  }
+
+  hidePauseMessage() {
+    const pauseMsg = document.getElementById('pause-message');
+    if (pauseMsg) {
+      pauseMsg.style.display = 'none';
+    }
   }
 }

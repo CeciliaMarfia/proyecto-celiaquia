@@ -1,11 +1,11 @@
 import { Camera } from './Camera.js';
 import { Canvas } from './Canvas.js';
 import * as rec from './Recognition.js';
-import { updateFPS } from "./fpsModule.js"; 
+import { updateFPS } from "./fpsModule.js";
 import { GameManager } from './GameManager.js';
 
 // Configuración principal
-const camera = new Camera();
+export const camera = new Camera();
 const canvas = new Canvas();
 const gameManager = new GameManager(canvas);
 
@@ -29,7 +29,10 @@ camera.getVideo().addEventListener('loadeddata', () => runInference(canvas, came
 
 document.getElementById('b-start-webcam').addEventListener('click', () => {
   camera.start(canvas);
+  // Deshabilita botones de juego hasta que empiece
   document.getElementById('b-start-game').disabled = false;
+  document.getElementById('b-pause-game').disabled = true;
+  document.getElementById('b-resume-game').disabled = true;
 });
 
 document.getElementById('b-stop-webcam').addEventListener('click', () => {
@@ -39,36 +42,57 @@ document.getElementById('b-stop-webcam').addEventListener('click', () => {
 
 document.getElementById('b-start-game').addEventListener('click', () => {
   gameManager.startGame();
-  this.disabled = true;
 });
+
+document.getElementById('b-pause-game').addEventListener('click', () => {
+  gameManager.pauseGame();
+});
+
+document.getElementById('b-resume-game').addEventListener('click', () => {
+  gameManager.resumeGame();
+});
+
+document.getElementById('b-end-game').addEventListener('click', () => {
+  gameManager.endGame();
+});
+
+document.getElementById('b-restart-game').addEventListener('click', () => {
+  gameManager.restartGame();
+});
+
+// Inicialización de los botones al cargar la página
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('b-pause-game').disabled = true;
+  document.getElementById('b-resume-game').disabled = true;
+  document.getElementById('b-start-game').disabled = true;
+  document.getElementById('b-end-game').disabled = true;
+  document.getElementById('b-restart-game').disabled = true;
+});
+
 
 // Bucle principal del juego
 async function runInference(canvas, camera) {
   const image = camera.getVideo();
-
   try {
     // Detectar tanto poses como manos
     const hands = await rec.estimateHands(image, {
       flipHorizontal: false,
       staticImageMode: false,
     });
-    
-    const poses = await rec.estimatePoses(image);
 
+    const poses = await rec.estimatePoses(image);
     canvas.drawCameraFrame(camera);
-    
+
     // Actualiza y dibuja el juego
     gameManager.update(Date.now(), hands);
     gameManager.draw();
-    
+
     // Dibuja todas las detecciones
     canvas.drawResultsPoses(poses);
     canvas.drawResultsHands(hands);
-
     updateFPS();
   } catch (error) {
     console.error("Error en la detección:", error);
   }
-
   requestAnimationFrame(() => runInference(canvas, camera));
 }
