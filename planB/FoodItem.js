@@ -39,12 +39,12 @@ export class FoodItem {
     }
   }
 
-  draw(ctx) {
+draw(ctx) {
     if (!this.isActive) return;
     
     try {
-      // Asegura que la imagen esté cargada y sea válida
-      if (this.image.complete && this.image.naturalWidth !== 0) {
+        // Asegura que la imagen esté cargada y sea válida
+        if (this.image.complete && this.image.naturalWidth !== 0) {
         ctx.drawImage(
           this.image, 
           this.x, 
@@ -52,12 +52,12 @@ export class FoodItem {
           this.width, 
           this.height
         );
-      }
+        }
     } catch (error) {
-      console.error('Error dibujando:', error);
-      this.isActive = false;
+        console.error('Error dibujando:', error);
+        this.isActive = false;
     }
-  }
+}
 
   checkCollision(handX, handY) {
     if (!this.isActive) return false;
