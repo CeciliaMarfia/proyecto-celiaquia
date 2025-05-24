@@ -18,6 +18,10 @@ rec.loadPoseNet(poseDetection.SupportedModels.MoveNet, {
 rec.loadHandNet(handPoseDetection.SupportedModels.MediaPipeHands, {
   runtime: 'tfjs',
   modelType: 'lite',
+  maxHands: 4,
+  detectorConfig: {
+    runtime: 'tfjs',
+  }
 });
 
 // Event Listeners
@@ -43,17 +47,18 @@ async function runInference(canvas, camera) {
   const image = camera.getVideo();
 
   try {
-    const poses = await rec.estimatePoses(image);
-    const hands = await rec.estimateHands(image, {flipHorizontal: false});
+    const hands = await rec.estimateHands(image, {
+      flipHorizontal: false,
+      staticImageMode: false,
+    });
 
     canvas.drawCameraFrame(camera);
     
     // Actualiza y dibuja el juego
-    gameManager.update(Date.now(), poses);
+    gameManager.update(Date.now(), hands);
     gameManager.draw();
     
     // Dibuja detecciones
-    canvas.drawResultsPoses(poses);
     canvas.drawResultsHands(hands);
 
     updateFPS();

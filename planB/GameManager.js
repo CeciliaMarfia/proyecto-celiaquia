@@ -58,7 +58,7 @@ export class GameManager {
     this.allFoodItems = this.allFoodItems.filter(food => food.isActive);
 
     // Detectar colisiones si hay jugadores
-    if (poses && poses.length >= 2) {
+    if (poses && poses.length >= 4) {
       this.detectCollisions(poses);
     }
   }
@@ -83,58 +83,51 @@ export class GameManager {
 
   getRandomFoodImage(type) {
     const foodImages = {
-      1: ['manzana.jpg', 'banana.jpg'],
-      2: ['chocolate.jpg'],
-      3: ['pan.jpg', 'pizza.jpg']
+      1: ['apple.png', 'banana.png'],
+      2: ['drink.png'],
+      3: ['bread.png', 'pizza.png']
     };
 
     const images = foodImages[type];
     const randomIndex = Math.floor(Math.random() * images.length);
 
-    // Ruta para mi estructura:
-    return `/food${type}_${images[randomIndex]}`;
+    return `food${type}_${images[randomIndex]}`;
   }
 
-  detectCollisions(poses) {
-    // Jugador 1 (pose 0)
-    const player1Hands = this.getHandPositions(poses[0]);
+  detectCollisions(hands) {
+    if (!hands || hands.length === 0) return;
+
+    // Procesar las manos del jugador 1 (primeras dos manos detectadas)
+    const player1Hands = hands.slice(0, 2);
     player1Hands.forEach(hand => {
-      this.activeFoods.forEach(food => {
-        if (food.checkCollision(hand.x, hand.y)) {
-          food.isActive = false;
-          this.players[0].collectFood(food.type);
-          this.createCollectionEffect(food);
-        }
-      });
+      if (hand.score > 0.7) { // Solo considerar detecciones con alta confianza
+        const handX = hand.keypoints[0].x;
+        const handY = hand.keypoints[0].y;
+        this.activeFoods.forEach(food => {
+          if (food.checkCollision(handX, handY)) {
+            food.isActive = false;
+            this.players[0].collectFood(food.type);
+            this.createCollectionEffect(food);
+          }
+        });
+      }
     });
 
-    // Jugador 2 (pose 1)
-    const player2Hands = this.getHandPositions(poses[1]);
+    // Procesar las manos del jugador 2 (siguientes dos manos detectadas)
+    const player2Hands = hands.slice(2, 4);
     player2Hands.forEach(hand => {
-      this.activeFoods.forEach(food => {
-        if (food.checkCollision(hand.x, hand.y)) {
-          food.isActive = false;
-          this.players[1].collectFood(food.type);
-          this.createCollectionEffect(food);
-        }
-      });
+      if (hand.score > 0.7) { // Solo considerar detecciones con alta confianza
+        const handX = hand.keypoints[0].x;
+        const handY = hand.keypoints[0].y;
+        this.activeFoods.forEach(food => {
+          if (food.checkCollision(handX, handY)) {
+            food.isActive = false;
+            this.players[1].collectFood(food.type);
+            this.createCollectionEffect(food);
+          }
+        });
+      }
     });
-  }
-
-  getHandPositions(pose) {
-    const hands = [];
-    if (pose.keypoints) {
-      const leftWrist = pose.keypoints.find(kp => kp.name === 'left_wrist');
-      const rightWrist = pose.keypoints.find(kp => kp.name === 'right_wrist');
-
-      if (leftWrist && leftWrist.score > 0.3) {
-        hands.push({ x: leftWrist.x, y: leftWrist.y });
-      }
-      if (rightWrist && rightWrist.score > 0.3) {
-        hands.push({ x: rightWrist.x, y: rightWrist.y });
-      }
-    }
-    return hands;
   }
 
   createCollectionEffect(food) {
@@ -173,13 +166,14 @@ export class GameManager {
     this.ctx.lineWidth = 3;
 
     // Jugador 1 (izquierda)
-    this.ctx.fillText(`Jugador 1: ${this.players[0].score} pts`, 20, 30);
-    this.ctx.strokeText(`Jugador 1: ${this.players[0].score} pts`, 20, 30);
+    this.ctx.fillText(`Jugador 1: ${this.players[0].score} pts | ❤️ ${this.players[0].vitalEnergy}%`, 20, 30);
+    this.ctx.strokeText(`Jugador 1: ${this.players[0].score} pts | ❤️ ${this.players[0].vitalEnergy}%`, 20, 30);
 
     // Jugador 2 (derecha)
-    const textWidth = this.ctx.measureText(`Jugador 2: ${this.players[1].score} pts`).width;
-    this.ctx.fillText(`Jugador 2: ${this.players[1].score} pts`, this.canvas.canvas.width - textWidth - 20, 30);
-    this.ctx.strokeText(`Jugador 2: ${this.players[1].score} pts`, this.canvas.canvas.width - textWidth - 20, 30);
+    const p2Text = `Jugador 2: ${this.players[1].score} pts | ❤️ ${this.players[1].vitalEnergy}%`;
+    const textWidth = this.ctx.measureText(p2Text).width;
+    this.ctx.fillText(p2Text, this.canvas.canvas.width - textWidth - 20, 30);
+    this.ctx.strokeText(p2Text, this.canvas.canvas.width - textWidth - 20, 30);
 
     // Tiempo restante
     const remaining = Math.ceil((this.gameDuration - (Date.now() - this.gameStartTime)) / 1000);
@@ -198,6 +192,7 @@ export class GameManager {
       <div class="player-result">
         <h2>Jugador 1</h2>
         <p>Puntuación: ${this.players[0].score}</p>
+        <p>Energía Vital: ${this.players[0].vitalEnergy}%</p>
         <div class="food-stats">
           <div class="food-stat">
             <span class="legend healthy"></span>
@@ -217,6 +212,7 @@ export class GameManager {
       <div class="player-result">
         <h2>Jugador 2</h2>
         <p>Puntuación: ${this.players[1].score}</p>
+        <p>Energía Vital: ${this.players[1].vitalEnergy}%</p>
         <div class="food-stats">
           <div class="food-stat">
             <span class="legend healthy"></span>

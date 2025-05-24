@@ -1,107 +1,260 @@
-/* Estilos generales */
-body {
-  font-family: 'Arial', sans-serif;
-  text-align: center;
-  background-color: #f5f5f5;
-  margin: 0;
-  padding: 20px;
-  color: #333;
+/* Variables */
+:root {
+  --primary-color: #4CAF50;
+  --secondary-color: #45a049;
+  --danger-color: #F44336;
+  --warning-color: #FFC107;
+  --safe-color: #4CAF50;
+  --text-color: #2C3E50;
+  --background-color: #F7F9FC;
+  --card-background: #FFFFFF;
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 8px rgba(0,0,0,0.1);
+  --shadow-lg: 0 8px 16px rgba(0,0,0,0.1);
+  --border-radius: 12px;
 }
 
-/* Controles del juego */
+/* Estilos generales */
+body {
+  font-family: 'Nunito', sans-serif;
+  text-align: center;
+  background-color: var(--background-color);
+  margin: 0;
+  padding: 20px;
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+/* Header del juego */
+.game-header {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.game-header h1 {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  margin: 0;
+  padding: 1rem;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+.sin-tacc-badge {
+  position: absolute;
+  top: -10px;
+  right: 20px;
+  background: var(--safe-color);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  transform: rotate(5deg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Instrucciones */
+.instructions {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: var(--card-background);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+}
+
+.instructions h2 {
+  color: var(--primary-color);
+  margin-top: 0;
+  font-size: 1.8rem;
+}
+
+.instruction-content {
+  margin-top: 1.5rem;
+}
+
+.main-instruction {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+}
+
+/* Tipos de comida */
+.food-types {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.food-type {
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  background: white;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.3s ease;
+}
+
+.food-type:hover {
+  transform: translateY(-5px);
+}
+
+.food-type.safe {
+  border-left: 5px solid var(--safe-color);
+}
+
+.food-type.caution {
+  border-left: 5px solid var(--warning-color);
+}
+
+.food-type.danger {
+  border-left: 5px solid var(--danger-color);
+}
+
+.food-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  display: inline-block;
+}
+
+.food-info h3 {
+  margin: 0.5rem 0;
+  color: var(--text-color);
+}
+
+.food-info p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.points {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  border-radius: 15px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.safe .points {
+  background: rgba(76, 175, 80, 0.1);
+  color: var(--safe-color);
+}
+
+.caution .points {
+  background: rgba(255, 193, 7, 0.1);
+  color: var(--warning-color);
+}
+
+.danger .points {
+  background: rgba(244, 67, 54, 0.1);
+  color: var(--danger-color);
+}
+
+.game-tip {
+  font-style: italic;
+  color: #666;
+  margin-top: 2rem;
+}
+
+/* Controles */
 .controls {
-  margin: 20px 0;
+  margin: 2rem 0;
   display: flex;
   justify-content: center;
-  gap: 15px;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 button {
-  padding: 12px 24px;
-  font-size: 16px;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 600;
   cursor: pointer;
-  background-color: #4CAF50;
-  color: white;
   border: none;
-  border-radius: 8px;
-  transition: all 0.3s;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  border-radius: var(--border-radius);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-icon {
+  font-size: 1.2rem;
+}
+
+.btn-primary {
+  background-color: #3498db;
+  color: white;
+}
+
+.btn-success {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn-danger {
+  background-color: var(--danger-color);
+  color: white;
 }
 
 button:hover {
-  background-color: #45a049;
   transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 button:disabled {
-  background-color: #cccccc;
+  background-color: #ccc;
   cursor: not-allowed;
+  transform: none;
+}
+
+/* Contador FPS */
+.fps-counter {
+  background: var(--card-background);
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  color: #666;
+  margin: 1rem 0;
+  box-shadow: var(--shadow-sm);
+}
+
+#fps {
+  font-weight: bold;
+  color: var(--primary-color);
 }
 
 /* Contenedor del juego */
 #game-container {
   position: relative;
   display: inline-block;
-  margin-top: 20px;
-  border: 3px solid #4CAF50;
-  border-radius: 10px;
+  margin-top: 1rem;
+  border-radius: var(--border-radius);
   overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow-lg);
+}
+
+.game-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  border: 3px solid var(--primary-color);
+  border-radius: var(--border-radius);
+  z-index: 2;
 }
 
 canvas {
   display: block;
-  transform: scaleX(-1); /* Espejo para mejor interacción */
   background-color: #f9f9f9;
-}
-
-/* Información del juego */
-.game-info {
-  margin: 10px 0;
-  font-size: 18px;
-}
-
-#fps {
-  font-weight: bold;
-  color: #4CAF50;
-}
-
-/* Instrucciones */
-.instructions {
-  max-width: 800px;
-  margin: 20px auto;
-  padding: 20px;
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.food-legends {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-top: 15px;
-}
-
-.legend {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  margin-right: 8px;
-  vertical-align: middle;
-}
-
-.legend.healthy {
-  background-color: #4CAF50;
-}
-
-.legend.unhealthy {
-  background-color: #FFC107;
-}
-
-.legend.gluten {
-  background-color: #F44336;
+  border-radius: var(--border-radius);
 }
 
 /* Resultados del juego */
@@ -111,57 +264,73 @@ canvas {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.85);
+  background-color: rgba(0, 0, 0, 0.9);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   color: white;
   z-index: 10;
-  padding: 20px;
+  padding: 2rem;
   box-sizing: border-box;
+  border-radius: var(--border-radius);
 }
 
 .game-results h1 {
-  color: #4CAF50;
-  margin-bottom: 30px;
+  color: var(--primary-color);
+  margin-bottom: 2rem;
+  font-size: 2.5rem;
 }
 
 .player-result {
   background-color: rgba(255, 255, 255, 0.1);
-  padding: 20px;
-  border-radius: 10px;
-  margin: 10px 0;
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  margin: 1rem 0;
   width: 80%;
   max-width: 500px;
+  backdrop-filter: blur(5px);
 }
 
 .food-stats {
-  margin-top: 10px;
+  margin-top: 1rem;
 }
 
 .food-stat {
   display: flex;
   justify-content: space-between;
-  margin: 5px 0;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
 }
 
 .game-message {
-  margin-top: 30px;
-  font-size: 18px;
+  margin-top: 2rem;
+  font-size: 1.2rem;
   line-height: 1.6;
   max-width: 80%;
+  text-align: center;
+  color: #fff;
 }
 
-/* Efectos visuales */
+/* Animaciones */
+@keyframes collectedAnimation {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
 .food-collected {
   position: absolute;
-  animation: collectedAnimation 0.5s forwards;
+  animation: collectedAnimation 0.5s ease-out forwards;
 }
-
-/*
-@keyframes collectedAnimation {
-  0% { transform: scale(1); opacity: 1; }
-  100% { transform: scale(3); opacity: 0; }
-}
-  */

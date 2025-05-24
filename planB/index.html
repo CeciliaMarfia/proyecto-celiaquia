@@ -1,52 +1,83 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>¡Aventura Sin TACC! - Juego sobre Celiaquía</title>
   <link rel="stylesheet" href="estilos.css">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
-  <h1>Juego sobre Celiaquía</h1>
+  <div class="game-header">
+    <h1>¡Aventura Sin TACC! 🌾</h1>
+    <div class="sin-tacc-badge">
+      Sin T.A.C.C
+    </div>
+  </div>
+
   <div class="instructions">
-    <h2>Instrucciones</h2>
-    <p>¡Ayuda a Clara y Santiago a seleccionar los alimentos correctos!</p>
-    <p>- Alimentos verdes: Sin TACC y saludables (máxima puntuación)</p>
-    <p>- Alimentos amarillos: Sin TACC pero no saludables (puntuación media)</p>
-    <p>- Alimentos rojos: Con TACC (restan puntos y dañan la salud)</p>
-    <p>Mueve tus manos para "agarrar" los alimentos que aparecen en pantalla.</p>
+    <h2>¿Cómo Jugar? 🎮</h2>
+    <div class="instruction-content">
+      <p class="main-instruction">¡Ayuda a Clara y Santiago a elegir alimentos seguros!</p>
+      <div class="food-types">
+        <div class="food-type safe">
+          <span class="food-icon">🥗</span>
+          <div class="food-info">
+            <h3>Alimentos Seguros</h3>
+            <p>Sin TACC y saludables</p>
+            <span class="points">+10 puntos</span>
+          </div>
+        </div>
+        <div class="food-type caution">
+          <span class="food-icon">🥤</span>
+          <div class="food-info">
+            <h3>Alimentos Regulares</h3>
+            <p>Sin TACC pero no tan saludables</p>
+            <span class="points">+5 puntos</span>
+          </div>
+        </div>
+        <div class="food-type danger">
+          <span class="food-icon">🍕</span>
+          <div class="food-info">
+            <h3>¡Cuidado! Con TACC</h3>
+            <p>Estos alimentos contienen gluten</p>
+            <span class="points">-10 puntos</span>
+          </div>
+        </div>
+      </div>
+      <p class="game-tip">Usa tus manos para atrapar los alimentos que aparecen en pantalla</p>
+    </div>
   </div>
 
   <div class="controls">
-    <button id="b-start-webcam">Iniciar Cámara</button>
-    <button id="b-start-game">Iniciar Juego</button>
-    <button id="b-stop-webcam">Detener Cámara</button>
-    <!--agtregar botom detener juego-->
+    <button id="b-start-webcam" class="btn-primary">
+      <span class="btn-icon">📹</span> Iniciar Cámara
+    </button>
+    <button id="b-start-game" class="btn-success" disabled>
+      <span class="btn-icon">🎮</span> ¡Comenzar Juego!
+    </button>
+    <button id="b-stop-webcam" class="btn-danger">
+      <span class="btn-icon">⏹️</span> Detener Cámara
+    </button>
   </div>
 
-  <div>FPS: <span id="fps"></span></div>
-
-  <br>
+  <div class="fps-counter">FPS: <span id="fps">0</span></div>
 
   <div id="game-container">
+    <div class="game-overlay"></div>
     <video width="640" height="480" autoplay hidden></video>
     <canvas width="640" height="480" style="transform: scaleX(-1);"></canvas>
-    <!-- el -1 hace qu equede como espejo, sacarlo y dejarlo para cuando tengamos que probar con el proyector -->
   </div>
 
-  <!-- Require the peer dependencies of pose-detection and hand-pose-detection. -->
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
-
-  <!-- You must explicitly require a TF.js backend if you're not using the TF.js union bundle. -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
-
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose-detection"></script>
-
   <script type="module" src="JuegoCeliaquia.js"></script>
 </body>
 
