@@ -18,6 +18,24 @@ export class GameManager {
       birthday: { speed: 1.3, foodRatio: [0.4, 0.3, 0.3] },
       travel: { speed: 1.6, foodRatio: [0.5, 0.2, 0.3] }
     };
+
+    // Agregar listener para redimensionamiento
+    window.addEventListener('resize', () => {
+      this.handleResize();
+    });
+  }
+
+  handleResize() {
+    const container = document.getElementById('game-container');
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    
+    // Actualizar dimensiones del canvas
+    this.canvas.canvas.width = width;
+    this.canvas.canvas.height = height;
+    
+    // Redibujar el estado actual
+    this.draw();
   }
 
   get activeFoods() {
@@ -83,9 +101,9 @@ export class GameManager {
 
   getRandomFoodImage(type) {
     const foodImages = {
-      1: ['apple.png', 'banana.png'],
-      2: ['drink.png'],
-      3: ['bread.png', 'pizza.png']
+      1: ['apple.png', 'banana.png','avocado.png','carrot.png','lettuce.png','nut.png','pepper.png','strawberry.png'],
+      2: ['drink.png','friepotatoes.png'],
+      3: ['bread.png', 'pizza.png','cookie.png','donut.png']
     };
 
     const images = foodImages[type];
