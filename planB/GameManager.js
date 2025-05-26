@@ -43,6 +43,15 @@ export class GameManager {
   get activeFoods() {
     return this.allFoodItems.filter(food => food.isActive);
   }
+  
+  updateButtons(startWebCam, stopWebCam, startGame, endGame, pauseGame, resumeGame) {
+    document.getElementById('b-start-webcam').disabled = startWebCam;
+    document.getElementById('b-stop-webcam').disabled = stopWebCam;
+    document.getElementById('b-start-game').disabled = startGame;
+    document.getElementById('b-pause-game').disabled = pauseGame;
+    document.getElementById('b-resume-game').disabled = resumeGame;
+    document.getElementById('b-end-game').disabled = endGame;
+  }
 
   startGame() {
     this.gameStarted = true;
@@ -53,11 +62,7 @@ export class GameManager {
     this.players.forEach(p => p.reset());
 
     // Actualiza estados de los botones
-    document.getElementById('b-start-game').disabled = true;
-    document.getElementById('b-pause-game').disabled = false;
-    document.getElementById('b-resume-game').disabled = true;
-    document.getElementById('b-end-game').disabled = false;
-    document.getElementById('b-restart-game').disabled = false;
+    this.updateButtons(true, false, true, false, false, true);
   }
 
   endGame() {
@@ -65,42 +70,29 @@ export class GameManager {
     this.isPaused = false;
     this.hidePauseMessage();
 
-    // Apaga la cámara
-    if (typeof camera !== 'undefined') {
-      camera.stop();
-      document.getElementById('b-stop-webcam').disabled = true;
-      document.getElementById('b-start-webcam').disabled = true;
+    // console.log(typeof camera);
+    if (typeof this.camera !== 'undefined') {
+      this.camera.stop();
     }
 
     this.showResults();
 
     // Actualiza estados de los botones
-    document.getElementById('b-start-game').disabled = false;
-    document.getElementById('b-pause-game').disabled = true;
-    document.getElementById('b-resume-game').disabled = true;
-    document.getElementById('b-end-game').disabled = true;
-    document.getElementById('b-restart-game').disabled = false;
+    this.updateButtons(false, true, false, true, true, true);
+
+    // guardarResultadosEnFirebase(); // -- a implementar después
   }
 
-  // queda en pausa hasta que se toca el boton de reanudar o el boton de salir del juego
+  // Pausa hasta que se toca el boton de reanudar o salir del juego
   pauseGame() {
     this.isPaused = true;
     this.pauseStartTime = Date.now(); // Guarda el momento en que se pausa
-
-    // Deshabilita botón de pausa y botones de cámara, y habilita el de continuar (resume) y el de salir del juego
-    document.getElementById('b-pause-game').disabled = true;
-    document.getElementById('b-start-webcam').disabled = true;
-    document.getElementById('b-stop-webcam').disabled = true;
-    document.getElementById('b-resume-game').disabled = false;
-    document.getElementById('b-end-game').disabled = false;
-    document.getElementById('b-restart-game').disabled = false;
-
-    // Muestra mensaje de pausa
-    this.showPauseMessage();
+    this.updateButtons(true, false, false, true, true, false);
+    this.showPauseMessage(); // Muestra mensaje de pausa
   }
 
   resumeGame() {
-    if (!this.isPaused) return; // Si no está pausado, no hacer nada
+    if (!this.isPaused) return; // Si no está pausado, no hacer nada -- no deberia pasar nunca pero deberia probarlo bien
 
     // Calcula tiempo de pausa
     const pauseDuration = Date.now() - this.pauseStartTime;
@@ -116,42 +108,11 @@ export class GameManager {
 
     this.isPaused = false;
     this.hidePauseMessage();
-
-    // Actualiza botones
-    document.getElementById('b-pause-game').disabled = false;
-    document.getElementById('b-resume-game').disabled = true;
-    document.getElementById('b-start-webcam').disabled = false;
-    document.getElementById('b-stop-webcam').disabled = false;
-    document.getElementById('b-restart-game').disabled = false;
+    this.updateButtons(false, false, false, true, false, true);
   }
 
-  restartGame() {
-  // Limpia todo el estado del juego
-  this.gameStarted = false;
-  this.isPaused = false;
-  this.allFoodItems = [];
-  this.players.forEach(p => p.reset());
-  
-  // Oculta resultados si están visibles
-  //const resultsDiv = document.querySelector('.game-results');
-  //if (resultsDiv) resultsDiv.remove();
-  
-  // Reseteo botones al estado inicial
-  document.getElementById('b-start-webcam').disabled = false;
-  document.getElementById('b-stop-webcam').disabled = true;
-  document.getElementById('b-start-game').disabled = true;
-  document.getElementById('b-pause-game').disabled = true;
-  document.getElementById('b-resume-game').disabled = true;
-  document.getElementById('b-end-game').disabled = true;
-  document.getElementById('b-restart-game').disabled = true;
-  
-  camera.stop();
-}
-
-  update(currentTime, poses) {
+  update(currentTime, hands) {
     if (!this.gameStarted || this.isPaused) return;
-
-    if (!this.gameStarted) return;
 
     // Verifica fin del juego
     if (currentTime - this.gameStartTime > this.gameDuration) {
@@ -169,9 +130,9 @@ export class GameManager {
     this.allFoodItems.forEach(food => food.update(currentTime));
     this.allFoodItems = this.allFoodItems.filter(food => food.isActive);
 
-    // Detecta colisiones si hay 4 manos (2 jugadores)
-    if (poses && poses.length >= 4) {
-      this.detectCollisions(poses);
+    // Detecta colisiones si hay 4 manos (2 jugadores) -- si no hay 4 manos, no detecta colisiones (esto no esta ok pero tendríamos que definir qué hacer, si un jugador esconde una mano no puede frenarse el juego)
+    if (hands && hands.length >= 4) {
+      this.detectCollisions(hands);
     }
   }
 
@@ -189,7 +150,6 @@ export class GameManager {
 
     const imageName = this.getRandomFoodImage(type);
     const imagePath = `foodImages/${imageName}`;
-    console.log('Cargando imagen:', imagePath); // Para debug
     this.allFoodItems.push(new FoodItem(x, y, type, imagePath));
   }
 
@@ -206,40 +166,41 @@ export class GameManager {
     return `food${type}_${images[randomIndex]}`;
   }
 
+  // Método auxiliar para procesar las manos de un jugador
+  processPlayerHands(playerHands, playerIndex) {
+    playerHands.forEach(hand => {
+      if (hand.keypoints && hand.keypoints.length > 0 && hand.score > 0.7) { // Verificación de keypoints y solo considera detecciones con alta confianza
+        const handX = hand.keypoints[0].x;
+        const handY = hand.keypoints[0].y;
+        this.activeFoods.forEach(food => {
+          console.log("comida activa");
+          if (food.checkCollision(handX, handY)) {
+            console.log("Colisión detectada");
+            food.isActive = false;
+            this.players[playerIndex].collectFood(food.type);
+            this.createCollectionEffect(food);
+          }
+        });
+      }
+    });
+  }
+
   detectCollisions(hands) {
     if (!hands || hands.length === 0) return;
 
+    console.log("Detectando colisiones con cant manos:", hands.length);
+
     // Procesa las manos del jugador 1 (primeras dos manos detectadas)
     const player1Hands = hands.slice(0, 2);
-    player1Hands.forEach(hand => {
-      if (hand.score > 0.7) { // Solo considera detecciones con alta confianza
-        const handX = hand.keypoints[0].x;
-        const handY = hand.keypoints[0].y;
-        this.activeFoods.forEach(food => {
-          if (food.checkCollision(handX, handY)) {
-            food.isActive = false;
-            this.players[0].collectFood(food.type);
-            this.createCollectionEffect(food);
-          }
-        });
-      }
-    });
+    this.processPlayerHands(player1Hands, 0);
+
+    console.log("Manos del jugador 1 procesadas:", player1Hands.length);
 
     // Procesa las manos del jugador 2 (siguientes dos manos detectadas)
     const player2Hands = hands.slice(2, 4);
-    player2Hands.forEach(hand => {
-      if (hand.score > 0.7) { // Solo considera detecciones con alta confianza
-        const handX = hand.keypoints[0].x;
-        const handY = hand.keypoints[0].y;
-        this.activeFoods.forEach(food => {
-          if (food.checkCollision(handX, handY)) {
-            food.isActive = false;
-            this.players[1].collectFood(food.type);
-            this.createCollectionEffect(food);
-          }
-        });
-      }
-    });
+    this.processPlayerHands(player2Hands, 1);
+
+    console.log("Manos del jugador 2 procesadas:", player2Hands.length);
   }
 
   createCollectionEffect(food) {
@@ -298,62 +259,82 @@ export class GameManager {
   showResults() {
     const resultsDiv = document.createElement('div');
     resultsDiv.className = 'game-results';
-    resultsDiv.innerHTML = `
-      <h1>¡Juego Terminado!</h1>
-      
-      <div class="player-result">
-        <h2>Jugador 1</h2>
-        <p>Puntuación: ${this.players[0].score}</p>
-        <p>Energía Vital: ${this.players[0].vitalEnergy}%</p>
-        <div class="food-stats">
-          <div class="food-stat">
-            <span class="legend healthy"></span>
-            <span>Saludables: ${this.players[0].foodsCollected.healthy}</span>
-          </div>
-          <div class="food-stat">
-            <span class="legend unhealthy"></span>
-            <span>No saludables: ${this.players[0].foodsCollected.unhealthy}</span>
-          </div>
-          <div class="food-stat">
-            <span class="legend gluten"></span>
-            <span>Con gluten: ${this.players[0].foodsCollected.gluten}</span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="player-result">
-        <h2>Jugador 2</h2>
-        <p>Puntuación: ${this.players[1].score}</p>
-        <p>Energía Vital: ${this.players[1].vitalEnergy}%</p>
-        <div class="food-stats">
-          <div class="food-stat">
-            <span class="legend healthy"></span>
-            <span>Saludables: ${this.players[1].foodsCollected.healthy}</span>
-          </div>
-          <div class="food-stat">
-            <span class="legend unhealthy"></span>
-            <span>No saludables: ${this.players[1].foodsCollected.unhealthy}</span>
-          </div>
-          <div class="food-stat">
-            <span class="legend gluten"></span>
-            <span>Con gluten: ${this.players[1].foodsCollected.gluten}</span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="game-message">
-        <p>La celiaquía es una condición seria donde incluso pequeñas cantidades de gluten pueden causar daño.</p>
-        <p>¡Siempre verifica los alimentos y busca el sello SIN TACC!</p>
-      </div>
-      
-      <button id="b-close-results">Cerrar</button>
-    `;
+    const title = document.createElement('h1');
+    title.textContent = '¡Juego Terminado!';
+
+    // Contenedor para los jugadores
+    const playersContainer = document.createElement('div');
+    playersContainer.className = 'players-results-container';
+
+    // Jugador 1
+    const player1Div = this.createPlayerResult('Jugador 1', 0);
+
+    // Jugador 2
+    const player2Div = this.createPlayerResult('Jugador 2', 1);
+
+    // Agregar jugadores al contenedor
+    playersContainer.append(player1Div, player2Div);
+
+    // Mensaje del juego
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'game-message';
+    const message1 = document.createElement('p');
+    message1.textContent = 'La celiaquía es una condición seria donde incluso pequeñas cantidades de gluten pueden causar daño.';
+    const message2 = document.createElement('p');
+    message2.textContent = '¡Siempre verifica los alimentos y busca el sello SIN TACC!';
+    messageDiv.append(message1, message2);
+
+    // Ensamblar todo para agregarlo al game conteiner
+    resultsDiv.append(
+      title,
+      playersContainer, // Usamos el contenedor en lugar de los divs individuales porque era re ilegible :)
+      messageDiv,
+    );
 
     document.getElementById('game-container').appendChild(resultsDiv);
+  }
 
-    document.getElementById('b-close-results').addEventListener('click', () => {
-      resultsDiv.remove();
-    });
+  // Método auxiliar para crear la sección de cada jugador
+  createPlayerResult(playerName, playerIndex) {
+    const playerDiv = document.createElement('div');
+    playerDiv.className = 'player-result';
+
+    const title = document.createElement('h2');
+    title.textContent = playerName;
+
+    const score = document.createElement('p');
+    score.textContent = `Puntuación: ${this.players[playerIndex].score}`;
+
+    const energy = document.createElement('p');
+    energy.textContent = `Energía Vital: ${this.players[playerIndex].vitalEnergy}%`;
+
+    const foodsDiv = document.createElement('div');
+    foodsDiv.className = 'food-stats';
+
+    // Estadísticas de comida
+    const healthyDiv = this.createFoodStat('healthy', 'Saludables', this.players[playerIndex].foodsCollected.healthy);
+    const unhealthyDiv = this.createFoodStat('unhealthy', 'No saludables', this.players[playerIndex].foodsCollected.unhealthy);
+    const glutenDiv = this.createFoodStat('gluten', 'Con gluten', this.players[playerIndex].foodsCollected.gluten);
+
+    foodsDiv.append(healthyDiv, unhealthyDiv, glutenDiv);
+    playerDiv.append(title, score, energy, foodsDiv);
+
+    return playerDiv;
+  }
+
+  // Método auxiliar para crear cada estadística de comida
+  createFoodStat(className, labelText, value) {
+    const statDiv = document.createElement('div');
+    statDiv.className = 'food-stat';
+
+    const legend = document.createElement('span');
+    legend.className = `legend ${className}`;
+
+    const label = document.createElement('span');
+    label.textContent = `${labelText}: ${value}`;
+
+    statDiv.append(legend, label);
+    return statDiv;
   }
 
   showPauseMessage() {

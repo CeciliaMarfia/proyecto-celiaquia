@@ -7,7 +7,8 @@ import { GameManager } from './GameManager.js';
 // Configuración principal
 export const camera = new Camera();
 const canvas = new Canvas();
-const gameManager = new GameManager(canvas);
+window.gameManager = new GameManager(canvas); // Variable global para acceder al GameManager
+window.gameManager.camera = camera; // Referencia al objeto Camera en el GameManager
 
 // Carga modelos de detección
 rec.loadPoseNet(poseDetection.SupportedModels.MoveNet, {
@@ -41,23 +42,19 @@ document.getElementById('b-stop-webcam').addEventListener('click', () => {
 });
 
 document.getElementById('b-start-game').addEventListener('click', () => {
-  gameManager.startGame();
+  window.gameManager.startGame();
 });
 
 document.getElementById('b-pause-game').addEventListener('click', () => {
-  gameManager.pauseGame();
+  window.gameManager.pauseGame();
 });
 
 document.getElementById('b-resume-game').addEventListener('click', () => {
-  gameManager.resumeGame();
+  window.gameManager.resumeGame();
 });
 
 document.getElementById('b-end-game').addEventListener('click', () => {
-  gameManager.endGame();
-});
-
-document.getElementById('b-restart-game').addEventListener('click', () => {
-  gameManager.restartGame();
+  window.gameManager.endGame();
 });
 
 // Inicialización de los botones al cargar la página
@@ -66,7 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('b-resume-game').disabled = true;
   document.getElementById('b-start-game').disabled = true;
   document.getElementById('b-end-game').disabled = true;
-  document.getElementById('b-restart-game').disabled = true;
 });
 
 
@@ -84,8 +80,8 @@ async function runInference(canvas, camera) {
     canvas.drawCameraFrame(camera);
 
     // Actualiza y dibuja el juego
-    gameManager.update(Date.now(), hands);
-    gameManager.draw();
+    window.gameManager.update(Date.now(), hands);
+    window.gameManager.draw();
 
     // Dibuja todas las detecciones
     canvas.drawResultsPoses(poses);
