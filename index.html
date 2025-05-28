@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -19,7 +20,7 @@
     <h2>¿Cómo Jugar? 🎮</h2>
     <div class="instruction-content">
       <p class="main-instruction">¡Ayuda a Clara y Santiago a elegir alimentos seguros!</p>
-      
+
       <div class="food-types">
         <div class="food-type safe">
           <span class="food-icon">🥗</span>
@@ -29,7 +30,7 @@
             <span class="points">+10 puntos</span>
           </div>
         </div>
-        
+
         <div class="food-type caution">
           <span class="food-icon">🥤</span>
           <div class="food-info">
@@ -38,7 +39,7 @@
             <span class="points">+5 puntos</span>
           </div>
         </div>
-        
+
         <div class="food-type danger">
           <span class="food-icon">🍕</span>
           <div class="food-info">
@@ -48,39 +49,42 @@
           </div>
         </div>
       </div>
-      
+
       <p class="game-tip">Usa tus manos para atrapar los alimentos que aparecen en pantalla</p>
     </div>
   </div>
 
   <div class="controls">
-    <button id="b-start-webcam" class="btn-primary">
-      <span class="btn-icon">📹</span> Iniciar Cámara
-    </button>
-    <button id="b-stop-webcam" class="btn-danger">
-      <span class="btn-icon">⏹️</span> Detener Cámara
-    </button>
-    <button id="b-start-game" class="btn-success" disabled>
-      <span class="btn-icon">🎮</span> ¡Comenzar Juego!
-    </button>
-  </div>
+    <div id="initial-controls">
+      <button id="b-start-webcam" class="btn-primary">
+        <span class="btn-icon">📹</span> Iniciar Cámara
+      </button>
+    </div>
 
-  <div class="control-game-on">
-    <button id="b-resume-game" class="btn-primary">
-      <span class="btn-icon">📹</span> Reanudar Juego
-    </button>
-    <button id="b-pause-game" class="btn-warning">
-      <span class="btn-icon">⏸️</span> Pausar Juego
-    </button>
-    <button id="b-end-game" class="btn-danger" disabled>
-      <span class="btn-icon">🎮</span> Salir del Juego
+    <div id="pre-game-controls" style="display: none;">
+      <button id="b-start-game" class="btn-success">
+        <span class="btn-icon">🎮</span> ¡Comenzar Juego!
+      </button>
+    </div>
+
+    <div id="game-controls" style="display: none;">
+      <button id="b-resume-game" class="btn-primary">
+        <span class="btn-icon">📹</span> Reanudar Juego
+      </button>
+      <button id="b-pause-game" class="btn-warning">
+        <span class="btn-icon">⏸️</span> Pausar Juego
+      </button>
+      <button id="b-end-game" class="btn-danger">
+        <span class="btn-icon">🎮</span> Salir del Juego
+      </button>
+    </div>
   </div>
 
   <div class="fps-counter">
-    FPS: <span id="fps">0</span>
+    FPS: <span id="fps" class="fps-counter__value">0</span>
   </div>
 
-  <div id="game-container">
+  <div id="game-container" class="game-container">
     <div class="game-overlay"></div>
     <video autoplay hidden></video>
     <canvas></canvas>

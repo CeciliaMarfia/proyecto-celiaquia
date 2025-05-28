@@ -29,42 +29,55 @@ rec.loadHandNet(handPoseDetection.SupportedModels.MediaPipeHands, {
 camera.getVideo().addEventListener('loadeddata', () => runInference(canvas, camera));
 
 document.getElementById('b-start-webcam').addEventListener('click', () => {
-  camera.start(canvas);
-  // Deshabilita botones de juego hasta que empiece
-  document.getElementById('b-start-game').disabled = false;
-  document.getElementById('b-pause-game').disabled = true;
-  document.getElementById('b-resume-game').disabled = true;
-});
-
-document.getElementById('b-stop-webcam').addEventListener('click', () => {
-  camera.stop();
-  document.getElementById('b-start-game').disabled = true;
+    camera.start(canvas);
+    // Limpia cualquier resultado previo
+    const existingResults = document.querySelector('.game-results');
+    if (existingResults) {
+        existingResults.remove();
+    }
+    // Oculta el botón de iniciar cámara y muestra el de comenzar juego
+    document.getElementById('initial-controls').style.display = 'none';
+    document.getElementById('pre-game-controls').style.display = 'block';
 });
 
 document.getElementById('b-start-game').addEventListener('click', () => {
   window.gameManager.startGame();
+  // Oculta el botón de comenzar juego y muestra los controles del juego
+  document.getElementById('pre-game-controls').style.display = 'none';
+  document.getElementById('game-controls').style.display = 'block';
+  // Asegura que solo se muestren los botones correctos
+  document.getElementById('b-pause-game').style.display = 'block';
+  document.getElementById('b-resume-game').style.display = 'none';
 });
 
 document.getElementById('b-pause-game').addEventListener('click', () => {
+  camera.stop();
   window.gameManager.pauseGame();
+  // Al pausar, muestra solo reanudar y salir
+  document.getElementById('b-pause-game').style.display = 'none';
+  document.getElementById('b-resume-game').style.display = 'block';
 });
 
 document.getElementById('b-resume-game').addEventListener('click', () => {
+  camera.start(canvas);
   window.gameManager.resumeGame();
+  // Al reanudar, muestra solo pausar y salir
+  document.getElementById('b-resume-game').style.display = 'none';
+  document.getElementById('b-pause-game').style.display = 'block';
 });
 
 document.getElementById('b-end-game').addEventListener('click', () => {
   window.gameManager.endGame();
+  // Al terminar el juego, vuelve al estado inicial
+  document.getElementById('game-controls').style.display = 'none';
+  document.getElementById('initial-controls').style.display = 'block';
 });
 
 // Inicialización de los botones al cargar la página
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('b-pause-game').disabled = true;
-  document.getElementById('b-resume-game').disabled = true;
-  document.getElementById('b-start-game').disabled = true;
-  document.getElementById('b-end-game').disabled = true;
+  document.getElementById('pre-game-controls').style.display = 'none';
+  document.getElementById('game-controls').style.display = 'none';
 });
-
 
 // Bucle principal del juego
 async function runInference(canvas, camera) {
