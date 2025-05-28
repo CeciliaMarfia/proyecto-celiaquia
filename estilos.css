@@ -256,7 +256,7 @@ button:hover {
   box-shadow: var(--shadow-lg);
   width: 90vw;
   max-width: 1200px;
-  aspect-ratio: 12/9;
+  aspect-ratio: 13/9;
 }
 
 #game-container video,
