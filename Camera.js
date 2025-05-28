@@ -48,10 +48,6 @@ export class Camera {
     canvas.width = width;
     canvas.height = height;
 
-    // Centrar el video/canvas si sus dimensiones son diferentes al contenedor
-    const xOffset = (containerWidth - width) / 2;
-    const yOffset = (containerHeight - height) / 2;
-
     this.video.style.position = 'absolute';
     this.video.style.top = '50%';
     this.video.style.left = '50%';
