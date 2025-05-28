@@ -43,15 +43,6 @@ export class GameManager {
   get activeFoods() {
     return this.allFoodItems.filter(food => food.isActive);
   }
-  
-  updateButtons(startWebCam, stopWebCam, startGame, endGame, pauseGame, resumeGame) {
-    document.getElementById('b-start-webcam').disabled = startWebCam;
-    document.getElementById('b-stop-webcam').disabled = stopWebCam;
-    document.getElementById('b-start-game').disabled = startGame;
-    document.getElementById('b-pause-game').disabled = pauseGame;
-    document.getElementById('b-resume-game').disabled = resumeGame;
-    document.getElementById('b-end-game').disabled = endGame;
-  }
 
   startGame() {
     this.gameStarted = true;
@@ -60,9 +51,6 @@ export class GameManager {
     this.pauseStartTime = 0;
     this.allFoodItems = [];
     this.players.forEach(p => p.reset());
-
-    // Actualiza estados de los botones
-    this.updateButtons(true, false, true, false, false, true);
   }
 
   endGame() {
@@ -77,8 +65,10 @@ export class GameManager {
 
     this.showResults();
 
-    // Actualiza estados de los botones
-    this.updateButtons(false, true, false, true, true, true);
+    // Vuelve al estado inicial de los botones
+    document.getElementById('initial-controls').style.display = 'block';
+    document.getElementById('pre-game-controls').style.display = 'none';
+    document.getElementById('game-controls').style.display = 'none';
 
     // guardarResultadosEnFirebase(); // -- a implementar después
   }
@@ -87,7 +77,6 @@ export class GameManager {
   pauseGame() {
     this.isPaused = true;
     this.pauseStartTime = Date.now(); // Guarda el momento en que se pausa
-    this.updateButtons(true, false, false, true, true, false);
     this.showPauseMessage(); // Muestra mensaje de pausa
   }
 
@@ -108,7 +97,6 @@ export class GameManager {
 
     this.isPaused = false;
     this.hidePauseMessage();
-    this.updateButtons(false, false, false, true, false, true);
   }
 
   update(currentTime, hands) {
@@ -131,7 +119,7 @@ export class GameManager {
     this.allFoodItems = this.allFoodItems.filter(food => food.isActive);
 
     // Detecta colisiones si hay 4 manos (2 jugadores) -- si no hay 4 manos, no detecta colisiones (esto no esta ok pero tendríamos que definir qué hacer, si un jugador esconde una mano no puede frenarse el juego)
-    if (hands && hands.length >= 4) {
+    if (hands && hands.length >= 1) {
       this.detectCollisions(hands);
     }
   }
@@ -173,7 +161,7 @@ export class GameManager {
         const handX = hand.keypoints[0].x;
         const handY = hand.keypoints[0].y;
         this.activeFoods.forEach(food => {
-          console.log("comida activa");
+          // console.log("comida activa");
           if (food.checkCollision(handX, handY)) {
             console.log("Colisión detectada");
             food.isActive = false;
@@ -188,19 +176,19 @@ export class GameManager {
   detectCollisions(hands) {
     if (!hands || hands.length === 0) return;
 
-    console.log("Detectando colisiones con cant manos:", hands.length);
+    // console.log("Detectando colisiones con cant manos:", hands.length);
 
     // Procesa las manos del jugador 1 (primeras dos manos detectadas)
     const player1Hands = hands.slice(0, 2);
     this.processPlayerHands(player1Hands, 0);
 
-    console.log("Manos del jugador 1 procesadas:", player1Hands.length);
+    // console.log("Manos del jugador 1 procesadas:", player1Hands.length);
 
     // Procesa las manos del jugador 2 (siguientes dos manos detectadas)
     const player2Hands = hands.slice(2, 4);
     this.processPlayerHands(player2Hands, 1);
 
-    console.log("Manos del jugador 2 procesadas:", player2Hands.length);
+    // console.log("Manos del jugador 2 procesadas:", player2Hands.length);
   }
 
   createCollectionEffect(food) {
@@ -223,38 +211,42 @@ export class GameManager {
     // Limpiar el canvas completamente primero
     // this.ctx.clearRect(0, 0, this.canvas.canvas.width, this.canvas.canvas.height);
 
-    // Dibujar alimentos activos
+    // Dibuja información del juego
+    this.drawGameInfo();
+
+    // Dibuja alimentos activos
     this.activeFoods.forEach(food => {
       food.draw(this.ctx);
     });
-
-    // Dibujar información del juego
-    this.drawGameInfo();
   }
 
   drawGameInfo() {
-    this.ctx.font = '20px Arial';
+    this.ctx.clearRect(0, 0, this.canvas.canvas.width, 50);
+
+    this.ctx.font = '20px Verdana';
     this.ctx.fillStyle = 'white';
     this.ctx.strokeStyle = 'black';
     this.ctx.lineWidth = 3;
 
-    // Jugador 1 (izquierda)
+    // Jugador 1
     this.ctx.fillText(`Jugador 1: ${this.players[0].score} pts | ❤️ ${this.players[0].vitalEnergy}%`, 20, 30);
     this.ctx.strokeText(`Jugador 1: ${this.players[0].score} pts | ❤️ ${this.players[0].vitalEnergy}%`, 20, 30);
 
-    // Jugador 2 (derecha)
+    // Jugador 2
     const p2Text = `Jugador 2: ${this.players[1].score} pts | ❤️ ${this.players[1].vitalEnergy}%`;
     const textWidth = this.ctx.measureText(p2Text).width;
     this.ctx.fillText(p2Text, this.canvas.canvas.width - textWidth - 20, 30);
     this.ctx.strokeText(p2Text, this.canvas.canvas.width - textWidth - 20, 30);
 
-    // Tiempo restante
-    const remaining = Math.ceil((this.gameDuration - (Date.now() - this.gameStartTime)) / 1000);
+    // Tiempo
+    let remaining = Math.ceil((this.gameDuration - (Date.now() - this.gameStartTime)) / 1000);
+    remaining = Math.max(0, remaining);
     const timeText = `Tiempo: ${remaining}s`;
     const timeWidth = this.ctx.measureText(timeText).width;
     this.ctx.fillText(timeText, this.canvas.canvas.width / 2 - timeWidth / 2, 30);
     this.ctx.strokeText(timeText, this.canvas.canvas.width / 2 - timeWidth / 2, 30);
   }
+
 
   showResults() {
     const resultsDiv = document.createElement('div');

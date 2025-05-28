@@ -8,9 +8,9 @@
   --text-color: #2C3E50;
   --background-color: #F7F9FC;
   --card-background: #FFFFFF;
-  --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
-  --shadow-md: 0 4px 8px rgba(0,0,0,0.1);
-  --shadow-lg: 0 8px 16px rgba(0,0,0,0.1);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
   --border-radius: 12px;
 }
 
@@ -36,7 +36,7 @@ body {
   color: var(--primary-color);
   margin: 0;
   padding: 1rem;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .sin-tacc-badge {
@@ -160,19 +160,26 @@ body {
 
 /* Controles */
 .controls {
-  margin: 2rem 0;
   display: flex;
+  gap: 10px;
   justify-content: center;
-  gap: 1rem;
-  flex-wrap: wrap;
+  margin: 20px 0;
 }
 
-.control-game-on {
-  margin: 2rem 0;
+/* Estilos para los grupos de controles */
+.controls-group {
   display: flex;
   justify-content: center;
   gap: 1rem;
   flex-wrap: wrap;
+  width: 100%;
+}
+
+#initial-controls,
+#pre-game-controls,
+#game-controls {
+  display: flex;
+  gap: 10px;
 }
 
 button {
@@ -214,11 +221,11 @@ button:hover {
   box-shadow: var(--shadow-md);
 }
 
-button:disabled {
+/* button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
   transform: none;
-}
+} */
 
 /* Contador FPS */
 .fps-counter {
@@ -249,7 +256,7 @@ button:disabled {
   box-shadow: var(--shadow-lg);
   width: 90vw;
   max-width: 1200px;
-  aspect-ratio: 16/9;
+  aspect-ratio: 13/9;
 }
 
 #game-container video,
@@ -262,6 +269,7 @@ button:disabled {
   background-color: #f9f9f9;
   border-radius: var(--border-radius);
   object-fit: cover;
+  transform: none;
 }
 
 .game-overlay {
@@ -305,7 +313,8 @@ button:disabled {
 .players-results-container {
   display: flex;
   justify-content: center;
-  gap: 2rem; /* Espacio entre los jugadores */
+  gap: 2rem;
+  /* Espacio entre los jugadores */
   width: 100%;
   max-width: 1000px;
   margin: 1rem 0;
@@ -315,7 +324,8 @@ button:disabled {
   background-color: rgba(255, 255, 255, 0.1);
   padding: 2rem;
   border-radius: var(--border-radius);
-  width: 50%; /* Cada jugador ocupa la mitad del espacio */
+  width: 50%;
+  /* Cada jugador ocupa la mitad del espacio */
   max-width: 500px;
   backdrop-filter: blur(5px);
   box-sizing: border-box;
@@ -349,10 +359,12 @@ button:disabled {
     transform: scale(1);
     opacity: 1;
   }
+
   50% {
     transform: scale(1.5);
     opacity: 0.5;
   }
+
   100% {
     transform: scale(2);
     opacity: 0;
@@ -367,28 +379,22 @@ button:disabled {
 
 /* Mensaje de Pausa */
 .game-pause-message {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 100;
-    pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  pointer-events: none;
 }
 
 .game-pause-message h1 {
-    color: white;
-    font-size: 4rem;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
+  color: white;
+  font-size: 4rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  /* animation: pulse 1.5s infinite; */
 }
