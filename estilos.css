@@ -167,6 +167,14 @@ body {
   flex-wrap: wrap;
 }
 
+.control-game-on {
+  margin: 2rem 0;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
 button {
   padding: 0.8rem 1.5rem;
   font-size: 1rem;
@@ -293,14 +301,24 @@ button:disabled {
   font-size: 2.5rem;
 }
 
+/* Contenedor para los resultados de los jugadores */
+.players-results-container {
+  display: flex;
+  justify-content: center;
+  gap: 2rem; /* Espacio entre los jugadores */
+  width: 100%;
+  max-width: 1000px;
+  margin: 1rem 0;
+}
+
 .player-result {
   background-color: rgba(255, 255, 255, 0.1);
   padding: 2rem;
   border-radius: var(--border-radius);
-  margin: 1rem 0;
-  width: 80%;
+  width: 50%; /* Cada jugador ocupa la mitad del espacio */
   max-width: 500px;
   backdrop-filter: blur(5px);
+  box-sizing: border-box;
 }
 
 .food-stats {
@@ -344,4 +362,33 @@ button:disabled {
 .food-collected {
   position: absolute;
   animation: collectedAnimation 0.5s ease-out forwards;
+}
+
+
+/* Mensaje de Pausa */
+.game-pause-message {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    pointer-events: none;
+}
+
+.game-pause-message h1 {
+    color: white;
+    font-size: 4rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
 }
