@@ -254,13 +254,9 @@ button:hover {
   border-radius: var(--border-radius);
   overflow: hidden;
   box-shadow: var(--shadow-lg);
-  width: 100%;
-  height: auto;
-  min-height: 50vh;
-  /* width: 90vw;
-  max-width: 1200px; */
-  padding-bottom: 50px; /* Agrega espacio para el texto final */
-  aspect-ratio: 16/9;
+  width: 90vw;
+  max-width: 1200px;
+  aspect-ratio: 12/9;
 }
 
 #game-container video,
