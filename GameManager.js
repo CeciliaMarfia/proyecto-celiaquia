@@ -158,8 +158,8 @@ export class GameManager {
   processPlayerHands(playerHands, playerIndex) {
     playerHands.forEach(hand => {
       if (hand.keypoints && hand.keypoints.length > 0 && hand.score > 0.7) { // Verificación de keypoints y solo considera detecciones con alta confianza
-        const handX = hand.keypoints[0].x;
-        const handY = hand.keypoints[0].y;
+        const handX = hand.keypoints[8].x;
+        const handY = hand.keypoints[8].y;
         this.activeFoods.forEach(food => {
           // console.log("comida activa");
           if (food.checkCollision(handX, handY)) {
