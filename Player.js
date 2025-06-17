@@ -2,6 +2,7 @@ export class Player {
   constructor(id) {
     this.id = id;
     this.reset();
+    this.correctQuestions = 0;
   }
 
   reset() {
@@ -12,6 +13,7 @@ export class Player {
       unhealthy: 0,
       gluten: 0
     };
+    this.correctQuestions = 0;
   }
 
   collectFood(foodType) {

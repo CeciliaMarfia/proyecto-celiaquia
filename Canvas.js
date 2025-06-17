@@ -17,10 +17,12 @@ export class Canvas { //obtiene el contexto para dibujar
   }
 //dibuja las poses detectadas
   drawResultsPoses(poses) {
-    drawResultsPoses(this.ctx, poses);
+    // No dibujamos nada aquí, solo queremos las manos
+    // drawResultsPoses(this.ctx, poses);
+    return;
   }
 //dibuja las manos detectadas
-  drawResultsHands(hands) {
+  renderHands(hands) {
     drawResultsHands(this.ctx, hands);
   }
 //Dibuja el frame actual del video de la cámara en el canvas
