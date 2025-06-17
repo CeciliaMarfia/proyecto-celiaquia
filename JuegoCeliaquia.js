@@ -71,12 +71,12 @@ async function runInference(canvas, camera) {
   try {
     // Detectar tanto poses como manos
     const hands = await rec.estimateHands(image, {
-      flipHorizontal: true,
+      // flipHorizontal: true,
       staticImageMode: false,
     });
 
     const poses = await rec.estimatePoses(image, {
-      flipHorizontal: true
+      // flipHorizontal: true
     });
     canvas.drawCameraFrame(camera);
 
