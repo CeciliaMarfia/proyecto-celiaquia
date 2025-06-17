@@ -611,15 +611,21 @@ export class GameManager {
     const introDiv = document.createElement('div');
     introDiv.className = 'intro-overlay';
     introDiv.innerHTML = `
-      <div class="intro-title">¡Bienvenido/a!</div>
-      <div class="intro-text">
-        Clara y Santiago son amigos, ambos celíacos, lo que significa que deben tener especial cuidado con lo que comen en su día a día.<br><br>
-        En este juego te invitamos a enfrentar el desafío de ponerse en su lugar: tendrás que seleccionar con atención los alimentos que sean seguros y evitar los que contienen gluten que aparecen en pantalla.<br><br>
-        Si elegís uno que no es apto pueden hacerle daño y tendrá consecuencias: se sienten mal y tus puntos bajan.<br><br>
-        El objetivo no es solo sumar puntos para ganar, sino aprender cómo es vivir con una condición alimentaria que requiere atención constante.<br><br>
-        <b>¿Estás listo para cuidarte como lo hacen Clara y Santiago todos los días?</b>
+      <div>
+        <div class="intro-content">
+          <div class="intro-title">¡Bienvenido/a!</div>
+          <div class="intro-text">
+            Clara y Santiago son amigos, ambos celíacos, lo que significa que deben tener especial cuidado con lo que comen en su día a día.<br><br>
+            En este juego te invitamos a enfrentar el desafío de ponerse en su lugar: tendrás que seleccionar con atención los alimentos que sean seguros y evitar los que contienen gluten que aparecen en pantalla.<br><br>
+            Si elegís uno que no es apto pueden hacerle daño y tendrá consecuencias: se sienten mal y tus puntos bajan.<br><br>
+            El objetivo no es solo sumar puntos para ganar, sino aprender cómo es vivir con una condición alimentaria que requiere atención constante.<br><br>
+            <b>¿Estás listo para cuidarte como lo hacen Clara y Santiago todos los días?</b>
+          </div>
+        </div>
+        <div class="intro-sidebar">
+          <button class="intro-btn">Continuar</button>
+        </div>
       </div>
-      <button class="intro-btn">Continuar</button>
     `;
     document.getElementById('game-container').appendChild(introDiv);
     introDiv.querySelector('.intro-btn').onclick = () => {
