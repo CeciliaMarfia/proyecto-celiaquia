@@ -10,7 +10,7 @@ export class GameManager {
     this.allFoodItems = [];
     this.players = [new Player(1), new Player(2)];
     this.lastFoodSpawn = 0;
-    this.foodSpawnInterval = 800; // ms entre spawns
+    this.foodSpawnInterval = 500; // ms entre spawns
     this.gameStarted = false;
     this.gameStartTime = 0;
     this.stageDuration = 60000; // 30 segundos por etapa
@@ -246,7 +246,7 @@ export class GameManager {
       }
       */
       video.src =  'videos/video_preEtapa.mp4';;
-      // video.muted = true;
+      video.muted = true; // sacar
       video.playsInline = true;
       video.setAttribute('autoplay', '');
       video.setAttribute('preload', 'auto');
