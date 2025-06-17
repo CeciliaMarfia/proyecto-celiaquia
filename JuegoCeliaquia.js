@@ -37,46 +37,32 @@ document.getElementById('b-start-webcam').addEventListener('click', () => {
     }
     // Oculta el botón de iniciar cámara y muestra el de comenzar juego
     document.getElementById('initial-controls').style.display = 'none';
-    document.getElementById('pre-game-controls').style.display = 'block';
+    document.getElementById('pre-game-controls').style.display = 'flex';
+    document.getElementById('game-controls').style.display = 'none';
 });
 
 document.getElementById('b-start-game').addEventListener('click', () => {
-  window.gameManager.startGame();
-  // Oculta el botón de comenzar juego y muestra los controles del juego
-  document.getElementById('pre-game-controls').style.display = 'none';
-  document.getElementById('game-controls').style.display = 'block';
-  // Asegura que solo se muestren los botones correctos
-  document.getElementById('b-pause-game').style.display = 'block';
-  document.getElementById('b-resume-game').style.display = 'none';
-});
-
-document.getElementById('b-pause-game').addEventListener('click', () => {
-  camera.stop();
-  window.gameManager.pauseGame();
-  // Al pausar, muestra solo reanudar y salir
-  document.getElementById('b-pause-game').style.display = 'none';
-  document.getElementById('b-resume-game').style.display = 'block';
-});
-
-document.getElementById('b-resume-game').addEventListener('click', () => {
-  camera.start(canvas);
-  window.gameManager.resumeGame();
-  // Al reanudar, muestra solo pausar y salir
-  document.getElementById('b-resume-game').style.display = 'none';
-  document.getElementById('b-pause-game').style.display = 'block';
+    window.gameManager.startGame();
+    // Oculta el botón de comenzar juego y muestra los controles del juego
+    document.getElementById('pre-game-controls').style.display = 'none';
+    document.getElementById('game-controls').style.display = 'flex';
 });
 
 document.getElementById('b-end-game').addEventListener('click', () => {
-  window.gameManager.endGame();
-  // Al terminar el juego, vuelve al estado inicial
-  document.getElementById('game-controls').style.display = 'none';
-  document.getElementById('initial-controls').style.display = 'block';
+    window.gameManager.endGame();
+    // Al terminar el juego, vuelve al estado inicial
+    document.getElementById('game-controls').style.display = 'none';
+    document.getElementById('initial-controls').style.display = 'flex';
+    // Detiene la cámara
+    camera.stop();
 });
 
 // Inicialización de los botones al cargar la página
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('pre-game-controls').style.display = 'none';
-  document.getElementById('game-controls').style.display = 'none';
+    // Asegura que solo el botón inicial esté visible
+    document.getElementById('initial-controls').style.display = 'flex';
+    document.getElementById('pre-game-controls').style.display = 'none';
+    document.getElementById('game-controls').style.display = 'none';
 });
 
 // Bucle principal del juego
@@ -85,11 +71,13 @@ async function runInference(canvas, camera) {
   try {
     // Detectar tanto poses como manos
     const hands = await rec.estimateHands(image, {
-      flipHorizontal: false,
+      flipHorizontal: true,
       staticImageMode: false,
     });
 
-    const poses = await rec.estimatePoses(image);
+    const poses = await rec.estimatePoses(image, {
+      flipHorizontal: true
+    });
     canvas.drawCameraFrame(camera);
 
     // Actualiza y dibuja el juego
@@ -98,7 +86,7 @@ async function runInference(canvas, camera) {
 
     // Dibuja todas las detecciones
     canvas.drawResultsPoses(poses);
-    canvas.drawResultsHands(hands);
+    canvas.renderHands(hands);
     updateFPS();
   } catch (error) {
     console.error("Error en la detección:", error);
