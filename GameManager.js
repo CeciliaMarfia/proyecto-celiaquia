@@ -239,7 +239,7 @@ export class GameManager {
       // Seleccionar video según la etapa
       let videoSrc = '';
       if (this.currentStage === 1) {
-        videoSrc = 'videos/video_etapa1.mp4';
+        videoSrc = 'videos/video_preEtapa.mp4';
       } else {
         videoSrc = 'videos/video_preEtapa.mp4';
       }
