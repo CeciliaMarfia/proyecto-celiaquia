@@ -237,13 +237,15 @@ export class GameManager {
       const video = document.createElement('video');
       video.className = 'stage-video';
       // Seleccionar video según la etapa
+      /*
       let videoSrc = '';
       if (this.currentStage === 1) {
         videoSrc = 'videos/video_etapa1.mp4';
       } else {
         videoSrc = 'videos/video_preEtapa.mp4';
       }
-      video.src = videoSrc;
+      */
+      video.src =  'videos/video_preEtapa.mp4';;
       // video.muted = true;
       video.playsInline = true;
       video.setAttribute('autoplay', '');
