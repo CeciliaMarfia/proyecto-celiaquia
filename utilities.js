@@ -204,9 +204,9 @@ function drawKeypointsHands(ctx, keypoints, handedness) {
   ctx.lineWidth = params.DEFAULT_LINE_WIDTH;
 
   for (let i = 0; i < keypointsArray.length; i++) {
-    const y = keypointsArray[i].x;
-    const x = keypointsArray[i].y;
-    drawPointHands(ctx, x - 2, y - 2, 3);
+    const x = keypointsArray[i].x;
+    const y = keypointsArray[i].y;
+    drawPointHands(ctx, x, y, 3);
   }
 
   const fingers = Object.keys(fingerLookupIndices);
@@ -231,7 +231,7 @@ function drawPathHands(ctx, points, closePath) {
   ctx.stroke(region);
 }
 
-function drawPointHands(ctx, y, x, r) {
+function drawPointHands(ctx, x, y, r) {
   ctx.beginPath();
   ctx.arc(x, y, r, 0, 2 * Math.PI);
   ctx.fill();

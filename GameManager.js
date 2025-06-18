@@ -13,7 +13,7 @@ export class GameManager {
     this.foodSpawnInterval = 500; // ms entre spawns
     this.gameStarted = false;
     this.gameStartTime = 0;
-    this.stageDuration = 60000; // 30 segundos por etapa
+    this.stageDuration = 60000; // 60 segundos por etapa
     this.currentStage = 1; // 1: Identificación, 2: Saludable, 3: Contaminación
     this.stageSettings = {
       1: {
