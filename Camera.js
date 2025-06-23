@@ -51,12 +51,12 @@ export class Camera {
     this.video.style.position = 'absolute';
     this.video.style.top = '50%';
     this.video.style.left = '50%';
-    this.video.style.transform = 'translate(-50%, -50%)';
+    this.video.style.transform = 'translate(-50%, -50%) scaleX(-1)';
 
     canvas.style.position = 'absolute';
     canvas.style.top = '50%';
     canvas.style.left = '50%';
-    canvas.style.transform = 'translate(-50%, -50%)';
+    canvas.style.transform = 'translate(-50%, -50%) scaleX(-1)';
   }
 
   start(canvas) {
