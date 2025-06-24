@@ -18,7 +18,6 @@ export class GameManager {
     this.stageSettings = {
       1: {
         // Etapa 1 - Identificación de alimentos con y sin TACC
-        foodRatio: [0.4, 0.3, 0.3], // [saludable, no saludable, con TACC]
         description: "Identificación de alimentos con y sin TACC",
         details: `
           <b>Objetivo:</b> Diferencir alimentos aptos y no aptos para celíacos.<br>
@@ -30,7 +29,7 @@ export class GameManager {
           <b>Puntaje:</b> +10 por saludable, +5 por no saludable, -10 por con TACC.<br>
           <br>
           <b>Energía vital:</b> ¡Cuidado! Restar puntos también te quita energía.
-        `
+        `,
       },
       2: {
         // Etapa 2 - Elección de alimentos más saludables
@@ -44,7 +43,7 @@ export class GameManager {
           <b>¿Qué hacer?</b> Atrapa la mayor cantidad de alimentos <b>saludables</b> (frutas, verduras, agua, etc). Evita los ultraprocesados.<br>
           <br>
           <b>Puntaje:</b> +10 por saludable, +5 por no saludable.
-        `
+        `,
       },
       3: {
         // Etapa 3 - Contaminación cruzada
@@ -60,8 +59,8 @@ export class GameManager {
           <b>Puntaje:</b> +10 por respuesta correcta.<br>
           <br>
           <b>¿Qué es la contaminación cruzada?</b> Es cuando un alimento con TACC se mezcla con uno sin TACC, provocando una <i>contaminacion</i>.
-        `
-      }
+        `,
+      },
     };
     this.currentQuestion = null;
     this.answeredQuestions = new Set();
@@ -71,21 +70,27 @@ export class GameManager {
     this.questions = [
       {
         id: 1,
-        question: "Clara va a usar el utensilio de su hermana con el que cortó pan. ¿Lo puede usar?",
+        question:
+          "Clara va a usar el utensilio de su hermana con el que cortó pan. ¿Lo puede usar?",
         options: ["Sí, si lo lava bien", "No, nunca", "Sí, si es de plástico"],
-        correctAnswer: 0
+        correctAnswer: 0,
       },
       {
         id: 2,
-        question: "¿Es seguro guardar alimentos sin TACC junto a alimentos con TACC en la heladera?",
-        options: ["No, nunca", "Sí, si están en diferentes estantes", "Sí, si están en recipientes cerrados"],
-        correctAnswer: 2
+        question:
+          "¿Es seguro guardar alimentos sin TACC junto a alimentos con TACC en la heladera?",
+        options: [
+          "No, nunca",
+          "Sí, si están en diferentes estantes",
+          "Sí, si están en recipientes cerrados",
+        ],
+        correctAnswer: 2,
       },
       {
         id: 3,
         question: "¿Qué alimento es más saludable?",
         options: ["Pan", "Pizza", "Helado"],
-        correctAnswer: 2
+        correctAnswer: 2,
       },
     ];
 
@@ -109,7 +114,7 @@ export class GameManager {
   }
 
   get activeFoods() {
-    return this.allFoodItems.filter(food => food.isActive);
+    return this.allFoodItems.filter((food) => food.isActive);
   }
 
   startGame() {
@@ -117,7 +122,7 @@ export class GameManager {
     this.gameEnded = false;
     this.currentStage = 1;
     this.allFoodItems = [];
-    this.players.forEach(p => p.reset());
+    this.players.forEach((p) => p.reset());
     this.currentQuestion = null;
     this.answeredQuestions = new Set();
     this.blockedByIntro = true;
@@ -162,7 +167,7 @@ export class GameManager {
         this.gameStarted = false;
         this.currentStage = 1;
         this.allFoodItems = [];
-        this.players.forEach(p => p.reset());
+        this.players.forEach((p) => p.reset());
         this.currentQuestion = null;
         this.answeredQuestions = new Set();
         this.blockedByIntro = false;
@@ -188,7 +193,7 @@ export class GameManager {
     if (currentTime - this.gameStartTime > this.stageDuration) {
       this.currentQuestion = null;
       this.draw();
-      this.nextStage();
+      this.showStageResults();
       return;
     }
 
@@ -203,8 +208,8 @@ export class GameManager {
       this.handleQuestions(currentTime, hands);
     } else {
       // Actualiza alimentos y filtra inactivos
-      this.allFoodItems.forEach(food => food.update(currentTime));
-      this.allFoodItems = this.allFoodItems.filter(food => food.isActive);
+      this.allFoodItems.forEach((food) => food.update(currentTime));
+      this.allFoodItems = this.allFoodItems.filter((food) => food.isActive);
 
       // Detecta colisiones si hay manos detectadas
       if (hands && hands.length >= 1) {
@@ -213,27 +218,111 @@ export class GameManager {
     }
   }
 
-  nextStage() {
+  showStageResults() {
+    const resultsDiv = document.createElement('div');
+    resultsDiv.className = 'game-results';
+    
+    const title = document.createElement('h1');
+    title.textContent = `¡Etapa ${this.currentStage} Completada!`;
+
+    // Contenedor para los jugadores
+    const playersContainer = document.createElement('div');
+    playersContainer.className = 'players-results-container';
+
+    // Jugador 1
+    const player1Div = this.createPlayerResult('Jugador 1', 0);
+
+    // Jugador 2
+    const player2Div = this.createPlayerResult('Jugador 2', 1);
+
+    // Agrega jugadores al contenedor
+    playersContainer.append(player1Div, player2Div);
+
+    // Mensaje específico de la etapa
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'game-message';
+    const stageInfo = this.stageSettings[this.currentStage];
+    const message = document.createElement('p');
+    message.innerHTML = `<b>${stageInfo.description}</b><br>¡Bien hecho! Has completado esta etapa. Cada etapa es un desafío independiente.`;
+    messageDiv.appendChild(message);
+
+    // Botones de acción
+    const buttonsContainer = document.createElement('div');
+    buttonsContainer.className = 'stage-results-buttons';
+    buttonsContainer.style.display = 'flex';
+    buttonsContainer.style.justifyContent = 'center';
+    buttonsContainer.style.gap = '1rem';
+    buttonsContainer.style.marginTop = '2rem';
+
+    const repeatButton = document.createElement('button');
+    repeatButton.textContent = 'Repetir Etapa';
+    repeatButton.className = 'btn-primary';
+    repeatButton.onclick = () => {
+      resultsDiv.remove();
+      this.repeatCurrentStage();
+    };
+
+    const nextButton = document.createElement('button');
+    nextButton.textContent = this.currentStage < 3 ? 'Siguiente Etapa' : 'Finalizar Juego';
+    nextButton.className = 'btn-success';
+    nextButton.onclick = () => {
+      resultsDiv.remove();
+      this.continueToNextStage();
+    };
+
+    buttonsContainer.append(repeatButton, nextButton);
+
+    // Ensamblar todo
+    resultsDiv.append(title, playersContainer, messageDiv, buttonsContainer);
+
+    document.getElementById('game-container').appendChild(resultsDiv);
+  }
+
+  resetStageValues() {
+    // Resetea todos los valores del juego
+    this.allFoodItems = [];
+    this.currentQuestion = [null, null];
+    this.answeredQuestions = new Set();
+    this.lastQuestionId = [null, null];
+    
+    // Resetea los jugadores
+    this.players.forEach((p) => {
+      p.score = 0;
+      p.vitalEnergy = 100;
+      p.foodsCollected = { healthy: 0, unhealthy: 0, gluten: 0 };
+      p.correctQuestions = 0;
+    });
+  }
+
+  repeatCurrentStage() {
+    this.resetStageValues();
+    this.blockedByIntro = true;
+    this.showStageIntroduction();
+  }
+
+  continueToNextStage() {
     this.currentStage++;
     if (this.currentStage > 3) {
       this.endGame();
       return;
     }
+
+    this.resetStageValues();
+
     this.blockedByIntro = true;
     this.gameStarted = false; // ya lo tengo en startGame() esto... chequear
     this.showStageVideo().then(() => {
-      if (this.gameEnded) return; // Si se salió del juego, no mostrar nada más
+      if (this.gameEnded) return;
       this.showStageIntroduction();
     });
   }
 
   showStageVideo() {
     return new Promise((resolve) => {
-      // Crear contenedor para el video
       const videoContainer = document.createElement('div');
       videoContainer.className = 'stage-video-container';
       videoContainer.style.transition = 'opacity 0.7s';
-      // Crear elemento de video
+      
       const video = document.createElement('video');
       video.className = 'stage-video';
       // Seleccionar video según la etapa
@@ -257,14 +346,14 @@ export class GameManager {
         <button class="skip-button">Saltar</button>
         <button class="mute-button">🔊</button>
       `;
-      // Agregar elementos al contenedor
+
       videoContainer.appendChild(video);
       videoContainer.appendChild(controls);
       document.getElementById('game-container').appendChild(videoContainer);
-      // Fade-in suave
+      
       setTimeout(() => videoContainer.style.opacity = '1', 10);
       video.play();
-      // Botón de saltar
+      
       controls.querySelector('.skip-button').addEventListener('click', () => {
         videoContainer.style.opacity = '0';
         setTimeout(() => {
@@ -272,11 +361,12 @@ export class GameManager {
           resolve();
         }, 700);
       });
+      
       controls.querySelector('.mute-button').addEventListener('click', () => {
         video.muted = !video.muted;
         controls.querySelector('.mute-button').textContent = video.muted ? '🔇' : '🔊';
       });
-      // Cuando el video termina
+      
       video.addEventListener('ended', () => {
         videoContainer.style.opacity = '0';
         setTimeout(() => {
@@ -288,7 +378,6 @@ export class GameManager {
   }
 
   showStageIntroduction() {
-    // Quitar cualquier ocultamiento de video/canvas
     const stageInfo = this.stageSettings[this.currentStage];
     const introDiv = document.createElement('div');
     introDiv.className = 'stage-introduction big-intro';
@@ -308,7 +397,7 @@ export class GameManager {
       this.gameStartTime = Date.now();
       this.lastFoodSpawn = Date.now();
       this.allFoodItems = [];
-      this.currentQuestion = [null, null]; // Una pregunta por jugador
+      this.currentQuestion = [null, null];
       this.draw();
     }, 10000); // 10 segundos
   }
@@ -317,16 +406,18 @@ export class GameManager {
     // Dos preguntas, una por jugador
     for (let playerIdx = 0; playerIdx < 2; playerIdx++) {
       if (!this.currentQuestion[playerIdx]) {
-        // Evitar repetir la última pregunta
+        // Evitar repetir la última pregunta (no impide que se repita en absoluto, sólo que no se repita inmediatamente)
         const lastQ = this.lastQuestionId ? this.lastQuestionId[playerIdx] : null;
-        let availableQuestions = this.questions.filter(q => !this.answeredQuestions.has(`${playerIdx}_${q.id}`));
+        let availableQuestions = this.questions.filter(
+          (q) => !this.answeredQuestions.has(`${playerIdx}_${q.id}`)
+        );
         if (availableQuestions.length === 0) {
           this.answeredQuestions.clear();
           availableQuestions = this.questions.slice();
         }
         // Filtrar la última pregunta usada
         if (lastQ && availableQuestions.length > 1) {
-          availableQuestions = availableQuestions.filter(q => q.id !== lastQ);
+          availableQuestions = availableQuestions.filter((q) => q.id !== lastQ);
         }
         const newQ = this.createNewQuestion(availableQuestions);
         this.currentQuestion[playerIdx] = newQ;
@@ -350,7 +441,9 @@ export class GameManager {
             q.feedbackSelected = selectedOption;
             // Contar preguntas correctas
             if (isCorrect) {
-              if (!this.players[playerIdx].correctQuestions) this.players[playerIdx].correctQuestions = 0;
+              if (!this.players[playerIdx].correctQuestions) {
+                this.players[playerIdx].correctQuestions = 0;
+              }
               this.players[playerIdx].correctQuestions++;
             }
             // Mostrar feedback visual durante 1 segundo, luego eliminar la pregunta
@@ -368,7 +461,7 @@ export class GameManager {
   createNewQuestion(availableQuestions = this.questions) {
     const randomIndex = Math.floor(Math.random() * availableQuestions.length);
     const question = availableQuestions[randomIndex];
-    
+
     // Calcular posición centrada en el canvas
     const x = (this.canvas.canvas.width - 300) / 2; // 300 es el ancho de la pregunta
     const y = (this.canvas.canvas.height - 200) / 2; // 200 es aproximadamente el alto total
@@ -378,46 +471,50 @@ export class GameManager {
 
   spawnFood() {
     if (this.currentStage === 3) return; // No hay alimentos en etapa 3
-    const { foodRatio } = this.stageSettings[this.currentStage];
-    const random = Math.random();
-    let type;
-    if (random < foodRatio[0]) type = 1;
-    else if (random < foodRatio[0] + foodRatio[1]) type = 2;
-    else type = 3;
-    // En etapa 2 no debe haber con TACC
-    if (this.currentStage === 2 && type === 3) return;
-    const images = this.getFoodImagesForCurrentStage(type);
+
+    const availableTypes = this.getAvailableFoodTypes();
+    if (availableTypes.length === 0) return;
+
+    // Selecciona tipo aleatorio de los disponibles
+    const randomType =
+      availableTypes[Math.floor(Math.random() * availableTypes.length)];
+
+    // Obtiene imágenes para el tipo seleccionado
+    const images = foodImages[randomType];
     if (!images || images.length === 0) return;
+
+    // Genera una posición aleatoria
     const x = Math.random() * (this.canvas.canvas.width - 60);
     const y = Math.random() * (this.canvas.canvas.height - 60);
+
+    // Imagen aleatoria del tipo
     const imageName = images[Math.floor(Math.random() * images.length)];
     const imagePath = `foodImages/${imageName}`;
-    this.allFoodItems.push(new FoodItem(x, y, type, imagePath));
+    this.allFoodItems.push(new FoodItem(x, y, randomType, imagePath));
   }
 
-  getRandomFoodImage(type) {
-    // type: 1 = sin tacc saludable, 2 = sin tacc no saludable, 3 = con tacc
-    const images = this.getFoodImagesForCurrentStage(type);
-    const randomIndex = Math.floor(Math.random() * images.length);
-    return images[randomIndex];
-  }
-
-  getFoodImagesForCurrentStage(type) {
-    // Etapa 1: todos los alimentos
-    // Etapa 2: solo healthySTACC y unhealthySTACC
-    // Etapa 3: ninguno
-    if (this.currentStage === 3) return [];
-    if (this.currentStage === 2 && type === 3) return [];
-    return foodImages[type];
+  getAvailableFoodTypes() {
+    // tipos: 1 = sin TACC saludable, 2 = sin TACC no saludable, 3 = con TACC
+    if (this.currentStage === 1) {
+      // Etapa 1: incluye todos los tipos de alimentos
+      return [1, 2, 3];
+    }
+    else if (this.currentStage === 2) {
+      // Etapa 2: solo sin TACC (saludable y no saludable)
+      return [1, 2];
+    }
+    // Etapa 3: no hay comida
+    return [];
   }
 
   // Método auxiliar para procesar las manos de un jugador
   processPlayerHands(playerHands, playerIndex) {
-    playerHands.forEach(hand => {
-      if (hand.keypoints && hand.keypoints.length > 0 && hand.score > 0.7) { // Verificación de keypoints y solo considera detecciones con alta confianza
+    playerHands.forEach((hand) => {
+      if (hand.keypoints && hand.keypoints.length > 0 && hand.score > 0.7) {
+        // Verificación de keypoints y solo considera detecciones con alta confianza
         const handX = hand.keypoints[8].x;
         const handY = hand.keypoints[8].y;
-        this.activeFoods.forEach(food => {
+        this.activeFoods.forEach((food) => {
           // console.log("comida activa");
           if (food.checkCollision(handX, handY)) {
             console.log("Colisión detectada");
@@ -460,19 +557,13 @@ export class GameManager {
   }
 
   getFoodColor(type) {
-    return type === 1 ? '#4CAF50' :
-      type === 2 ? '#FFC107' : '#F44336';
+    return type === 1 ? "#4CAF50" : type === 2 ? "#FFC107" : "#F44336";
   }
 
   draw() {
-    // Limpiar el canvas completamente primero
-    // this.ctx.clearRect(0, 0, this.canvas.canvas.width, this.canvas.canvas.height);
-
-    // Dibuja información del juego
     this.drawGameInfo();
 
-    // Dibuja alimentos activos
-    this.activeFoods.forEach(food => {
+    this.activeFoods.forEach((food) => {
       food.draw(this.ctx);
     });
 
@@ -481,7 +572,6 @@ export class GameManager {
       for (let playerIdx = 0; playerIdx < 2; playerIdx++) {
         const q = this.currentQuestion[playerIdx];
         if (q) {
-          // Ubicación: izquierda/derecha
           if (playerIdx === 0) {
             q.x = 60;
             q.y = this.canvas.canvas.height / 2 - 80;
@@ -504,8 +594,16 @@ export class GameManager {
     this.ctx.lineWidth = 3;
 
     // Jugador 1
-    this.ctx.fillText(`Jugador 1: ${this.players[0].score} pts | ❤️ ${this.players[0].vitalEnergy}%`, 20, 30);
-    this.ctx.strokeText(`Jugador 1: ${this.players[0].score} pts | ❤️ ${this.players[0].vitalEnergy}%`, 20, 30);
+    this.ctx.fillText(
+      `Jugador 1: ${this.players[0].score} pts | ❤️ ${this.players[0].vitalEnergy}%`,
+      20,
+      30
+    );
+    this.ctx.strokeText(
+      `Jugador 1: ${this.players[0].score} pts | ❤️ ${this.players[0].vitalEnergy}%`,
+      20,
+      30
+    );
 
     // Jugador 2
     const p2Text = `Jugador 2: ${this.players[1].score} pts | ❤️ ${this.players[1].vitalEnergy}%`;
@@ -514,14 +612,15 @@ export class GameManager {
     this.ctx.strokeText(p2Text, this.canvas.canvas.width - textWidth - 20, 30);
 
     // Tiempo
-    let remaining = Math.ceil((this.stageDuration - (Date.now() - this.gameStartTime)) / 1000);
+    let remaining = Math.ceil(
+      (this.stageDuration - (Date.now() - this.gameStartTime)) / 1000
+    );
     remaining = Math.max(0, remaining);
     const timeText = `${remaining} segundos`;
     const timeWidth = this.ctx.measureText(timeText).width;
     this.ctx.fillText(timeText, this.canvas.canvas.width / 2 - timeWidth / 2, 30);
     this.ctx.strokeText(timeText, this.canvas.canvas.width / 2 - timeWidth / 2, 30);
   }
-
 
   showResults() {
     const resultsDiv = document.createElement('div');
@@ -533,16 +632,12 @@ export class GameManager {
     const playersContainer = document.createElement('div');
     playersContainer.className = 'players-results-container';
 
-    // Jugador 1
     const player1Div = this.createPlayerResult('Jugador 1', 0);
 
-    // Jugador 2
     const player2Div = this.createPlayerResult('Jugador 2', 1);
 
-    // Agregar jugadores al contenedor
     playersContainer.append(player1Div, player2Div);
 
-    // Mensaje del juego
     const messageDiv = document.createElement('div');
     messageDiv.className = 'game-message';
     const message1 = document.createElement('p');
@@ -551,13 +646,7 @@ export class GameManager {
     message2.textContent = '¡Siempre verifica los alimentos y busca el sello SIN TACC!';
     messageDiv.append(message1, message2);
 
-    // Ensamblar todo para agregarlo al game conteiner
-    resultsDiv.append(
-      title,
-      playersContainer, // Usamos el contenedor en lugar de los divs individuales porque era re ilegible :)
-      messageDiv,
-    );
-
+    resultsDiv.append(title, playersContainer, messageDiv);
     document.getElementById('game-container').appendChild(resultsDiv);
   }
 
@@ -579,12 +668,24 @@ export class GameManager {
     foodsDiv.className = 'food-stats';
 
     // Estadísticas de comida
-    const healthyDiv = this.createFoodStat('healthy', 'Saludables', this.players[playerIndex].foodsCollected.healthy);
-    const unhealthyDiv = this.createFoodStat('unhealthy', 'No saludables', this.players[playerIndex].foodsCollected.unhealthy);
-    const glutenDiv = this.createFoodStat('gluten', 'Con gluten', this.players[playerIndex].foodsCollected.gluten);
+    const healthyDiv = this.createFoodStat(
+      "healthy",
+      "Saludables",
+      this.players[playerIndex].foodsCollected.healthy
+    );
+    const unhealthyDiv = this.createFoodStat(
+      "unhealthy",
+      "No saludables",
+      this.players[playerIndex].foodsCollected.unhealthy
+    );
+    const glutenDiv = this.createFoodStat(
+      "gluten",
+      "Con gluten",
+      this.players[playerIndex].foodsCollected.gluten
+    );
 
     foodsDiv.append(healthyDiv, unhealthyDiv, glutenDiv);
-    // Preguntas correctas
+    
     const correctQuestions = document.createElement('p');
     correctQuestions.textContent = `Preguntas correctas: ${this.players[playerIndex].correctQuestions || 0}`;
     playerDiv.append(title, score, energy, foodsDiv, correctQuestions);
