@@ -15,6 +15,8 @@ export class GameManager {
     this.gameStartTime = 0;
     this.stageDuration = 60000; // 60 segundos por etapa
     this.currentStage = 1; // 1: Identificación, 2: Saludable, 3: Contaminación
+    this.isInCountdown = false; // Estado para controlar el conteo inicial de cada etapa
+    this.countdownStartTime = 0; // Tiempo de inicio del conteo
     this.stageSettings = {
       1: {
         // Etapa 1 - Identificación de alimentos con y sin TACC
@@ -148,46 +150,37 @@ export class GameManager {
       this.camera.stop();
     }
 
-    this.showResults();
+    this.hidePlayersInfo();
+    this.showFinalMessage();
 
     // Vuelve al estado inicial de los botones
     document.getElementById('initial-controls').style.display = 'flex';
     document.getElementById('pre-game-controls').style.display = 'none';
     document.getElementById('game-controls').style.display = 'none';
+  }
 
-    // Agrega el botón de salir solo en la pantalla de resultados
-    const resultsDiv = document.querySelector('.game-results');
-    if (resultsDiv) {
-      const exitButton = document.createElement('button');
-      exitButton.id = 'exit-game-button';
-      exitButton.className = 'exit-button';
-      exitButton.textContent = 'Salir del juego';
-      exitButton.onclick = () => {
-        this.gameEnded = false;
-        this.gameStarted = false;
-        this.currentStage = 1;
-        this.allFoodItems = [];
-        this.players.forEach((p) => p.reset());
-        this.currentQuestion = null;
-        this.answeredQuestions = new Set();
-        this.blockedByIntro = false;
-        const videoDiv = document.querySelector('.stage-video-container');
-        if (videoDiv) videoDiv.remove();
-        const introDiv = document.querySelector('.stage-introduction');
-        if (introDiv) introDiv.remove();
-        const questionDiv = document.querySelector('.question-container');
-        if (questionDiv) questionDiv.remove();
-        this.draw();
-        window.location.reload();
-      };
-      resultsDiv.appendChild(exitButton);
-    
-      // guardarResultadosEnFirebase(); // -- a implementar después
-    }
+  showFinalMessage() {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'final-message';
+    messageDiv.innerHTML = `
+      <div class="final-content">
+        <h1>¡Gracias por jugar!</h1>
+        <p>La celiaquía es una condición seria donde incluso pequeñas cantidades de gluten pueden causar daño.</p>
+        <p>¡Siempre verifica los alimentos y busca el sello SIN TACC!</p>
+        <button class="btn-primary" onclick="window.location.reload()">Jugar de nuevo</button>
+      </div>
+    `;
+    document.getElementById('game-container').appendChild(messageDiv);
   }
 
   update(currentTime, hands) {
     if (!this.gameStarted || this.gameEnded || this.blockedByIntro) return;
+
+    // Si está en conteo inicial, sólo maneja el contador
+    if (this.isInCountdown) {
+      this.handleInitialCountdown(currentTime);
+      return;
+    }
 
     // Verifica fin de etapa
     if (currentTime - this.gameStartTime > this.stageDuration) {
@@ -196,6 +189,10 @@ export class GameManager {
       this.showStageResults();
       return;
     }
+
+    // Actualiza información de tiempo jugadores del html
+    this.updatePlayersInfo();
+    this.handleTimeCounter(currentTime);
 
     // Genera nuevos alimentos solo en etapas 1 y 2
     if (this.currentStage < 3 && currentTime - this.lastFoodSpawn > this.foodSpawnInterval) {
@@ -218,10 +215,65 @@ export class GameManager {
     }
   }
 
+  updatePlayersInfo() {
+    const player1Score = document.getElementById('player1-score');
+    const player1Energy = document.getElementById('player1-energy');
+    const player2Score = document.getElementById('player2-score');
+    const player2Energy = document.getElementById('player2-energy');
+
+    if (player1Score) player1Score.textContent = `${this.players[0].score} pts`;
+    if (player1Energy) player1Energy.textContent = `❤️ ${this.players[0].vitalEnergy}%`;
+    if (player2Score) player2Score.textContent = `${this.players[1].score} pts`;
+    if (player2Energy) player2Energy.textContent = `❤️ ${this.players[1].vitalEnergy}%`;
+  }
+
+  handleInitialCountdown(currentTime) {
+    const elapsed = currentTime - this.countdownStartTime;
+    const countdownDuration = 3000; // 3 segundos total
+    const timeDisplay = document.getElementById('time-display');
+    const timeCounter = document.getElementById('time-counter');
+
+    if (elapsed >= countdownDuration) {
+      // Terminó el conteo, x lo tanto empieza el juego
+      this.isInCountdown = false; // Para que no se muestre el contador de nuevo!!!!!
+      timeCounter.style.display = 'none';
+      this.gameStartTime = currentTime; // Reinicia el tiempo de la etapa
+      this.lastFoodSpawn = currentTime; // Reinicia el tiempo de spawn de alimentos
+      return;
+    }
+
+    // Muestra el número correspondiente (3, 2, 1)
+    const remainingTime = Math.ceil((countdownDuration - elapsed) / 1000);
+    timeDisplay.textContent = remainingTime;
+    timeCounter.style.display = 'block';
+
+    // Dibuja fondo blanco durante el conteo
+    this.ctx.fillStyle = '#f5f5f5';
+    this.ctx.fillRect(0, 0, this.canvas.canvas.width, this.canvas.canvas.height);
+  }
+
+  handleTimeCounter(currentTime) {
+    const remaining = Math.ceil((this.stageDuration - (currentTime - this.gameStartTime)) / 1000);
+    const timeDisplay = document.getElementById('time-display');
+    const timeCounter = document.getElementById('time-counter');
+
+    if (remaining <= 0) return;
+
+    // Muestra contador al final (últimos 3 segundos)
+    if (remaining <= 3 && remaining > 0) {
+      timeDisplay.textContent = remaining;
+      timeCounter.style.display = 'block';
+    } else {
+      timeCounter.style.display = 'none';
+    }
+  }
+
   showStageResults() {
+    this.clearStageResults();
+    this.hidePlayersInfo();
+    
     const resultsDiv = document.createElement('div');
     resultsDiv.className = 'game-results';
-    
     const title = document.createElement('h1');
     title.textContent = `¡Etapa ${this.currentStage} Completada!`;
 
@@ -258,7 +310,6 @@ export class GameManager {
     repeatButton.textContent = 'Repetir Etapa';
     repeatButton.className = 'btn-primary';
     repeatButton.onclick = () => {
-      resultsDiv.remove();
       this.repeatCurrentStage();
     };
 
@@ -266,7 +317,6 @@ export class GameManager {
     nextButton.textContent = this.currentStage < 3 ? 'Siguiente Etapa' : 'Finalizar Juego';
     nextButton.className = 'btn-success';
     nextButton.onclick = () => {
-      resultsDiv.remove();
       this.continueToNextStage();
     };
 
@@ -295,26 +345,35 @@ export class GameManager {
   }
 
   repeatCurrentStage() {
-    this.resetStageValues();
+    this.clearStageResults(); // Elimina la tabla de resultados anterior
+    this.resetStageValues(); // Resetea todo
     this.blockedByIntro = true;
-    this.showStageIntroduction();
+    this.gameStarted = false;
+    this.showStageVideo().then(() => {
+      if (this.gameEnded) return;
+      this.showStageIntroduction();
+    });
   }
 
   continueToNextStage() {
+    this.clearStageResults(); // Eliminar tabla de resultados anterior
     this.currentStage++;
     if (this.currentStage > 3) {
       this.endGame();
       return;
     }
-
     this.resetStageValues();
-
     this.blockedByIntro = true;
     this.gameStarted = false; // ya lo tengo en startGame() esto... chequear
     this.showStageVideo().then(() => {
       if (this.gameEnded) return;
       this.showStageIntroduction();
     });
+  }
+
+  clearStageResults() {
+    const existingResults = document.querySelector('.game-results');
+    if (existingResults) existingResults.remove();
   }
 
   showStageVideo() {
@@ -392,14 +451,33 @@ export class GameManager {
     setTimeout(() => {
       introDiv.remove();
       this.blockedByIntro = false;
-      // Solo después de quitar el cartel, comienza la etapa
+      // Después del cartel, inicia el conteo hacia atrás
       this.gameStarted = true;
-      this.gameStartTime = Date.now();
-      this.lastFoodSpawn = Date.now();
+      this.isInCountdown = true;
+      this.countdownStartTime = Date.now();
       this.allFoodItems = [];
       this.currentQuestion = [null, null];
+      this.showPlayersInfo(); // Muestra información de jugadores
       this.draw();
     }, 10000); // 10 segundos
+  }
+
+  showPlayersInfo() {
+    const playersInfo = document.getElementById('players-info');
+    if (playersInfo) {
+      playersInfo.style.display = 'flex';
+    }
+  }
+
+  hidePlayersInfo() {
+    const playersInfo = document.getElementById('players-info');
+    const timeCounter = document.getElementById('time-counter');
+    if (playersInfo) {
+      playersInfo.style.display = 'none';
+    }
+    if (timeCounter) {
+      timeCounter.style.display = 'none';
+    }
   }
 
   handleQuestions(currentTime, hands) {
@@ -561,65 +639,31 @@ export class GameManager {
   }
 
   draw() {
-    this.drawGameInfo();
+    // En la etapa 3 dibuja un fondo blanco en lugar de la cámara
+    if (this.currentStage === 3) {
+      this.ctx.fillStyle = '#f5f5f5'; // Fondo beige claro
+      this.ctx.fillRect(0, 0, this.canvas.canvas.width, this.canvas.canvas.height);
+    }
 
     this.activeFoods.forEach((food) => {
       food.draw(this.ctx);
     });
 
-    // Dibujar preguntas de ambos jugadores
-    if (Array.isArray(this.currentQuestion)) {
-      for (let playerIdx = 0; playerIdx < 2; playerIdx++) {
-        const q = this.currentQuestion[playerIdx];
+    // Preguntas una debajo de la otra y centradas
+    if (this.currentStage === 3 && Array.isArray(this.currentQuestion)) {
+      const totalQuestions = this.currentQuestion.length;
+      const blockHeight = this.canvas.canvas.height / totalQuestions;
+      for (let i = 0; i < totalQuestions; i++) {
+        const q = this.currentQuestion[i];
         if (q) {
-          if (playerIdx === 0) {
-            q.x = 60;
-            q.y = this.canvas.canvas.height / 2 - 80;
-          } else {
-            q.x = this.canvas.canvas.width - q.width - 60;
-            q.y = this.canvas.canvas.height / 2 - 80;
-          }
+          q.x = 60;
+          q.y = i * blockHeight + 40;
+          q.width = this.canvas.canvas.width - 120;
+          q.height = blockHeight - 80;
           q.draw(this.ctx);
         }
       }
     }
-  }
-
-  drawGameInfo() {
-    this.ctx.clearRect(0, 0, this.canvas.canvas.width, 50);
-
-    this.ctx.font = '20px Verdana';
-    this.ctx.fillStyle = 'white';
-    this.ctx.strokeStyle = 'black';
-    this.ctx.lineWidth = 3;
-
-    // Jugador 1
-    this.ctx.fillText(
-      `Jugador 1: ${this.players[0].score} pts | ❤️ ${this.players[0].vitalEnergy}%`,
-      20,
-      30
-    );
-    this.ctx.strokeText(
-      `Jugador 1: ${this.players[0].score} pts | ❤️ ${this.players[0].vitalEnergy}%`,
-      20,
-      30
-    );
-
-    // Jugador 2
-    const p2Text = `Jugador 2: ${this.players[1].score} pts | ❤️ ${this.players[1].vitalEnergy}%`;
-    const textWidth = this.ctx.measureText(p2Text).width;
-    this.ctx.fillText(p2Text, this.canvas.canvas.width - textWidth - 20, 30);
-    this.ctx.strokeText(p2Text, this.canvas.canvas.width - textWidth - 20, 30);
-
-    // Tiempo
-    let remaining = Math.ceil(
-      (this.stageDuration - (Date.now() - this.gameStartTime)) / 1000
-    );
-    remaining = Math.max(0, remaining);
-    const timeText = `${remaining} segundos`;
-    const timeWidth = this.ctx.measureText(timeText).width;
-    this.ctx.fillText(timeText, this.canvas.canvas.width / 2 - timeWidth / 2, 30);
-    this.ctx.strokeText(timeText, this.canvas.canvas.width / 2 - timeWidth / 2, 30);
   }
 
   showResults() {
@@ -737,4 +781,5 @@ export class GameManager {
       });
     };
   }
+
 }

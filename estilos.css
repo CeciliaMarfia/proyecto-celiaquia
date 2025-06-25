@@ -353,27 +353,31 @@ button:hover {
   color: #fff;
 }
 
-/* Animaciones */
-@keyframes collectedAnimation {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-
-  50% {
-    transform: scale(1.5);
-    opacity: 0.5;
-  }
-
-  100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-
+/* Efecto de recolección de alimentos - esto no funcionaba, chequear si así sí!!! */
 .food-collected {
   position: absolute;
-  animation: collectedAnimation 0.5s ease-out forwards;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1000;
+  animation: collectEffect 0.5s ease-out forwards;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes collectEffect {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
 }
 
 /* Estilos para introducción de etapa */
@@ -811,4 +815,124 @@ button:hover {
   background: linear-gradient(135deg, #45a049, #388e3c);
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
+}
+
+/* Información de jugadores fuera del contenedor */
+.players-info {
+  position: fixed;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 30px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.player-info {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 15px 25px;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 200px;
+}
+
+.player-name {
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+.player-score {
+  font-size: 20px;
+  color: #4CAF50;
+}
+
+.player-energy {
+  font-size: 18px;
+  color: #FF6B6B;
+}
+
+/* Contador de tiempo en el centro */
+.time-counter {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 2rem 4rem;
+  border-radius: 20px;
+  font-size: 4rem;
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+/* Animación para el contador */
+@keyframes pulse {
+  0% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.1); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+/* Mensaje final del juego */
+.final-message {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.final-content {
+  background: white;
+  padding: 3rem;
+  border-radius: 20px;
+  text-align: center;
+  max-width: 600px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.final-content h1 {
+  color: #4a5568;
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: bold;
+}
+
+.final-content p {
+  color: #2d3748;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.final-content .btn-primary {
+  margin-top: 2rem;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.final-content .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }

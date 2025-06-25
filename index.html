@@ -60,13 +60,11 @@
         <span class="btn-icon">📹</span> Iniciar Cámara
       </button>
     </div>
-
     <div id="pre-game-controls" class="controls-group" style="display: none;">
       <button id="b-start-game" class="btn-success">
         <span class="btn-icon">🎮</span> ¡Comenzar Juego!
       </button>
     </div>
-
     <div id="game-controls" class="controls-group" style="display: none;">
       <button id="b-end-game" class="btn-danger">
         <span class="btn-icon">🚫</span> Salir del juego
@@ -76,6 +74,25 @@
 
   <div class="fps-counter">
     FPS: <span id="fps" class="fps-counter__value">0</span>
+  </div>
+
+  <!-- Información de jugadores fuera del contenedor de juego -->
+  <div id="players-info" class="players-info" style="display: none;">
+    <div class="player-info player-1">
+      <span class="player-name">Jugador 1</span>
+      <span class="player-score" id="player1-score">0 pts</span>
+      <span class="player-energy" id="player1-energy">❤️ 100%</span>
+    </div>
+    <div class="player-info player-2">
+      <span class="player-name">Jugador 2</span>
+      <span class="player-score" id="player2-score">0 pts</span>
+      <span class="player-energy" id="player2-energy">❤️ 100%</span>
+    </div>
+  </div>
+
+  <!-- Contador de tiempo en el centro, no definimos estética asique a chequear -->
+  <div id="time-counter" class="time-counter" style="display: none;">
+    <span id="time-display">60</span>
   </div>
 
   <div id="game-container" class="game-container">
