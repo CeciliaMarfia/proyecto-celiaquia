@@ -20,43 +20,18 @@ export class Camera {
   }
 
   updateDimensions(sourceWidth, sourceHeight) {
-    // Obtener dimensiones del contenedor
+    // Guarda dimensiones del contenedor
     const container = document.getElementById('game-container');
     const containerWidth = container.clientWidth;
     const containerHeight = container.clientHeight;
 
-    // Mantener la relación de aspecto del video
-    const videoAspectRatio = sourceWidth / sourceHeight;
-    const containerAspectRatio = containerWidth / containerHeight;
-
-    let width, height;
-    if (videoAspectRatio > containerAspectRatio) {
-      // El video es más ancho que el contenedor
-      height = containerHeight;
-      width = height * videoAspectRatio;
-    } else {
-      // El video es más alto que el contenedor
-      width = containerWidth;
-      height = width / videoAspectRatio;
-    }
-
-    // Actualizar dimensiones del video y canvas
-    this.video.width = width;
-    this.video.height = height;
+    // Usa dimensiones del contenedor para asignarle al video y al canvas asi no hay que hacer conversiones
+    this.video.width = containerWidth;
+    this.video.height = containerHeight;
 
     const canvas = document.querySelector('canvas');
-    canvas.width = width;
-    canvas.height = height;
-
-    this.video.style.position = 'absolute';
-    this.video.style.top = '50%';
-    this.video.style.left = '50%';
-    this.video.style.transform = 'translate(-50%, -50%) scaleX(-1)';
-
-    canvas.style.position = 'absolute';
-    canvas.style.top = '50%';
-    canvas.style.left = '50%';
-    canvas.style.transform = 'translate(-50%, -50%) scaleX(-1)';
+    canvas.width = containerWidth;
+    canvas.height = containerHeight;
   }
 
   start(canvas) {

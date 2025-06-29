@@ -356,7 +356,7 @@ export class GameManager {
   }
 
   continueToNextStage() {
-    this.clearStageResults(); // Eliminar tabla de resultados anterior
+    this.clearStageResults(); // Elimina la tabla de resultados anterior
     this.currentStage++;
     if (this.currentStage > 3) {
       this.endGame();
@@ -626,8 +626,12 @@ export class GameManager {
   createCollectionEffect(food) {
     const effect = document.createElement('div');
     effect.className = 'food-collected';
-    effect.style.left = `${food.x + food.width / 2}px`;
-    effect.style.top = `${food.y + food.height / 2}px`;
+    // Como el canvas está espejado con scaleX(-1) invertimos la coordenada X asi el efecto se ve en la posicion correcta
+    const coordX = this.canvas.canvas.width - (food.x + food.width / 2);
+    const coordY = food.y + food.height / 2;
+    
+    effect.style.left = `${coordX}px`;
+    effect.style.top = `${coordY}px`;
     effect.style.backgroundColor = this.getFoodColor(food.type);
     document.getElementById('game-container').appendChild(effect);
 
