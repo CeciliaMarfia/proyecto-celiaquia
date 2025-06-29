@@ -12,11 +12,13 @@ export class GameManager {
     this.lastFoodSpawn = 0;
     this.foodSpawnInterval = 500; // ms entre spawns
     this.gameStarted = false;
+    this.gameEnded = false;
     this.gameStartTime = 0;
     this.stageDuration = 60000; // 60 segundos por etapa
     this.currentStage = 1; // 1: Identificación, 2: Saludable, 3: Contaminación
     this.isInCountdown = false; // Estado para controlar el conteo inicial de cada etapa
     this.countdownStartTime = 0; // Tiempo de inicio del conteo
+    this.blockedByIntro = true;
     this.stageSettings = {
       1: {
         // Etapa 1 - Identificación de alimentos con y sin TACC
@@ -271,6 +273,7 @@ export class GameManager {
   showStageResults() {
     this.clearStageResults();
     this.hidePlayersInfo();
+    this.hideTimer();
     
     const resultsDiv = document.createElement('div');
     resultsDiv.className = 'game-results';
@@ -301,22 +304,18 @@ export class GameManager {
     // Botones de acción
     const buttonsContainer = document.createElement('div');
     buttonsContainer.className = 'stage-results-buttons';
-    buttonsContainer.style.display = 'flex';
-    buttonsContainer.style.justifyContent = 'center';
-    buttonsContainer.style.gap = '1rem';
-    buttonsContainer.style.marginTop = '2rem';
 
     const repeatButton = document.createElement('button');
     repeatButton.textContent = 'Repetir Etapa';
     repeatButton.className = 'btn-primary';
-    repeatButton.onclick = () => {
-      this.repeatCurrentStage();
-    };
+    repeatButton.onclick = () => this.repeatCurrentStage();
 
     const nextButton = document.createElement('button');
     nextButton.textContent = this.currentStage < 3 ? 'Siguiente Etapa' : 'Finalizar Juego';
+    const aux = this.currentStage < 3 ? 'Siguiente Etapa' : 'Finalizar Juego';
     nextButton.className = 'btn-success';
     nextButton.onclick = () => {
+      console.log(aux);
       this.continueToNextStage();
     };
 
@@ -670,7 +669,17 @@ export class GameManager {
     }
   }
 
+  hideTimer() {
+    // Oculta el contador de tiempo para evitar interferencias
+    const timeCounter = document.getElementById('time-counter');
+    if (timeCounter) {
+      timeCounter.style.display = 'none';
+    }
+  }
+
   showResults() {
+    this.hideTimer();
+    
     const resultsDiv = document.createElement('div');
     resultsDiv.className = 'game-results';
     const title = document.createElement('h1');
@@ -681,7 +690,6 @@ export class GameManager {
     playersContainer.className = 'players-results-container';
 
     const player1Div = this.createPlayerResult('Jugador 1', 0);
-
     const player2Div = this.createPlayerResult('Jugador 2', 1);
 
     playersContainer.append(player1Div, player2Div);
@@ -694,7 +702,18 @@ export class GameManager {
     message2.textContent = '¡Siempre verifica los alimentos y busca el sello SIN TACC!';
     messageDiv.append(message1, message2);
 
-    resultsDiv.append(title, playersContainer, messageDiv);
+    // Botón de finalizar
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'stage-results-buttons';
+
+    const finishButton = document.createElement('button');
+    finishButton.textContent = 'Finalizar Juego';
+    finishButton.className = 'btn-primary';
+    finishButton.onclick = () => this.showFinalMessage();
+
+    buttonContainer.appendChild(finishButton);
+
+    resultsDiv.append(title, playersContainer, messageDiv, buttonContainer);
     document.getElementById('game-container').appendChild(resultsDiv);
   }
 
