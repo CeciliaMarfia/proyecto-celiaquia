@@ -14,7 +14,7 @@ export class GameManager {
     this.gameStarted = false;
     this.gameEnded = false;
     this.gameStartTime = 0;
-    this.stageDuration = 60000; // 60 segundos por etapa
+    this.stageDuration = 15000; // 15 segundos por etapa
     this.currentStage = 1; // 1: Identificación, 2: Saludable, 3: Contaminación
     this.isInCountdown = false; // Estado para controlar el conteo inicial de cada etapa
     this.countdownStartTime = 0; // Tiempo de inicio del conteo
@@ -37,7 +37,6 @@ export class GameManager {
       },
       2: {
         // Etapa 2 - Elección de alimentos más saludables
-        foodRatio: [0.6, 0.4, 0], // 60% de alimentos saludables, 40% de alimentos no saludables
         description: "Elección de alimentos más saludables",
         details: `
           <b>Objetivo:</b> Elegir los alimentos más saludables entre los aptos para celíacos.<br>
@@ -51,7 +50,6 @@ export class GameManager {
       },
       3: {
         // Etapa 3 - Contaminación cruzada
-        foodRatio: [0, 0, 0], // No se spawnean alimentos en esta etapa, solo preguntas
         description: "Contaminación cruzada y situaciones cotidianas",
         details: `
           <b>Objetivo:</b> Responder correctamente preguntas sobre situaciones de riesgo.<br>
@@ -70,7 +68,6 @@ export class GameManager {
     this.answeredQuestions = new Set();
     this.selectionStartTime = null;
     this.selectionThreshold = 3000; // 3 segundos para seleccionar
-    this.currentHoveredOption = null;
     this.questions = [
       {
         id: 1,
@@ -308,7 +305,9 @@ export class GameManager {
     const repeatButton = document.createElement('button');
     repeatButton.textContent = 'Repetir Etapa';
     repeatButton.className = 'btn-primary';
-    repeatButton.onclick = () => this.repeatCurrentStage();
+    repeatButton.onclick = () => {
+      this.repeatCurrentStage();
+    };
 
     const nextButton = document.createElement('button');
     nextButton.textContent = this.currentStage < 3 ? 'Siguiente Etapa' : 'Finalizar Juego';
@@ -596,7 +595,7 @@ export class GameManager {
           if (food.checkCollision(handX, handY)) {
             console.log("Colisión detectada");
             food.isActive = false;
-            this.players[playerIndex].collectFood(food.type);
+            this.players[playerIndex].collectFood(food.type, this.currentStage);
             this.createCollectionEffect(food);
           }
         });

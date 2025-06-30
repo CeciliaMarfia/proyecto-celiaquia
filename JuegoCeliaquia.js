@@ -80,9 +80,11 @@ async function runInference(canvas, camera) {
     });
     canvas.drawCameraFrame(camera);
 
-    // Actualiza y dibuja el juego
-    window.gameManager.update(Date.now(), hands);
-    window.gameManager.draw();
+    // Actualiza y dibuja el juego sólo cuando no está mostrando resultados de etapa
+    if (window.gameManager && !window.gameManager.gameEnded && !document.querySelector('.game-results')) {
+      window.gameManager.update(Date.now(), hands);
+      window.gameManager.draw();
+    }
 
     // Dibuja todas las detecciones
     canvas.drawResultsPoses(poses);
