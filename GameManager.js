@@ -163,10 +163,15 @@ export class GameManager {
     messageDiv.className = 'final-message';
     messageDiv.innerHTML = `
       <div class="final-content">
-        <h1>¡Gracias por jugar!</h1>
-        <p>La celiaquía es una condición seria donde incluso pequeñas cantidades de gluten pueden causar daño.</p>
-        <p>¡Siempre verifica los alimentos y busca el sello SIN TACC!</p>
-        <button class="btn-primary" onclick="window.location.reload()">Jugar de nuevo</button>
+        <div class="final-left">
+          <h1>¡Gracias por jugar!</h1>
+          <p>La celiaquía es una condición seria donde incluso pequeñas cantidades de gluten pueden causar daño.</p>
+          <p>¡Siempre verifica los alimentos y busca el sello SIN TACC!</p>
+          <button class="btn-primary btn-large" onclick="window.location.reload()">Jugar de nuevo</button>
+        </div>
+        <div class="final-right">
+          <img src="images/qr.png" alt="QR Code" class="qr-code">
+        </div>
       </div>
     `;
     document.getElementById('game-container').appendChild(messageDiv);
@@ -565,7 +570,7 @@ export class GameManager {
 
     // Imagen aleatoria del tipo
     const imageName = images[Math.floor(Math.random() * images.length)];
-    const imagePath = `foodImages/${imageName}`;
+    const imagePath = `images/foodImages/${imageName}`;
     this.allFoodItems.push(new FoodItem(x, y, randomType, imagePath));
   }
 
