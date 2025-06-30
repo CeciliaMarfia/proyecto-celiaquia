@@ -607,8 +607,7 @@ export class GameManager {
       console.log("entro al for each 'player hands' ");
       if (hand.keypoints && hand.keypoints.length > 0 && hand.score > 0.7) {
         // Verificación de keypoints y solo considera detecciones con alta confianza
-        // Actualización de detección, chequear si funciona:
-        // ahora la detección es con toda la mano (dedos y palma)
+        // Detección con toda la mano (dedos y palma)
         const detectedHand = new HandDetector(hand);
         if(this.activeFoods.length > 0) console.log("hay active foods"); else console.log("no hay active foods...");
         this.activeFoods.forEach((food) => {

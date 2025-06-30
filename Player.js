@@ -1,7 +1,14 @@
 export class Player {
   constructor(id) {
     this.id = id;
-    this.reset();
+    this.score = 0;
+    this.vitalEnergy = 100;
+    this.foodsCollected = {
+      healthy: 0,
+      unhealthy: 0,
+      gluten: 0,
+    };
+    this.correctQuestions = 0;
   }
 
   reset() {
@@ -15,7 +22,8 @@ export class Player {
     this.correctQuestions = 0;
   }
 
-  collectFood(foodType, currentStage) { // si no funciona bien, poner currentStage = 1 como parametro
+  collectFood(foodType, currentStage) {
+    // si no funciona bien, poner currentStage = 1 como parametro
     switch (foodType) {
       case 1: // food1* (saludable)
         this.score += 10; // 10 puntos por comida tipo food1
