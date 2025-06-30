@@ -2,6 +2,7 @@ import { Player } from './Player.js';
 import { FoodItem } from './FoodItem.js';
 import { QuestionItem } from './QuestionItem.js';
 import { foodImages } from './foodImagesList.js';
+import { HandDetector } from './HandDetector.js';
 
 export class GameManager {
   constructor(canvas) {
@@ -100,6 +101,8 @@ export class GameManager {
       this.handleResize();
     });
     
+
+    // CHEQUEAR ESTO..... YO LO SACARIA Y YA FUE, MAS ADELANTE VEO SI PODEMOS ADAPTAR TODO PARA QUE SE PUEDA JUGAR EN MOVILES TMB
     // Listener para cambio de orientación en móviles
     window.addEventListener('orientationchange', () => {
       setTimeout(() => {
@@ -221,7 +224,7 @@ export class GameManager {
       this.allFoodItems.forEach((food) => food.update(currentTime));
       this.allFoodItems = this.allFoodItems.filter((food) => food.isActive);
 
-      // Detecta colisiones si hay manos detectadas
+      // Detecta colisiones si hay por lo menos una mano detectada
       if (hands && hands.length >= 1) {
         this.detectCollisions(hands);
       }
@@ -601,14 +604,17 @@ export class GameManager {
   // Método auxiliar para procesar las manos de un jugador
   processPlayerHands(playerHands, playerIndex) {
     playerHands.forEach((hand) => {
+      console.log("entro al for each 'player hands' ");
       if (hand.keypoints && hand.keypoints.length > 0 && hand.score > 0.7) {
         // Verificación de keypoints y solo considera detecciones con alta confianza
-        const handX = hand.keypoints[8].x;
-        const handY = hand.keypoints[8].y;
+        // Actualización de detección, chequear si funciona:
+        // ahora la detección es con toda la mano (dedos y palma)
+        const detectedHand = new HandDetector(hand);
+        if(this.activeFoods.length > 0) console.log("hay active foods"); else console.log("no hay active foods...");
         this.activeFoods.forEach((food) => {
-          // console.log("comida activa");
-          if (food.checkCollision(handX, handY)) {
-            console.log("Colisión detectada");
+          console.log("comida activa");
+          if (food.checkCollision(detectedHand)) {
+            console.log("Colisión detectada!!!!!");
             food.isActive = false;
             this.players[playerIndex].collectFood(food.type, this.currentStage);
             this.createCollectionEffect(food);
@@ -616,7 +622,7 @@ export class GameManager {
         });
       }
     });
-  }
+  }  
 
   detectCollisions(hands) {
     if (!hands || hands.length === 0) return;
@@ -815,7 +821,6 @@ export class GameManager {
     introDiv.innerHTML = `
       <div>
         <div class="intro-content">
-          <div class="intro-title">¡Bienvenido/a!</div>
           <div class="intro-text">
             Clara y Santiago son amigos, ambos celíacos, lo que significa que deben tener especial cuidado con lo que comen en su día a día.<br><br>
             En este juego te invitamos a enfrentar el desafío de ponerse en su lugar: tendrás que seleccionar con atención los alimentos que sean seguros y evitar los que contienen gluten que aparecen en pantalla.<br><br>

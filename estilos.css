@@ -684,14 +684,6 @@ button:hover {
   min-width: 200px;
 }
 
-.intro-overlay .intro-title {
-  font-size: 2.5rem;
-  color: #3498db;
-  margin-bottom: 2rem;
-  font-weight: bold;
-  text-align: left;
-}
-
 .intro-overlay .intro-text {
   font-size: 1.3rem;
   color: #2C3E50;
@@ -754,10 +746,6 @@ button:hover {
   
   .intro-content {
     align-items: center;
-    text-align: center;
-  }
-  
-  .intro-overlay .intro-title {
     text-align: center;
   }
   
@@ -1164,7 +1152,7 @@ button:hover {
 }
 
 /* Mejoras específicas para preguntas de la etapa 3 */
-/* revisar que no se pise con nada de arriba esto*/
+/* chequear que no se pise con nada de arriba esto*/
 #game-container canvas {
   /* Asegura que el canvas de preguntas sea legible */
   image-rendering: -webkit-optimize-contrast;
