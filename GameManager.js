@@ -99,6 +99,13 @@ export class GameManager {
     window.addEventListener('resize', () => {
       this.handleResize();
     });
+    
+    // Listener para cambio de orientación en móviles
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => {
+        this.handleResize();
+      }, 100);
+    });
   }
 
   handleResize() {
@@ -110,8 +117,10 @@ export class GameManager {
     this.canvas.canvas.width = width;
     this.canvas.canvas.height = height;
 
-    // Redibujar el estado actual
-    this.draw();
+    // Redibujar el estado actual solo si el juego está activo
+    if (this.gameStarted && !this.gameEnded && !this.blockedByIntro) {
+      this.draw();
+    }
   }
 
   get activeFoods() {
@@ -512,9 +521,10 @@ export class GameManager {
         const hand = hands[playerIdx * 2]; // Mano principal de cada jugador
         const q = this.currentQuestion[playerIdx];
         if (hand && hand.keypoints && hand.keypoints.length > 0 && hand.score > 0.7 && q && !q.feedbackActive) {
-          const handX = hand.keypoints[8].x;
+          // Invertir la coordenada X porque el canvas está espejado
+          const handX = this.canvas.canvas.width - hand.keypoints[8].x;
           const handY = hand.keypoints[8].y;
-          if (q.checkCollision(handX, handY)) {
+          if (q.checkCollision(handX, handY, this.ctx)) {
             const selectedOption = q.selectedOption;
             const isCorrect = selectedOption === q.correctAnswer;
             q.feedbackActive = true;
@@ -659,14 +669,34 @@ export class GameManager {
     // Preguntas una debajo de la otra y centradas
     if (this.currentStage === 3 && Array.isArray(this.currentQuestion)) {
       const totalQuestions = this.currentQuestion.length;
-      const blockHeight = this.canvas.canvas.height / totalQuestions;
+      const canvasHeight = this.canvas.canvas.height;
+      const canvasWidth = this.canvas.canvas.width;
+      
+      // Calcula espaciado entre preguntas para que sean legibles
+      const minQuestionHeight = 200; // Altura mínima por pregunta
+      const spacingBetweenQuestions = 50; // Espacio entre preguntas
+      const totalMinHeight = totalQuestions * minQuestionHeight + (totalQuestions - 1) * spacingBetweenQuestions;
+      const availableHeight = canvasHeight - 80; // Dejar margen arriba y abajo
+      
+      let blockHeight, startY;
+      
+      if (totalMinHeight <= availableHeight) {
+        // Si hay espacio suficiente, usar altura mínima con espaciado
+        blockHeight = minQuestionHeight + spacingBetweenQuestions;
+        startY = 40;
+      } else {
+        // Si no hay espacio, distribuir uniformemente
+        blockHeight = availableHeight / totalQuestions;
+        startY = 40;
+      }
+      
       for (let i = 0; i < totalQuestions; i++) {
         const q = this.currentQuestion[i];
         if (q) {
-          q.x = 60;
-          q.y = i * blockHeight + 40;
-          q.width = this.canvas.canvas.width - 120;
-          q.height = blockHeight - 80;
+          q.x = Math.max(20, canvasWidth * 0.05); // Mínimo 20px de margen
+          q.y = startY + i * blockHeight;
+          q.width = Math.min(canvasWidth - 40, canvasWidth * 0.9); // Máximo 90% del ancho
+          q.height = Math.max(150, blockHeight - spacingBetweenQuestions); // Altura mínima de 150px
           q.draw(this.ctx);
         }
       }

@@ -22,24 +22,25 @@ export class QuestionItem {
 
     // --- Medir alto de la pregunta dinámicamente ---
     ctx.save();
-    ctx.font = `bold ${Math.max(22, Math.floor(this.height/11))}px Nunito`;
-    const questionLines = this.wrapText(ctx, this.question, this.width - 40);
-    const questionLineHeight = Math.max(22, Math.floor(this.height/11)) + 8;
+    const questionFontSize = Math.max(18, Math.min(24, Math.floor(this.height/12)));
+    ctx.font = `bold ${questionFontSize}px Nunito`;
+    const questionLines = this.wrapText(ctx, this.question, this.width - 60);
+    const questionLineHeight = questionFontSize + 6;
     const questionHeight = questionLines.length * questionLineHeight;
     ctx.restore();
 
     // Medir alto de opciones
-    const optionFontSize = Math.max(22, Math.floor(40/1.5)); // Antes era 16 y 40/2.5
-    const optionHeight = optionFontSize + 28;
-    const optionSpacing = 20;
+    const optionFontSize = Math.max(16, Math.min(20, Math.floor(this.height/15)));
+    const optionHeight = optionFontSize + 20;
+    const optionSpacing = Math.max(10, Math.floor(this.height/20));
     const optionsHeight = this.options.length * optionHeight + (this.options.length - 1) * optionSpacing;
 
     // Margen superior e inferior
-    const marginTop = 30;
-    const marginBottom = 30;
+    const marginTop = Math.max(20, Math.floor(this.height/10));
+    const marginBottom = Math.max(20, Math.floor(this.height/10));
 
     // Calcula el alto total
-    const boxH = marginTop + questionHeight + 30 + optionsHeight + marginBottom;
+    const boxH = marginTop + questionHeight + 20 + optionsHeight + marginBottom;
     const boxX = this.x;
     const boxY = this.y;
     const boxW = this.width;
@@ -47,12 +48,13 @@ export class QuestionItem {
     // Fondo
     ctx.save();
     ctx.beginPath();
-    ctx.roundRect(boxX, boxY, boxW, boxH, 30);
-    ctx.fillStyle = "rgba(255,255,255,0.97)";
-    ctx.strokeStyle = "#bbb";
+    ctx.roundRect(boxX, boxY, boxW, boxH, 20);
+    ctx.fillStyle = "rgba(255,255,255,0.95)";
+    ctx.strokeStyle = "#3498db";
     ctx.lineWidth = 2;
-    ctx.shadowColor = "rgba(44,62,80,0.10)";
-    ctx.shadowBlur = 20;
+    ctx.shadowColor = "rgba(44,62,80,0.15)";
+    ctx.shadowBlur = 15;
+    ctx.shadowOffsetY = 3;
     ctx.fill();
     ctx.stroke();
     ctx.restore();
@@ -60,7 +62,7 @@ export class QuestionItem {
     // Espeja el texto de las preguntas para que se vea normal
     ctx.save();
     ctx.scale(-1, 1);
-    ctx.font = `bold ${Math.max(22, Math.floor(this.height/11))}px Nunito`;
+    ctx.font = `bold ${questionFontSize}px Nunito`;
     ctx.fillStyle = "#2C3E50";
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
@@ -71,14 +73,14 @@ export class QuestionItem {
         line,
         -(this.x + this.width / 2),
         this.y + marginTop + i * questionLineHeight,
-        this.width - 40
+        this.width - 60
       );
     });
     ctx.restore();
 
     // Dibuja opciones
     this.options.forEach((option, index) => {
-      const optionY = this.y + marginTop + questionHeight + 30 + index * (optionHeight + optionSpacing);
+      const optionY = this.y + marginTop + questionHeight + 20 + index * (optionHeight + optionSpacing);
       // Feedback visual SOLO para la opción seleccionada
       let feedbackColor = null;
       if (this.feedbackActive && index === this.feedbackSelected) {
@@ -86,13 +88,13 @@ export class QuestionItem {
       }
       ctx.save();
       ctx.beginPath();
-      ctx.roundRect(this.x + 40, optionY, this.width - 80, optionHeight, 18);
-      ctx.fillStyle = feedbackColor || "white";
-      ctx.strokeStyle = "#bbb";
+      ctx.roundRect(this.x + 30, optionY, this.width - 60, optionHeight, 12);
+      ctx.fillStyle = feedbackColor || "rgba(248, 249, 250, 0.9)";
+      ctx.strokeStyle = feedbackColor ? feedbackColor : "#dee2e6";
       ctx.lineWidth = 1.5;
-      ctx.shadowColor = "rgba(0, 0, 0, 0.08)";
-      ctx.shadowBlur = 6;
-      ctx.shadowOffsetY = 2;
+      ctx.shadowColor = "rgba(0, 0, 0, 0.05)";
+      ctx.shadowBlur = 4;
+      ctx.shadowOffsetY = 1;
       ctx.fill();
       ctx.stroke();
       ctx.restore();
@@ -100,15 +102,15 @@ export class QuestionItem {
       // Texto de la opción
       ctx.save();
       ctx.scale(-1, 1);
-      ctx.fillStyle = feedbackColor ? "white" : "#2C3E50";
-      ctx.font = `bold ${optionFontSize}px Nunito`;
+      ctx.fillStyle = feedbackColor ? "white" : "#495057";
+      ctx.font = `600 ${optionFontSize}px Nunito`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(
         option,
         -(this.x + this.width / 2),
         optionY + optionHeight / 2,
-        this.width - 120
+        this.width - 80
       );
       ctx.restore();
 
@@ -119,21 +121,21 @@ export class QuestionItem {
         !this.feedbackActive
       ) {
         ctx.save();
-        ctx.fillStyle = "rgba(200, 200, 200, 0.3)";
+        ctx.fillStyle = "rgba(52, 152, 219, 0.1)";
         ctx.fillRect(
-          this.x + 60,
-          optionY + optionHeight - 12,
-          this.width - 120,
-          8
+          this.x + 40,
+          optionY + optionHeight - 8,
+          this.width - 80,
+          6
         );
 
         // Barra de progreso
-        ctx.fillStyle = "rgba(100, 100, 100, 0.8)";
+        ctx.fillStyle = "rgba(52, 152, 219, 0.8)";
         ctx.fillRect(
-          this.x + 60,
-          optionY + optionHeight - 12,
-          (this.width - 120) * Math.min((Date.now() - this.selectionStartTime) / this.selectionThreshold, 1),
-          8
+          this.x + 40,
+          optionY + optionHeight - 8,
+          (this.width - 80) * Math.min((Date.now() - this.selectionStartTime) / this.selectionThreshold, 1),
+          6
         );
         ctx.restore();
       }
@@ -159,35 +161,70 @@ export class QuestionItem {
     return lines;
   }
 
-  checkCollision(handX, handY) {
+  // Obtiene las posiciones reales de las opciones
+  getOptionPositions(ctx) {
+    const positions = [];
+    
+    // Calcula altura de la pregunta - tiene que haber una manera mas simple de hacer esto.... chequear
+    const questionFontSize = Math.max(18, Math.min(24, Math.floor(this.height/12)));
+    const questionLineHeight = questionFontSize + 6;
+    const questionLines = this.wrapText(ctx, this.question, this.width - 60);
+    const questionHeight = questionLines.length * questionLineHeight;
+    
+    const marginTop = Math.max(20, Math.floor(this.height/10));
+    const optionFontSize = Math.max(16, Math.min(20, Math.floor(this.height/15)));
+    const optionHeight = optionFontSize + 20;
+    const optionSpacing = Math.max(10, Math.floor(this.height/20));
+    
+    for (let i = 0; i < this.options.length; i++) {
+      const optionY = this.y + marginTop + questionHeight + 20 + i * (optionHeight + optionSpacing);
+      const optionX = this.x + 30;
+      const optionWidth = this.width - 60;
+      
+      positions.push({
+        x: optionX,
+        y: optionY,
+        width: optionWidth,
+        height: optionHeight
+      });
+    }
+    
+    return positions;
+  }
+
+  checkCollision(handX, handY, ctx) {
     if (!this.isActive) return false;
 
-    // Verificar colisión con cada opción
+    // Posiciones reales de las opciones
+    const optionPositions = this.getOptionPositions(ctx);
+
+    // Verifica colisión con cada opción
     for (let i = 0; i < this.options.length; i++) {
-      const optionY = this.y + 80 + i * (Math.max(60, Math.floor(this.height / (this.options.length + 1))) + 20);
+      const option = optionPositions[i];
+      
+      // Verifica si la mano está dentro del área de la opción
       if (
-        handX > this.x + 40 &&
-        handX < this.x + this.width - 40 &&
-        handY > optionY &&
-        handY < optionY + Math.max(60, Math.floor(this.height / (this.options.length + 1)))
+        handX > option.x &&
+        handX < option.x + option.width &&
+        handY > option.y &&
+        handY < option.y + option.height
       ) {
-        // Si es una nueva selección, iniciar el temporizador
+        // Si es una nueva selección, inicia el temporizador
         if (this.selectedOption !== i) {
           this.selectedOption = i;
           this.selectionStartTime = Date.now();
         }
-        // Verificar si se ha mantenido la selección el tiempo suficiente
+        // Verifica si se ha mantenido la selección el tiempo suficiente
         if (
           this.selectionStartTime &&
           Date.now() - this.selectionStartTime >= this.selectionThreshold
         ) {
-          // NO poner isActive=false aquí, solo devolver true para que el GameManager maneje el feedback
           return true;
         }
         return false;
       }
     }
-    // Si no hay colisión, resetear la selección
+    // Si no hay colisión, resetea la selección
     this.selectedOption = null;
     this.selectionStartTime = null;
     return false;
