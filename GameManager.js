@@ -101,15 +101,7 @@ export class GameManager {
     window.addEventListener('resize', () => {
       this.handleResize();
     });
-    
 
-    // CHEQUEAR ESTO..... YO LO SACARIA Y YA FUE, MAS ADELANTE VEO SI PODEMOS ADAPTAR TODO PARA QUE SE PUEDA JUGAR EN MOVILES TMB
-    // Listener para cambio de orientación en móviles
-    window.addEventListener('orientationchange', () => {
-      setTimeout(() => {
-        this.handleResize();
-      }, 100);
-    });
   }
 
   handleResize() {
@@ -408,7 +400,7 @@ export class GameManager {
         videoSrc = 'videos/video_preEtapa.mp4';
       }
       */
-      video.src =  'videos/video_preEtapa.mp4';;
+      video.src =  'videos/video_preEtapa.mp4';
       video.muted = true; // sacar
       video.playsInline = true;
       video.setAttribute('autoplay', '');
@@ -425,13 +417,23 @@ export class GameManager {
       videoContainer.appendChild(controls);
       document.getElementById('game-container').appendChild(videoContainer);
       
+      // --- OCULTAR CANVAS/CAMARA ---
+      const canvas = this.canvas && this.canvas.canvas ? this.canvas.canvas : null;
+      if (canvas) canvas.style.visibility = 'hidden';
+      // --- FIN OCULTAR ---
+
       setTimeout(() => videoContainer.style.opacity = '1', 10);
       video.play();
       
+      const restoreCanvas = () => {
+        if (canvas) canvas.style.visibility = 'visible';
+      };
+
       controls.querySelector('.skip-button').addEventListener('click', () => {
         videoContainer.style.opacity = '0';
         setTimeout(() => {
           videoContainer.remove();
+          restoreCanvas();
           resolve();
         }, 700);
       });
@@ -444,6 +446,7 @@ export class GameManager {
       video.addEventListener('ended', () => {
         videoContainer.style.opacity = '0';
         setTimeout(() => {
+          restoreCanvas();
           videoContainer.remove();
           resolve();
         }, 700);
