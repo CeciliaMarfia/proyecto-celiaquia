@@ -65,7 +65,8 @@ export class GameManager {
         `,
       },
     };
-    this.currentQuestion = null;
+    this.currentQuestion = [null, null];
+    this.lastQuestionId = [null, null];
     this.answeredQuestions = new Set();
     this.selectionStartTime = null;
     this.selectionThreshold = 3000; // 3 segundos para seleccionar
@@ -136,7 +137,7 @@ export class GameManager {
     this.currentStage = 1;
     this.allFoodItems = [];
     this.players.forEach((p) => p.reset());
-    this.currentQuestion = null;
+    this.currentQuestion = [null, null];
     this.answeredQuestions = new Set();
     this.blockedByIntro = true;
     this.showIntroOverlay();
@@ -144,9 +145,8 @@ export class GameManager {
 
   endGame() {
     this.gameStarted = false;
-
     // Limpia cualquier pregunta o introducción que quede
-    this.currentQuestion = null;
+    this.currentQuestion = [null, null];
     this.blockedByIntro = false;
     const questionDiv = document.querySelector('.question-container');
     if (questionDiv) questionDiv.remove();
@@ -200,7 +200,7 @@ export class GameManager {
 
     // Verifica fin de etapa
     if (currentTime - this.gameStartTime > this.stageDuration) {
-      this.currentQuestion = null;
+      this.currentQuestion = [null, null];
       this.draw();
       this.showStageResults();
       return;
@@ -500,7 +500,7 @@ export class GameManager {
     for (let playerIdx = 0; playerIdx < 2; playerIdx++) {
       if (!this.currentQuestion[playerIdx]) {
         // Evitar repetir la última pregunta (no impide que se repita en absoluto, sólo que no se repita inmediatamente)
-        const lastQ = this.lastQuestionId ? this.lastQuestionId[playerIdx] : null;
+        const lastQ = this.lastQuestionId[playerIdx];
         let availableQuestions = this.questions.filter(
           (q) => !this.answeredQuestions.has(`${playerIdx}_${q.id}`)
         );
@@ -514,7 +514,6 @@ export class GameManager {
         }
         const newQ = this.createNewQuestion(availableQuestions);
         this.currentQuestion[playerIdx] = newQ;
-        if (!this.lastQuestionId) this.lastQuestionId = [null, null];
         this.lastQuestionId[playerIdx] = newQ ? newQ.id : null;
       }
     }
@@ -666,13 +665,11 @@ export class GameManager {
       this.ctx.fillStyle = '#f5f5f5'; // Fondo beige claro
       this.ctx.fillRect(0, 0, this.canvas.canvas.width, this.canvas.canvas.height);
     }
-
     this.activeFoods.forEach((food) => {
       food.draw(this.ctx);
     });
-
     // Preguntas una debajo de la otra y centradas
-    if (this.currentStage === 3 && Array.isArray(this.currentQuestion)) {
+    if (this.currentStage === 3) {
       const totalQuestions = this.currentQuestion.length;
       const canvasHeight = this.canvas.canvas.height;
       const canvasWidth = this.canvas.canvas.width;
