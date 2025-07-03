@@ -20,46 +20,25 @@ export class Camera {
   }
 
   updateDimensions(sourceWidth, sourceHeight) {
-    // Obtener dimensiones del contenedor
+    // Guarda dimensiones del contenedor
     const container = document.getElementById('game-container');
-    const containerWidth = container.clientWidth;
-    const containerHeight = container.clientHeight;
+    container.style.width = sourceWidth + 'px';
+    container.style.height = sourceHeight + 'px';
 
-    // Mantener la relación de aspecto del video
-    const videoAspectRatio = sourceWidth / sourceHeight;
-    const containerAspectRatio = containerWidth / containerHeight;
-
-    let width, height;
-    if (videoAspectRatio > containerAspectRatio) {
-      // El video es más ancho que el contenedor
-      height = containerHeight;
-      width = height * videoAspectRatio;
-    } else {
-      // El video es más alto que el contenedor
-      width = containerWidth;
-      height = width / videoAspectRatio;
-    }
-
-    // Actualizar dimensiones del video y canvas
-    this.video.width = width;
-    this.video.height = height;
+    // Usa dimensiones del contenedor para asignarle al video y al canvas asi no hay que hacer conversiones
+    this.video.width = sourceWidth;
+    this.video.height = sourceHeight;
 
     const canvas = document.querySelector('canvas');
-    canvas.width = width;
-    canvas.height = height;
-
-    this.video.style.position = 'absolute';
-    this.video.style.top = '50%';
-    this.video.style.left = '50%';
-    this.video.style.transform = 'translate(-50%, -50%)';
-
-    canvas.style.position = 'absolute';
-    canvas.style.top = '50%';
-    canvas.style.left = '50%';
-    canvas.style.transform = 'translate(-50%, -50%)';
+    if (canvas) {
+      canvas.width = sourceWidth;
+      canvas.height = sourceHeight;
+      canvas.style.width = sourceWidth + 'px';
+      canvas.style.height = sourceHeight + 'px';
+    }
   }
 
-  start(canvas) {
+  start(canvasInstance) {
     var self = this;
     if (navigator.getUserMedia) {
       navigator.getUserMedia(
@@ -75,13 +54,15 @@ export class Camera {
 
           const { width, height } = self.webcamStream.getTracks()[0].getSettings();
           self.updateDimensions(width, height);
+
+          // El contenedor se va a adaptar al tamaño del video
+          self.video.addEventListener('loadedmetadata', () => {
+            self.updateDimensions(self.video.videoWidth, self.video.videoHeight);
+          });
         },
         // errorCallback
         function (err) {
-          console.log("The following error occured: " + err);
         });
-    } else {
-      console.log("getUserMedia not supported");
     }
   }
 
