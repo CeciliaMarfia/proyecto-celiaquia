@@ -34,7 +34,7 @@ export class Camera {
     canvas.height = containerHeight;
   }
 
-  start(canvas) {
+  start(canvasInstance) {
     var self = this;
     if (navigator.getUserMedia) {
       navigator.getUserMedia(
@@ -50,13 +50,20 @@ export class Camera {
 
           const { width, height } = self.webcamStream.getTracks()[0].getSettings();
           self.updateDimensions(width, height);
+
+          // El contenedor se va a adaptar al tamaño del video
+          self.video.addEventListener('loadedmetadata', () => {
+            const container = document.getElementById('game-container');
+            container.style.width = self.video.width + 'px';
+            container.style.height = self.video.height + 'px';
+            const canvas = document.querySelector('canvas');
+            canvas.style.width = self.video.width + 'px';
+            canvas.style.height = self.video.height + 'px';
+          });
         },
         // errorCallback
         function (err) {
-          console.log("The following error occured: " + err);
         });
-    } else {
-      console.log("getUserMedia not supported");
     }
   }
 
