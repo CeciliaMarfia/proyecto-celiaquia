@@ -15,42 +15,47 @@
 }
 
 /* Estilos generales */
+/*  Es recomendable para asegurar que tanto el <html> como el <body> ocupen el 100% de
+    la pantalla porque ayuda a evitar problemas de scroll o de que el contenedor no ocupe
+    toda la pantalla en todos los navegadores!!!!! chequear que realmente funcione ;)
+*/
+html,
 body {
-  font-family: 'Nunito', sans-serif;
-  text-align: center;
-  background-color: var(--background-color);
+  height: 100%;
   margin: 0;
-  padding: 20px;
-  color: var(--text-color);
-  line-height: 1.6;
+  padding: 0;
 }
 
-/* Header del juego */
+body {
+  background: #f5f6fa;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Header del juego fijo arriba */
 .game-header {
-  position: relative;
-  margin-bottom: 2rem;
+  /* para que qnada tape el header deben ir estas 4 */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  position: fixed;
+
+  height: 95px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 1rem 2rem 0.5rem 1.5rem;
+  background: #f9f7f7f4;
+  box-sizing: border-box;
+  z-index: 4000;
 }
 
 .game-header h1 {
+  margin: 0;
   font-size: 2.5rem;
   color: var(--primary-color);
-  margin: 0;
-  padding: 1rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.sin-tacc-badge {
-  position: absolute;
-  top: -10px;
-  right: 20px;
-  background: var(--safe-color);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-weight: bold;
-  font-size: 0.9rem;
-  transform: rotate(5deg);
-  box-shadow: var(--shadow-sm);
 }
 
 /* Instrucciones */
@@ -172,14 +177,15 @@ body {
 .controls-group {
   display: flex;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.4rem;
   width: 100%;
-  max-width: 600px;
+  max-width: 400px;
+  /* para que no se estire tanto */
 }
 
 button {
-  padding: 0.8rem 1.5rem;
-  font-size: 1rem;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.8rem;
   font-family: 'Nunito', sans-serif;
   font-weight: 600;
   cursor: pointer;
@@ -191,7 +197,7 @@ button {
   justify-content: center;
   gap: 0.5rem;
   box-shadow: var(--shadow-sm);
-  min-width: 200px;
+  min-width: 120px;
 }
 
 .btn-icon {
@@ -218,25 +224,24 @@ button:hover {
   box-shadow: var(--shadow-md);
 }
 
-/* button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-  transform: none;
-} */
-
 /* Contador FPS */
 .fps-counter {
-  background: var(--card-background);
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  border-radius: var(--border-radius);
-  font-size: 0.9rem;
-  color: #666;
-  margin: 1rem 0;
   box-shadow: var(--shadow-sm);
+  margin-left: 2.5rem;
+  color: #666;
+  font-weight: bold;
+  display: flex;
+}
+
+/* Para que el fps no mueva el resto del header cuando cambia de valor */
+.fps-counter__value {
+  display: inline-block;
+  min-width: 40px;
+  text-align: right;
 }
 
 #fps {
+  /* nro */
   font-weight: bold;
   color: var(--primary-color);
 }
@@ -244,70 +249,19 @@ button:hover {
 /* Contenedor del juego */
 #game-container {
   position: relative;
-  margin: 1rem auto;
-  border-radius: var(--border-radius);
+  /* margin: 1rem auto; */
+  /* border-radius: var(--border-radius); */
   overflow: hidden;
-  box-shadow: var(--shadow-lg);
-  width: 90vw;
-  max-width: 1200px;
-  aspect-ratio: 13/9;
-  height: 70vh;
-  min-height: 400px;
-  max-height: 90vh;
-}
-
-#game-container video,
-#game-container canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100% !important;
-  height: 100% !important;
-  background-color: #f9f9f9;
-  border-radius: var(--border-radius);
-  object-fit: cover;
-  transform: none;
-  z-index: 1;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-.game-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  border: 3px solid var(--primary-color);
-  border-radius: var(--border-radius);
-  z-index: 2;
-}
-
-/* Resultados del juego */
-.game-results {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.9);
+  /* box-shadow: var(--shadow-lg); */
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  min-width: 100vw;
+  /* max-width: 1200px; */
+  /* aspect-ratio: 13/9; */
+  background: #f5f6fa;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  z-index: 10;
-  padding: 2rem;
-  box-sizing: border-box;
-  border-radius: var(--border-radius);
-}
-
-.game-results h1 {
-  color: var(--primary-color);
-  margin-bottom: 2rem;
-  font-size: 2.5rem;
 }
 
 /* Contenedor para los resultados de los jugadores */
@@ -354,77 +308,33 @@ button:hover {
   color: #fff;
 }
 
-/* Animaciones */
-@keyframes collectedAnimation {
+/* Efecto de recolección de alimentos - esto no funcionaba, chequear si así sí!!! */
+.food-collected {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 100;
+  animation: collectEffect 0.5s ease-out forwards;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes collectEffect {
   0% {
-    transform: scale(1);
+    transform: translate(-50%, -50%) scale(0);
     opacity: 1;
   }
 
   50% {
-    transform: scale(1.5);
-    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0.8;
   }
 
   100% {
-    transform: scale(2);
+    transform: translate(-50%, -50%) scale(2);
     opacity: 0;
   }
-}
-
-.food-collected {
-  position: absolute;
-  animation: collectedAnimation 0.5s ease-out forwards;
-}
-
-/* Estilos para introducción de etapa */
-.stage-introduction,
-.big-intro {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  font-size: 2.5rem !important;
-  padding: 0 !important;
-  border: none !important;
-  background: rgba(255,255,255,0.98) !important;
-  box-shadow: 0 0 40px rgba(52,152,219,0.2) !important;
-  z-index: 3000 !important;
-  text-align: center;
-}
-
-.stage-introduction h2, .big-intro h2 {
-  font-size: 2.5rem !important;
-  color: #3498db !important;
-  margin-top: 1.5rem !important;
-  margin-bottom: 1.2rem !important;
-}
-
-.stage-introduction p, .big-intro p {
-  font-size: 1.4rem !important;
-  color: #2C3E50 !important;
-  margin: 0 auto 1.2rem auto;
-  max-width: 90vw;
-}
-
-.stage-introduction button {
-  background-color: #3498db;
-  color: white;
-  border: none;
-  padding: 1rem 2rem;
-  border-radius: 5px;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.stage-introduction button:hover {
-  background-color: #2980b9;
 }
 
 /* Estilos para el sistema de preguntas */
@@ -497,8 +407,15 @@ button:hover {
 
 /* Animación para las preguntas */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translate(-50%, -48%); }
-  to { opacity: 1; transform: translate(-50%, -50%); }
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
 }
 
 .question-container {
@@ -529,24 +446,66 @@ button:hover {
 }
 
 /* Fade-in y fade-out para el video de etapa */
-.stage-video-container {
+/* Video de etapa centrado */
+.stage-video-container { /* esto queda por encima del header , arreglar para que se vea el boton de skip y mute */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
   opacity: 0;
-  transition: opacity 0.7s;
+  padding-top: 95px; /* Para que no tape el header ni sea tapado x él */
 }
+
 .stage-video-container.visible {
   opacity: 1;
 }
 
 .stage-video {
-  width: 100vw;
-  height: 100vh;
-  object-fit: cover;
-  max-width: 100vw;
-  max-height: 100vh;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: var(--border-radius);
+}
+
+/* Cartel explicativo de etapas */
+.stage-introduction,
+.big-intro {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 1001;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.98);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  padding: 2rem;
+  box-sizing: border-box;
+  overflow-y: auto;
+  text-align: center;
+}
+
+.stage-introduction h2,
+.big-intro h2 {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  font-size: 2rem;
+}
+
+.stage-introduction p,
+.big-intro p {
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+  max-width: 90%;
 }
 
 .video-controls {
@@ -556,7 +515,7 @@ button:hover {
   left: auto;
   bottom: auto;
   z-index: 1002;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   padding: 0.5rem 1rem;
   border-radius: 25px;
   display: flex;
@@ -589,6 +548,7 @@ button:hover {
   color: white !important;
   border: 2px solid #388e3c !important;
 }
+
 .question-canvas-box .option-incorrect {
   background: #F44336 !important;
   color: white !important;
@@ -602,6 +562,7 @@ button:hover {
   top: 50%;
   transform: translateY(-50%);
 }
+
 .question-canvas-box.player2 {
   position: absolute;
   right: 5%;
@@ -611,9 +572,9 @@ button:hover {
 
 /* Caja de pregunta mejorada */
 .question-canvas-box {
-  background: rgba(255,255,255,0.97);
+  background: rgba(255, 255, 255, 0.97);
   border-radius: 20px;
-  box-shadow: 0 0 30px rgba(44,62,80,0.15);
+  box-shadow: 0 0 30px rgba(44, 62, 80, 0.15);
   border: 3px solid #3498db;
   padding: 2.5rem 2rem 2rem 2rem;
   width: 520px;
@@ -626,6 +587,7 @@ button:hover {
   align-items: center;
   font-size: 1.25rem;
 }
+
 .question-canvas-box .question-title {
   font-size: 1.35rem;
   color: #2C3E50;
@@ -640,7 +602,7 @@ button:hover {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(255,255,255,0.98);
+  background: rgba(255, 255, 255, 0.98);
   z-index: 3000;
   display: flex;
   justify-content: center;
@@ -649,7 +611,7 @@ button:hover {
   overflow-y: auto;
 }
 
-.intro-overlay > div {
+.intro-overlay>div {
   max-width: 1200px;
   width: 95vw;
   display: flex;
@@ -676,14 +638,6 @@ button:hover {
   min-width: 200px;
 }
 
-.intro-overlay .intro-title {
-  font-size: 2.5rem;
-  color: #3498db;
-  margin-bottom: 2rem;
-  font-weight: bold;
-  text-align: left;
-}
-
 .intro-overlay .intro-text {
   font-size: 1.3rem;
   color: #2C3E50;
@@ -692,9 +646,9 @@ button:hover {
   text-align: left;
   line-height: 1.6;
   border-radius: 12px;
-  background: rgba(255,255,255,0.7);
+  background: rgba(255, 255, 255, 0.7);
   padding: 2rem 1.5rem;
-  box-shadow: 0 0 20px rgba(52,152,219,0.08);
+  box-shadow: 0 0 20px rgba(52, 152, 219, 0.08);
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
@@ -708,7 +662,7 @@ button:hover {
   border-radius: 50px;
   cursor: pointer;
   font-weight: bold;
-  box-shadow: 0 8px 25px rgba(52,152,219,0.3);
+  box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
   transition: all 0.3s ease;
   min-width: 200px;
   position: relative;
@@ -722,52 +676,463 @@ button:hover {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   transition: left 0.5s;
 }
 
 .intro-overlay .intro-btn:hover {
   background: linear-gradient(135deg, #2980b9, #1f5f8b);
   transform: translateY(-3px);
-  box-shadow: 0 12px 35px rgba(52,152,219,0.4);
+  box-shadow: 0 12px 35px rgba(52, 152, 219, 0.4);
 }
 
 .intro-overlay .intro-btn:hover::before {
   left: 100%;
 }
 
-/* Responsive para pantallas pequeñas */
-@media (max-width: 768px) {
-  .intro-overlay > div {
-    flex-direction: column;
-    gap: 2rem;
-    text-align: center;
+/* Resultados de la etapa */
+.stage-results {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  z-index: 2000;
+  padding: 2rem;
+  box-sizing: border-box;
+  border-radius: var(--border-radius);
+  pointer-events: auto;
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+.stage-results h1 {
+  color: var(--primary-color);
+  margin-bottom: 2rem;
+  font-size: 2.5rem;
+  text-align: center;
+}
+
+.stage-results-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  position: relative;
+  z-index: 2001;
+}
+
+.stage-results-buttons button {
+  min-width: 180px;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  z-index: 2002;
+  /* Asegurar que el botón sea siempre visible */
+  max-width: 90vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stage-results-buttons .btn-primary {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+}
+
+.stage-results-buttons .btn-primary:hover {
+  background: linear-gradient(135deg, #2980b9, #1f5f8b);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.stage-results-buttons .btn-success {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+}
+
+.stage-results-buttons .btn-success:hover {
+  background: linear-gradient(135deg, #45a049, #388e3c);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Fila central: info jugadores + video/canvas */
+.game-center-row {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  /* stretch es para que los hijos ocupen todo el alto porque no puedo poner heigh 100% */
+  justify-content: center;
+  width: 100vw;
+  height: calc(100vh - 70px);
+  margin-top: 95px; /* igual al height del header */
+  position: relative;
+  z-index: 1;
+}
+
+.player-info {
+  height: 100%; /* ocupa todo el alto del contenedor - misma altura que el video */
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  padding: 18px 20px;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 120px;
+  max-width: 180px;
+  align-items: flex-end; /* probar como queda flex-start, no se queda mejro */
+  margin: 0 10px;
+  z-index: 2;
+}
+
+.player-info.player-2 {
+  align-items: flex-start;
+  margin-left: 0px;
+  margin-right: 0;
+  height: 100%; /* misma altura que player info para el jugador 2 */
+}
+
+.video-canvas-container {
+  /* centra el video/canvas y los mantiene juntos */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 720px;
+  height: 540px;
+  max-width: 90vw;
+  max-height: 80vh;
+}
+
+.video-canvas-container video,
+.video-canvas-container canvas {
+  /* aseguran que ambos ocupen el mismo espacio */
+  width: 100%;
+  height: 100%;
+  background: #f9f9f9;
+  border-radius: 12px;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: scaleX(-1);
+}
+
+.player-name {
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+.player-score {
+  font-size: 20px;
+  color: #4CAF50;
+}
+
+.player-energy {
+  font-size: 18px;
+  color: #FF6B6B;
+}
+
+/* Contador de tiempo en el centro */
+.time-counter {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 2rem 4rem;
+  border-radius: 20px;
+  font-size: 4rem;
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+/* Animación para el contador */
+@keyframes pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
   }
-  
-  .intro-content {
-    align-items: center;
-    text-align: center;
+
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
   }
-  
-  .intro-overlay .intro-title {
-    text-align: center;
-  }
-  
-  .intro-overlay .intro-text {
-    text-align: center;
+
+  100% {
+    transform: translate(-50%, -50%) scale(1);
   }
 }
 
-.cartel-etapa-detalles {
-  font-size: 1.25rem !important;
-  color: #2C3E50 !important;
-  margin: 1.5rem auto 0 auto;
-  max-width: 90vw;
-  text-align: left;
-  line-height: 1.7;
-  background: rgba(52,152,219,0.07);
-  border-left: 5px solid #3498db;
+/* Mensaje final del juego */
+.final-message {
+  position: fixed;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+  top: 95px; /* igual al alto del header */
+  height: calc(100vh - 95px);
+  padding-top: 0;
+}
+
+.final-content {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 3rem;
+  border-radius: var(--border-radius);
+  max-width: 1200px;
+  width: 90%;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  gap: 3rem;
+  align-items: center;
+}
+
+.final-left {
+  flex: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.final-right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.final-content h1 {
+  color: var(--primary-color);
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: bold;
+}
+
+.final-content p {
+  color: #2d3748;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.final-content .btn-large {
+  margin-top: 2rem;
+  padding: 1.5rem 3rem;
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+  font-weight: 600;
+  min-width: 300px;
+}
+
+.final-content .btn-large:hover {
+  background: linear-gradient(135deg, #2980b9, #1f5f8b);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.final-content .btn-large:active {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.qr-code {
+  max-width: 300px;
+  width: 100%;
+  height: auto;
   border-radius: 10px;
-  padding: 1.2rem 2rem;
-  box-shadow: 0 2px 10px rgba(52,152,219,0.08);
+  box-shadow: var(--shadow-md);
+}
+
+/* Responsive básico para el juego */
+@media (max-width: 768px),
+(max-height: 600px) {
+
+  /* Header más compacto */
+  .game-header h1 {
+    font-size: 1.5rem;
+  }
+
+  /* Instrucciones más compactas */
+  .instructions h2 {
+    font-size: 1.3rem;
+  }
+
+  .main-instruction {
+    font-size: 1rem;
+  }
+
+  .food-types {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .food-type {
+    flex-direction: row;
+    text-align: left;
+    padding: 1rem;
+  }
+
+  .food-icon {
+    font-size: 2rem;
+    margin-right: 1rem;
+    margin-bottom: 0;
+  }
+
+  /* Controles más compactos */
+  .controls-group {
+    flex-direction: column;
+    gap: 0.5rem;
+    display: flex;
+    margin-left: auto;
+  }
+
+  button {
+    margin-left: 0.5rem;
+  }
+
+  /* Canvas responsive */
+  #game-container {
+    height: 60vh;
+    min-height: 300px;
+  }
+
+  #game-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+  }
+
+  /* Información de jugadores más compacta */
+  .player-info {
+    padding: 10px 15px;
+    font-size: 14px;
+    min-width: 150px;
+  }
+
+  .player-name {
+    font-size: 12px;
+  }
+
+  .player-score {
+    font-size: 16px;
+  }
+
+  .player-energy {
+    font-size: 14px;
+  }
+
+  /* Contador de tiempo más pequeño */
+  .time-counter {
+    padding: 1.5rem 3rem;
+    font-size: 3rem;
+  }
+
+  .players-results-container {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .stage-results-buttons {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .stage-results-buttons button {
+    min-width: 150px;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  /* Preguntas más compactas */
+  .question-container {
+    max-width: 95%;
+    padding: 1.5rem;
+  }
+
+  .question-container h3 {
+    font-size: 1.2rem;
+  }
+
+  .option {
+    padding: 0.8rem;
+  }
+
+  /* Video de etapa */
+  .video-controls {
+    top: 15px;
+    right: 20px;
+    padding: 0.3rem 0.8rem;
+  }
+
+  .video-controls button {
+    font-size: 0.9rem;
+    padding: 0.3rem 0.8rem;
+  }
+}
+
+/* Para pantallas muy pequeñas o zoom alto */
+@media (max-width: 480px),
+(max-height: 400px) {
+  .game-header h1 {
+    font-size: 1.2rem;
+  }
+
+  #game-container {
+    height: 50vh;
+  }
+
+  .player-info {
+    min-width: 120px;
+    font-size: 12px;
+  }
+
+  .time-counter {
+    padding: 1rem 2rem;
+    font-size: 2.5rem;
+  }
+
+  .stage-results-buttons button {
+    min-width: 120px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Para pantallas muy pequeñas, ajusta el espaciado de preguntas */
+@media (max-height: 500px) {
+  #game-container {
+    height: 70vh;
+  }
 }
