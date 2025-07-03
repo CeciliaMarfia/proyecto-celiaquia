@@ -163,6 +163,7 @@ export class GameManager {
     if (currentTime - this.gameStartTime > this.stageDuration) {
       this.currentQuestion = [null, null];
       this.draw();
+      this.hideCanvas();
       this.showStageResults();
       return;
     }
@@ -216,6 +217,7 @@ export class GameManager {
       timeCounter.style.display = 'none';
       this.gameStartTime = currentTime; // Reinicia el tiempo de la etapa
       this.lastFoodSpawn = currentTime; // Reinicia el tiempo de spawn de alimentos
+      this.showCanvas(); // Se vuelve a mostrar el canvas
       return;
     }
 
@@ -249,7 +251,7 @@ export class GameManager {
     this.clearStageResults();
     this.hidePlayersInfo();
     this.hideTimer();
-    
+
     const resultsDiv = document.createElement('div');
     resultsDiv.className = 'game-results';
     const title = document.createElement('h1');
@@ -259,21 +261,17 @@ export class GameManager {
     const playersContainer = document.createElement('div');
     playersContainer.className = 'players-results-container';
 
-    // Jugador 1
-    const player1Div = this.createPlayerResult('Jugador 1', 0);
 
-    // Jugador 2
+    const player1Div = this.createPlayerResult('Jugador 1', 0);
     const player2Div = this.createPlayerResult('Jugador 2', 1);
 
-    // Agrega jugadores al contenedor
     playersContainer.append(player1Div, player2Div);
 
-    // Mensaje específico de la etapa
     const messageDiv = document.createElement('div');
     messageDiv.className = 'game-message';
     const stageInfo = this.stageSettings[this.currentStage];
     const message = document.createElement('p');
-    message.innerHTML = `<b>${stageInfo.description}</b><br>¡Bien hecho! Has completado esta etapa. Cada etapa es un desafío independiente.`;
+    message.innerHTML = `<b>${stageInfo.description}</b><br>¡Bien hecho! Has completado esta etapa.`;
     messageDiv.appendChild(message);
 
     // Botones de acción
@@ -289,12 +287,14 @@ export class GameManager {
 
     const nextButton = document.createElement('button');
     nextButton.textContent = this.currentStage < 3 ? 'Siguiente Etapa' : 'Finalizar Juego';
-    const aux = this.currentStage < 3 ? 'Siguiente Etapa' : 'Finalizar Juego';
     nextButton.className = 'btn-success';
-    nextButton.onclick = () => {
-      console.log(aux);
-      this.continueToNextStage();
-    };
+    if (nextButton.textContent === 'Finalizar Juego') {
+      nextButton.onclick = () => this.showFinalMessage();
+    } else {
+      nextButton.onclick = () => {
+        this.continueToNextStage();
+      };
+    }
 
     buttonsContainer.append(repeatButton, nextButton);
 
@@ -310,7 +310,7 @@ export class GameManager {
     this.currentQuestion = [null, null];
     this.answeredQuestions = new Set();
     this.lastQuestionId = [null, null];
-    
+
     // Resetea los jugadores
     this.players.forEach((p) => {
       p.score = 0;
@@ -352,12 +352,22 @@ export class GameManager {
     if (existingResults) existingResults.remove();
   }
 
+  hideCanvas() {
+    const canvas = this.canvas && this.canvas.canvas ? this.canvas.canvas : null;
+    if (canvas) canvas.style.visibility = 'hidden';
+  }
+
+  showCanvas() {
+    const canvas = this.canvas && this.canvas.canvas ? this.canvas.canvas : null;
+    if (canvas) canvas.style.visibility = 'visible';
+  }
+
   showStageVideo() {
     return new Promise((resolve) => {
       const videoContainer = document.createElement('div');
       videoContainer.className = 'stage-video-container';
       videoContainer.style.transition = 'opacity 0.7s';
-      
+
       const video = document.createElement('video');
       video.className = 'stage-video';
       // Seleccionar video según la etapa
@@ -369,7 +379,7 @@ export class GameManager {
         videoSrc = 'videos/video_preEtapa.mp4';
       }
       */
-      video.src =  'videos/video_preEtapa.mp4';
+      video.src = 'videos/video_preEtapa.mp4';
       video.muted = true; // sacar
       video.playsInline = true;
       video.setAttribute('autoplay', '');
@@ -385,37 +395,26 @@ export class GameManager {
       videoContainer.appendChild(video);
       videoContainer.appendChild(controls);
       document.getElementById('game-container').appendChild(videoContainer);
-      
-      // --- OCULTAR CANVAS/CAMARA ---
-      const canvas = this.canvas && this.canvas.canvas ? this.canvas.canvas : null;
-      if (canvas) canvas.style.visibility = 'hidden';
-      // --- FIN OCULTAR ---
 
       setTimeout(() => videoContainer.style.opacity = '1', 10);
       video.play();
-      
-      const restoreCanvas = () => {
-        if (canvas) canvas.style.visibility = 'visible';
-      };
 
       controls.querySelector('.skip-button').addEventListener('click', () => {
         videoContainer.style.opacity = '0';
         setTimeout(() => {
           videoContainer.remove();
-          restoreCanvas();
           resolve();
         }, 700);
       });
-      
+
       controls.querySelector('.mute-button').addEventListener('click', () => {
         video.muted = !video.muted;
         controls.querySelector('.mute-button').textContent = video.muted ? '🔇' : '🔊';
       });
-      
+
       video.addEventListener('ended', () => {
         videoContainer.style.opacity = '0';
         setTimeout(() => {
-          restoreCanvas();
           videoContainer.remove();
           resolve();
         }, 700);
@@ -433,7 +432,10 @@ export class GameManager {
     `;
     const container = document.getElementById('game-container');
     container.appendChild(introDiv);
+
     this.blockedByIntro = true;
+    this.hideCanvas();
+
     setTimeout(() => {
       introDiv.remove();
       this.blockedByIntro = false;
@@ -445,7 +447,7 @@ export class GameManager {
       this.currentQuestion = [null, null];
       this.showPlayersInfo(); // Muestra información de jugadores
       this.draw();
-    }, 10000); // 10 segundos
+    }, 4000); // 4 segundos
   }
 
   showPlayersInfo() {
@@ -529,7 +531,7 @@ export class GameManager {
     // Calcular posición centrada en el canvas
     const x = (this.canvas.canvas.width - 300) / 2; // 300 es el ancho de la pregunta
     const y = (this.canvas.canvas.height - 200) / 2; // 200 es aproximadamente el alto total
-    
+
     return new QuestionItem(x, y, question.question, question.options, question.correctAnswer);
   }
 
@@ -579,7 +581,7 @@ export class GameManager {
         // Verificación de keypoints y solo considera detecciones con alta confianza
         // Detección con toda la mano (dedos y palma)
         const detectedHand = new HandDetector(hand);
-        if(this.activeFoods.length > 0) console.log("hay active foods"); else console.log("no hay active foods...");
+        if (this.activeFoods.length > 0) console.log("hay active foods"); else console.log("no hay active foods...");
         this.activeFoods.forEach((food) => {
           console.log("comida activa");
           if (food.checkCollision(detectedHand)) {
@@ -591,7 +593,7 @@ export class GameManager {
         });
       }
     });
-  }  
+  }
 
   detectCollisions(hands) {
     if (!hands || hands.length === 0) return;
@@ -617,7 +619,7 @@ export class GameManager {
     // Como el canvas está espejado con scaleX(-1) invertimos la coordenada X asi el efecto se ve en la posicion correcta
     const coordX = this.canvas.canvas.width - (food.x + food.width / 2);
     const coordY = food.y + food.height / 2;
-    
+
     effect.style.left = `${coordX}px`;
     effect.style.top = `${coordY}px`;
     effect.style.backgroundColor = this.getFoodColor(food.type);
@@ -644,15 +646,15 @@ export class GameManager {
       const totalQuestions = this.currentQuestion.length;
       const canvasHeight = this.canvas.canvas.height;
       const canvasWidth = this.canvas.canvas.width;
-      
+
       // Calcula espaciado entre preguntas para que sean legibles
       const minQuestionHeight = 200; // Altura mínima por pregunta
       const spacingBetweenQuestions = 50; // Espacio entre preguntas
       const totalMinHeight = totalQuestions * minQuestionHeight + (totalQuestions - 1) * spacingBetweenQuestions;
       const availableHeight = canvasHeight - 80; // Dejar margen arriba y abajo
-      
+
       let blockHeight, startY;
-      
+
       if (totalMinHeight <= availableHeight) {
         // Si hay espacio suficiente, usar altura mínima con espaciado
         blockHeight = minQuestionHeight + spacingBetweenQuestions;
@@ -662,7 +664,7 @@ export class GameManager {
         blockHeight = availableHeight / totalQuestions;
         startY = 40;
       }
-      
+
       for (let i = 0; i < totalQuestions; i++) {
         const q = this.currentQuestion[i];
         if (q) {
@@ -684,52 +686,12 @@ export class GameManager {
     }
   }
 
-  showResults() {
-    this.hideTimer();
-    
-    const resultsDiv = document.createElement('div');
-    resultsDiv.className = 'game-results';
-    const title = document.createElement('h1');
-    title.textContent = '¡Juego Terminado!';
-
-    // Contenedor para los jugadores
-    const playersContainer = document.createElement('div');
-    playersContainer.className = 'players-results-container';
-
-    const player1Div = this.createPlayerResult('Jugador 1', 0);
-    const player2Div = this.createPlayerResult('Jugador 2', 1);
-
-    playersContainer.append(player1Div, player2Div);
-
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'game-message';
-    const message1 = document.createElement('p');
-    message1.textContent = 'La celiaquía es una condición seria donde incluso pequeñas cantidades de gluten pueden causar daño.';
-    const message2 = document.createElement('p');
-    message2.textContent = '¡Siempre verifica los alimentos y busca el sello SIN TACC!';
-    messageDiv.append(message1, message2);
-
-    // Botón de finalizar
-    const buttonContainer = document.createElement('div');
-    buttonContainer.className = 'stage-results-buttons';
-
-    const finishButton = document.createElement('button');
-    finishButton.textContent = 'Finalizar Juego';
-    finishButton.className = 'btn-primary';
-    finishButton.onclick = () => this.showFinalMessage();
-
-    buttonContainer.appendChild(finishButton);
-
-    resultsDiv.append(title, playersContainer, messageDiv, buttonContainer);
-    document.getElementById('game-container').appendChild(resultsDiv);
-  }
-
   // Método auxiliar para crear la sección de cada jugador
   createPlayerResult(playerName, playerIndex) {
     const playerDiv = document.createElement('div');
     playerDiv.className = 'player-result';
 
-    const title = document.createElement('h2');
+    const title = document.createElement('h3');
     title.textContent = playerName;
 
     const score = document.createElement('p');
@@ -759,7 +721,7 @@ export class GameManager {
     );
 
     foodsDiv.append(healthyDiv, unhealthyDiv, glutenDiv);
-    
+
     const correctQuestions = document.createElement('p');
     correctQuestions.textContent = `Preguntas correctas: ${this.players[playerIndex].correctQuestions || 0}`;
     playerDiv.append(title, score, energy, foodsDiv, correctQuestions);
@@ -790,9 +752,9 @@ export class GameManager {
         <div class="intro-content">
           <div class="intro-text">
             Clara y Santiago son amigos, ambos celíacos, lo que significa que deben tener especial cuidado con lo que comen en su día a día.<br><br>
-            En este juego te invitamos a enfrentar el desafío de ponerse en su lugar: tendrás que seleccionar con atención los alimentos que sean seguros y evitar los que contienen gluten que aparecen en pantalla.<br><br>
-            Si elegís uno que no es apto pueden hacerle daño y tendrá consecuencias: se sienten mal y tus puntos bajan.<br><br>
-            El objetivo no es solo sumar puntos para ganar, sino aprender cómo es vivir con una condición alimentaria que requiere atención constante.<br><br>
+            En este juego te invitamos a ayudarlos: tendrás que seleccionar con atención los alimentos que aparecen en pantalla, algunos son seguros y otros contienen gluten.<br><br>
+            Si elegís uno con TACC tus puntos y tu energía bajan.<br><br>
+            El objetivo no es sólo sumar puntos para ganar, sino aprender cómo es vivir con una condición alimentaria que requiere atención constante.<br><br>
             <b>¿Estás listo para cuidarte como lo hacen Clara y Santiago todos los días?</b>
           </div>
         </div>
@@ -804,6 +766,7 @@ export class GameManager {
     document.getElementById('game-container').appendChild(introDiv);
     introDiv.querySelector('.intro-btn').onclick = () => {
       introDiv.remove();
+      this.hideCanvas();
       this.showStageVideo().then(() => {
         if (this.gameEnded) return;
         this.showStageIntroduction();
