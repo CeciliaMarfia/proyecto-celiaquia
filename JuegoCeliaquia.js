@@ -31,7 +31,7 @@ camera.getVideo().addEventListener('loadeddata', () => runInference(canvas, came
 document.getElementById('b-start-webcam').addEventListener('click', () => {
     camera.start(canvas);
     // Limpia cualquier resultado previo
-    const existingResults = document.querySelector('.game-results');
+    const existingResults = document.querySelector('.stage-results');
     if (existingResults) {
         existingResults.remove();
     }
@@ -81,7 +81,7 @@ async function runInference(canvas, camera) {
     canvas.drawCameraFrame(camera);
 
     // Actualiza y dibuja el juego sólo cuando no está mostrando resultados de etapa
-    if (window.gameManager && !window.gameManager.gameEnded && !document.querySelector('.game-results')) {
+    if (window.gameManager && !window.gameManager.gameEnded && !document.querySelector('.stage-results')) {
       window.gameManager.update(Date.now(), hands);
       window.gameManager.draw();
     }

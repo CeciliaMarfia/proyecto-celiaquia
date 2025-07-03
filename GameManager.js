@@ -253,7 +253,7 @@ export class GameManager {
     this.hideTimer();
 
     const resultsDiv = document.createElement('div');
-    resultsDiv.className = 'game-results';
+    resultsDiv.className = 'stage-results';
     const title = document.createElement('h1');
     title.textContent = `¡Etapa ${this.currentStage} Completada!`;
 
@@ -348,7 +348,7 @@ export class GameManager {
   }
 
   clearStageResults() {
-    const existingResults = document.querySelector('.game-results');
+    const existingResults = document.querySelector('.stage-results');
     if (existingResults) existingResults.remove();
   }
 
