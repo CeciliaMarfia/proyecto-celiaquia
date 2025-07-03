@@ -22,16 +22,20 @@ export class Camera {
   updateDimensions(sourceWidth, sourceHeight) {
     // Guarda dimensiones del contenedor
     const container = document.getElementById('game-container');
-    const containerWidth = container.clientWidth;
-    const containerHeight = container.clientHeight;
+    container.style.width = sourceWidth + 'px';
+    container.style.height = sourceHeight + 'px';
 
     // Usa dimensiones del contenedor para asignarle al video y al canvas asi no hay que hacer conversiones
-    this.video.width = containerWidth;
-    this.video.height = containerHeight;
+    this.video.width = sourceWidth;
+    this.video.height = sourceHeight;
 
     const canvas = document.querySelector('canvas');
-    canvas.width = containerWidth;
-    canvas.height = containerHeight;
+    if (canvas) {
+      canvas.width = sourceWidth;
+      canvas.height = sourceHeight;
+      canvas.style.width = sourceWidth + 'px';
+      canvas.style.height = sourceHeight + 'px';
+    }
   }
 
   start(canvasInstance) {
@@ -53,12 +57,7 @@ export class Camera {
 
           // El contenedor se va a adaptar al tamaño del video
           self.video.addEventListener('loadedmetadata', () => {
-            const container = document.getElementById('game-container');
-            container.style.width = self.video.width + 'px';
-            container.style.height = self.video.height + 'px';
-            const canvas = document.querySelector('canvas');
-            canvas.style.width = self.video.width + 'px';
-            canvas.style.height = self.video.height + 'px';
+            self.updateDimensions(self.video.videoWidth, self.video.videoHeight);
           });
         },
         // errorCallback
