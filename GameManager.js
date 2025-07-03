@@ -122,7 +122,7 @@ export class GameManager {
       this.camera.stop();
     }
 
-    this.hidePlayersInfo();
+    // this.hidePlayersInfo(); -- creeria que esta de mas, chequear
     this.showFinalMessage();
 
     // Vuelve al estado inicial de los botones
@@ -215,9 +215,13 @@ export class GameManager {
       // Terminó el conteo, x lo tanto empieza el juego
       this.isInCountdown = false; // Para que no se muestre el contador de nuevo!!!!!
       timeCounter.style.display = 'none';
+      this.allFoodItems = []; // Limpia los alimentos de la etapa anterior
+      this.currentQuestion = [null, null]; // Resetea las preguntas
       this.gameStartTime = currentTime; // Reinicia el tiempo de la etapa
       this.lastFoodSpawn = currentTime; // Reinicia el tiempo de spawn de alimentos
+      this.draw(); // Dibuja el estado inicial del juego
       this.showCanvas(); // Se vuelve a mostrar el canvas
+      this.showPlayersInfo(); // Aparece la info de los jugadores
       return;
     }
 
@@ -439,26 +443,23 @@ export class GameManager {
     setTimeout(() => {
       introDiv.remove();
       this.blockedByIntro = false;
-      // Después del cartel, inicia el conteo hacia atrás
       this.gameStarted = true;
+
+      // Después del cartel, inicia el conteo hacia atrás
       this.isInCountdown = true;
       this.countdownStartTime = Date.now();
-      this.allFoodItems = [];
-      this.currentQuestion = [null, null];
-      this.showPlayersInfo(); // Muestra información de jugadores
-      this.draw();
     }, 4000); // 4 segundos
   }
 
   showPlayersInfo() {
-    const playersInfo = document.getElementById('players-info');
+    const playersInfo = document.getElementById('game-center-row');
     if (playersInfo) {
       playersInfo.style.display = 'flex';
     }
   }
 
   hidePlayersInfo() {
-    const playersInfo = document.getElementById('players-info');
+    const playersInfo = document.getElementById('game-center-row');
     const timeCounter = document.getElementById('time-counter');
     if (playersInfo) {
       playersInfo.style.display = 'none';
@@ -623,7 +624,20 @@ export class GameManager {
     effect.style.left = `${coordX}px`;
     effect.style.top = `${coordY}px`;
     effect.style.backgroundColor = this.getFoodColor(food.type);
-    document.getElementById('game-container').appendChild(effect);
+    const videoContainer = document.querySelector('.video-canvas-container');
+    if (videoContainer) {
+      // Calcula la posición relativa al contenedor
+      const rect = videoContainer.getBoundingClientRect();
+      const canvasRect = this.canvas.canvas.getBoundingClientRect();
+
+      // Calcula coordenadas relativas a videoContainer
+      const offsetX = canvasRect.left - rect.left;
+      const offsetY = canvasRect.top - rect.top;
+
+      effect.style.left = `${coordX - offsetX}px`;
+      effect.style.top = `${coordY - offsetY}px`;
+      videoContainer.appendChild(effect);
+    }
 
     setTimeout(() => effect.remove(), 500);
   }
