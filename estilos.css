@@ -736,20 +736,6 @@ button:hover {
   left: 100%;
 }
 
-.cartel-etapa-detalles {
-  font-size: 1.25rem !important;
-  color: #2C3E50 !important;
-  margin: 1.5rem auto 0 auto;
-  max-width: 90vw;
-  text-align: left;
-  line-height: 1.7;
-  background: rgba(52,152,219,0.07);
-  border-left: 5px solid #3498db;
-  border-radius: 10px;
-  padding: 1.2rem 2rem;
-  box-shadow: 0 2px 10px rgba(52,152,219,0.08);
-}
-
 /* Estilos para los botones de resultados de etapa */
 .stage-results-buttons {
   display: flex;

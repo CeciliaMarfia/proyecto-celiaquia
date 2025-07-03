@@ -24,45 +24,14 @@ export class GameManager {
       1: {
         // Etapa 1 - Identificación de alimentos con y sin TACC
         description: "Identificación de alimentos con y sin TACC",
-        details: `
-          <b>Objetivo:</b> Diferencir alimentos aptos y no aptos para celíacos.<br>
-          <br>
-          <b>¿Qué alimentos vas a ver?</b> Alimentos sin TACC saludables, sin TACC no saludables y con TACC.<br>
-          <br>
-          <b>¿Qué hacer?</b> Usa tus manos para atrapar solo los alimentos <b>sin TACC</b> (aptos). Evita los que tienen TACC.<br>
-          <br>
-          <b>Puntaje:</b> +10 por saludable, +5 por no saludable, -10 por con TACC.<br>
-          <br>
-          <b>Energía vital:</b> ¡Cuidado! Restar puntos también te quita energía.
-        `,
       },
       2: {
         // Etapa 2 - Elección de alimentos más saludables
         description: "Elección de alimentos más saludables",
-        details: `
-          <b>Objetivo:</b> Elegir los alimentos más saludables entre los aptos para celíacos.<br>
-          <br>
-          <b>¿Qué alimentos aparecen?</b> Sólo alimentos sin TACC (saludables y no saludables).<br>
-          <br>
-          <b>¿Qué hacer?</b> Atrapa la mayor cantidad de alimentos <b>saludables</b> (frutas, verduras, agua, etc). Evita los ultraprocesados.<br>
-          <br>
-          <b>Puntaje:</b> +10 por saludable, +5 por no saludable.
-        `,
       },
       3: {
         // Etapa 3 - Contaminación cruzada
         description: "Contaminación cruzada y situaciones cotidianas",
-        details: `
-          <b>Objetivo:</b> Responder correctamente preguntas sobre situaciones de riesgo.<br>
-          <br>
-          <b>¿Qué aparece?</b> Preguntas de opción múltiple para cada jugador.<br>
-          <br>
-          <b>¿Qué hacer?</b> Lee la pregunta y selecciona la respuesta correcta manteniendo la mano sobre la opción.<br>
-          <br>
-          <b>Puntaje:</b> +10 por respuesta correcta.<br>
-          <br>
-          <b>¿Qué es la contaminación cruzada?</b> Es cuando un alimento con TACC se mezcla con uno sin TACC, provocando una <i>contaminacion</i>.
-        `,
       },
     };
     this.currentQuestion = [null, null];
@@ -461,7 +430,6 @@ export class GameManager {
     introDiv.innerHTML = `
       <h2>Etapa ${this.currentStage}</h2>
       <p>${stageInfo.description}</p>
-      <div class="stage-details cartel-etapa-detalles">${stageInfo.details}</div>
     `;
     const container = document.getElementById('game-container');
     container.appendChild(introDiv);
