@@ -686,6 +686,33 @@ export class GameManager {
     }
   }
 
+  getStageStatsForPlayer(playerIndex) {
+    const stats = [];
+    const player = this.players[playerIndex];
+
+    if (this.currentStage === 1) {
+      // Etapa 1: Saludables, No saludables, Con gluten
+      stats.push(
+        this.createFoodStat("healthy", "Saludables", player.foodsCollected.healthy),
+        this.createFoodStat("unhealthy", "No saludables", player.foodsCollected.unhealthy),
+        this.createFoodStat("gluten", "Con gluten", player.foodsCollected.gluten)
+      );
+    } else if (this.currentStage === 2) {
+      // Etapa 2: Saludables, No saludables
+      stats.push(
+        this.createFoodStat("healthy", "Saludables", player.foodsCollected.healthy),
+        this.createFoodStat("unhealthy", "No saludables", player.foodsCollected.unhealthy)
+      );
+    } else if (this.currentStage === 3) {
+      // Etapa 3: Preguntas correctas
+      const correctQuestions = document.createElement('p');
+      correctQuestions.textContent = `Preguntas correctas: ${player.correctQuestions || 0}`;
+      stats.push(correctQuestions);
+    }
+
+    return stats;
+  }
+
   // Método auxiliar para crear la sección de cada jugador
   createPlayerResult(playerName, playerIndex) {
     const playerDiv = document.createElement('div');
@@ -700,31 +727,18 @@ export class GameManager {
     const energy = document.createElement('p');
     energy.textContent = `Energía Vital: ${this.players[playerIndex].vitalEnergy}%`;
 
-    const foodsDiv = document.createElement('div');
-    foodsDiv.className = 'food-stats';
+    playerDiv.append(title, score, energy);
 
-    // Estadísticas de comida
-    const healthyDiv = this.createFoodStat(
-      "healthy",
-      "Saludables",
-      this.players[playerIndex].foodsCollected.healthy
-    );
-    const unhealthyDiv = this.createFoodStat(
-      "unhealthy",
-      "No saludables",
-      this.players[playerIndex].foodsCollected.unhealthy
-    );
-    const glutenDiv = this.createFoodStat(
-      "gluten",
-      "Con gluten",
-      this.players[playerIndex].foodsCollected.gluten
-    );
-
-    foodsDiv.append(healthyDiv, unhealthyDiv, glutenDiv);
-
-    const correctQuestions = document.createElement('p');
-    correctQuestions.textContent = `Preguntas correctas: ${this.players[playerIndex].correctQuestions || 0}`;
-    playerDiv.append(title, score, energy, foodsDiv, correctQuestions);
+    // Agrega las estadísticas correspondientes a la etapa
+    const stats = this.getStageStatsForPlayer(playerIndex);
+    if (this.currentStage === 1 || this.currentStage === 2) {
+      const foodsDiv = document.createElement('div');
+      foodsDiv.className = 'food-stats';
+      stats.forEach(stat => foodsDiv.appendChild(stat));
+      playerDiv.appendChild(foodsDiv);
+    } else if (this.currentStage === 3) {
+      stats.forEach(stat => playerDiv.appendChild(stat));
+    }
 
     return playerDiv;
   }
