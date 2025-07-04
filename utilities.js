@@ -199,21 +199,47 @@ function drawResultHands(ctx, hand) {
  */
 function drawKeypointsHands(ctx, keypoints, handedness) {
   const keypointsArray = keypoints;
-  ctx.fillStyle = handedness === 'Left' ? 'Red' : 'Blue';
-  ctx.strokeStyle = 'White';
-  ctx.lineWidth = params.DEFAULT_LINE_WIDTH;
-
-  for (let i = 0; i < keypointsArray.length; i++) {
-    const x = keypointsArray[i].x;
-    const y = keypointsArray[i].y;
-    drawPointHands(ctx, x, y, 3);
-  }
-
+  
+  // Colores fluo tipo Just Dance
+  const handColor = handedness === 'Left' ? '#ff0080' : '#00ff80'; // Rosa/Verde brillante
+  const shadowColor = handedness === 'Left' ? '#800040' : '#004020'; // Sombra más oscura
+  
+  ctx.lineWidth = 8; // Líneas más gruesas -- no llega a parecer un guante, acomodar
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  
+  ctx.strokeStyle = shadowColor;
   const fingers = Object.keys(fingerLookupIndices);
   for (let i = 0; i < fingers.length; i++) {
     const finger = fingers[i];
     const points = fingerLookupIndices[finger].map(idx => keypoints[idx]);
     drawPathHands(ctx, points, false);
+  }
+  
+  ctx.strokeStyle = handColor;
+  for (let i = 0; i < fingers.length; i++) {
+    const finger = fingers[i];
+    const points = fingerLookupIndices[finger].map(idx => keypoints[idx]);
+    drawPathHands(ctx, points, false);
+  }
+  
+  // Dibuja puntos de articulaciones
+  ctx.fillStyle = handColor;
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 3;
+  
+  for (let i = 0; i < keypointsArray.length; i++) {
+    const x = keypointsArray[i].x;
+    const y = keypointsArray[i].y;
+    
+    // Punto principal
+    drawPointHands(ctx, x, y, 8);
+    
+    // Efecto de brillo
+    ctx.fillStyle = '#ffffff';
+    drawPointHands(ctx, x, y, 4);
+
+    ctx.fillStyle = handColor; // Vuelve al color de la mano
   }
 }
 
