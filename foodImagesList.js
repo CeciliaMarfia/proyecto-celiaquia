@@ -21,7 +21,8 @@ export const foodImages = {
     'unhealthySTACC_oreo.png',
     'unhealthySTACC_hotdogs.png',
     'unhealthySTACC_friepotatoes.png',
-    'unhealthySTACC_coke.png'
+    'unhealthySTACC_coke.png',
+    'unhealthySTACC_alfajorcitoDeMaicena.png',
   ],
   3: [ // Con TACC
     'CTACC_cookie.png',

@@ -1,3 +1,4 @@
+import { HandDetector } from "./HandDetector.js";
 export class FoodItem {
   constructor(x, y, type, imageSrc) {
     this.x = x;
@@ -38,32 +39,40 @@ export class FoodItem {
       this.isActive = false;
     }
   }
-  
+
   draw(ctx) {
     if (!this.isActive) return;
 
     try {
       // Asegura que la imagen esté cargada y sea válida
       if (this.image.complete && this.image.naturalWidth !== 0) {
-        ctx.drawImage(
-          this.image,
-          this.x,
-          this.y,
-          this.width,
-          this.height
-        );
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
       }
     } catch (error) {
-      console.error('Error dibujando:', error);
+      console.error("Error dibujando:", error);
       this.isActive = false;
     }
   }
 
-  checkCollision(handX, handY) {
+  checkCollision(hand) {
     if (!this.isActive) return false;
 
-    // Verificación simple de colisión rectangular
-    return handX > this.x && handX < this.x + this.width &&
-      handY > this.y && handY < this.y + this.height;
+    const keypoints = hand.getKeypoints(); // Keypoints a verificar por colisión
+
+    for (let i = 0; i < keypoints.length; i++) {
+      const { x, y } = keypoints[i];
+      const isInside =
+        x > this.x &&
+        x < this.x + this.width &&
+        y > this.y &&
+        y < this.y + this.height;
+      if (isInside) {
+        console.log("hay colision en foodItem");
+        return true;
+      } else {
+        console.log("no hay colision en foodItem");
+      }
+    }
+    return false;
   }
 }
