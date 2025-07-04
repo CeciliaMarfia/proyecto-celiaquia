@@ -11,75 +11,61 @@
 </head>
 
 <body>
-  <div class="game-header">
-    <h1>¡Aventura Sin TACC! 🌾</h1>
-    <div class="sin-tacc-badge">Sin T.A.C.C</div>
-  </div>
-
-  <div class="instructions">
-    <h2>¿Cómo Jugar? 🎮</h2>
-    <div class="instruction-content">
-      <p class="main-instruction">¡Ayuda a Clara y Santiago a elegir alimentos seguros!</p>
-
-      <div class="food-types">
-        <div class="food-type safe">
-          <span class="food-icon">🥗</span>
-          <div class="food-info">
-            <h3>Alimentos Seguros</h3>
-            <p>Sin TACC y saludables</p>
-            <span class="points">+10 puntos</span>
-          </div>
+  <div id="game-container" class="game-container">
+    <div class="game-header">
+      <div class="controls-group">
+        <div id="initial-controls" style="display: flex;">
+          <button id="b-start-webcam" class="btn-primary">
+            <span class="btn-icon">📹</span> Iniciar Cámara
+          </button>
         </div>
-
-        <div class="food-type caution">
-          <span class="food-icon">🥤</span>
-          <div class="food-info">
-            <h3>Alimentos Regulares</h3>
-            <p>Sin TACC pero no tan saludables</p>
-            <span class="points">+5 puntos</span>
-          </div>
+        <div id="pre-game-controls" style="display: none;">
+          <button id="b-start-game" class="btn-success">
+            <span class="btn-icon">🎮</span> ¡Comenzar Juego!
+          </button>
         </div>
-
-        <div class="food-type danger">
-          <span class="food-icon">🍕</span>
-          <div class="food-info">
-            <h3>¡Cuidado! Con TACC</h3>
-            <p>Estos alimentos contienen gluten</p>
-            <span class="points">-10 puntos</span>
-          </div>
+        <div id="game-controls" style="display: none;">
+          <button id="b-end-game" class="btn-danger">
+            <span class="btn-icon">🚫</span> Salir del juego
+          </button>
         </div>
       </div>
 
-      <p class="game-tip">Usa tus manos para atrapar los alimentos que aparecen en pantalla</p>
-    </div>
-  </div>
+      <h1>¡Aventura Sin TACC! 🌾</h1>
 
-  <div class="controls">
-    <div id="initial-controls" class="controls-group">
-      <button id="b-start-webcam" class="btn-primary">
-        <span class="btn-icon">📹</span> Iniciar Cámara
-      </button>
+      <div class="fps-counter">
+        FPS: <span id="fps" class="fps-counter__value">0</span>
+      </div>
     </div>
 
-    <div id="pre-game-controls" class="controls-group" style="display: none;">
-      <button id="b-start-game" class="btn-success">
-        <span class="btn-icon">🎮</span> ¡Comenzar Juego!
-      </button>
+    <!-- aca tendria que ir el juego de prueba -->
+<div id="test-stage-message" class="time-counter" style="display: none; color: white; background-color: #daa243;">
+      ¿Estás listo para comenzar?
     </div>
 
-    <div id="game-controls" class="controls-group" style="display: none;">
-      <button id="b-end-game" class="btn-danger">
-        <span class="btn-icon">🚫</span> Salir del juego
-      </button>
+    <!-- Contador de tiempo para el 3,2,1... -->
+    <div id="time-counter" style="display: none;">
+      <span id="time-display"></span>
     </div>
-  </div>
 
-  <div class="fps-counter">
-    FPS: <span id="fps" class="fps-counter__value">0</span>
-  </div>
+    <div class="game-center-column" id="game-center-column" style="display: none;">
+      <div class="video-and-info-wrapper">
+        <div class="video-canvas-container" id="video-wrapper">
+          <canvas></canvas>
+        </div>
+        <div class="player-info-row">
+          <div class="player-info player-1" id="player-info-left">
+            <span class="player-name">Jugador 1</span>
+            <span class="player-score" id="player1-score">0 pts</span>
+          </div>
+          <div class="player-info player-2" id="player-info-right">
+            <span class="player-name">Jugador 2</span>
+            <span class="player-score" id="player2-score">0 pts</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-  <div id="game-container" class="game-container">
-    <div class="game-overlay"></div>
     <video autoplay hidden></video>
     <canvas></canvas>
   </div>
