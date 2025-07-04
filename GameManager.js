@@ -23,15 +23,15 @@ export class GameManager {
     this.stageSettings = {
       1: {
         // Etapa 1 - Identificación de alimentos con y sin TACC
-        description: "Identificación de alimentos con y sin TACC",
+        description: "Identificación de alimentos con y sin TACC 🔍",
       },
       2: {
         // Etapa 2 - Elección de alimentos más saludables
-        description: "Elección de alimentos más saludables",
+        description: "Elección de alimentos más saludables 🔍",
       },
       3: {
         // Etapa 3 - Contaminación cruzada
-        description: "Contaminación cruzada y situaciones cotidianas",
+        description: "Contaminación cruzada y situaciones cotidianas 🔍",
       },
     };
     this.currentQuestion = [null, null];
@@ -60,9 +60,9 @@ export class GameManager {
       },
       {
         id: 3,
-        question: "¿Qué alimento es más saludable?",
-        options: ["Pan", "Pizza", "Helado"],
-        correctAnswer: 2,
+        question: "¿Cuál de las siguientes situaciones puede causar contaminación cruzada con gluten?",
+        options: ["C) Usar la misma tostadora para pan con gluten y pan sin TACC", "Usar utensilios distintos para alimentos con y sin gluten", "Cocinar alimentos sin TACC en una sartén limpia"],
+        correctAnswer: 1,
       },
     ];
 
@@ -271,7 +271,7 @@ export class GameManager {
     messageDiv.className = 'game-message';
     const stageInfo = this.stageSettings[this.currentStage];
     const message = document.createElement('p');
-    message.innerHTML = `<b>${stageInfo.description}</b><br>¡Bien hecho! Has completado esta etapa.`;
+    message.innerHTML = `<b>${stageInfo.description}</b><br>¡Muy bien! Completaste esta etapa.`;
     messageDiv.appendChild(message);
 
     // Botones de acción
@@ -771,15 +771,14 @@ export class GameManager {
       <div>
         <div class="intro-content">
           <div class="intro-text">
-            Clara y Santiago son amigos, ambos celíacos, lo que significa que deben tener especial cuidado con lo que comen en su día a día.<br><br>
-            En este juego te invitamos a ayudarlos: tendrás que seleccionar con atención los alimentos que aparecen en pantalla, algunos son seguros y otros contienen gluten.<br><br>
-            Si elegís uno con TACC tus puntos bajan.<br><br>
-            El objetivo no es sólo sumar puntos para ganar, sino aprender cómo es vivir con una condición alimentaria que requiere atención constante.<br><br>
-            <b>¿Estás listo para cuidarte como lo hacen Clara y Santiago todos los días?</b>
+            Clara y Santiago son amigos, ambos celíacos, lo que significa que deben tener especial cuidado con lo que comen en su día a día 👀.<br><br>
+            En este juego te invitamos a ayudarlos: tendrás que seleccionar con atención los alimentos que aparecen en pantalla, algunos son sin TACC y otros contienen gluten.🚫🌾<br><br>
+            🎯El objetivo es capturar la mayor cantidad de alimentos sanos sin TACC que aparezcan <br><br>
+            <b>¡Animate a cuidarte como lo hacen Clara y Santiago todos los días🤩!</b>
           </div>
         </div>
         <div class="intro-sidebar">
-          <button class="intro-btn">Continuar</button>
+          <button class="intro-btn">¡Comenzar!</button>
         </div>
       </div>
     `;
