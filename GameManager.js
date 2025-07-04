@@ -15,7 +15,7 @@ export class GameManager {
     this.gameStarted = false;
     this.gameEnded = false;
     this.gameStartTime = 0;
-    this.stageDuration = 15000; // 15 segundos por etapa
+    this.stageDuration = 20000; // 20 segundos por etapa
     this.currentStage = 1; // 1: Identificación, 2: Saludable, 3: Contaminación
     this.isInCountdown = false; // Estado para controlar el conteo inicial de cada etapa
     this.countdownStartTime = 0; // Tiempo de inicio del conteo
@@ -195,14 +195,10 @@ export class GameManager {
 
   updatePlayersInfo() {
     const player1Score = document.getElementById('player1-score');
-    const player1Energy = document.getElementById('player1-energy');
     const player2Score = document.getElementById('player2-score');
-    const player2Energy = document.getElementById('player2-energy');
 
     if (player1Score) player1Score.textContent = `${this.players[0].score} pts`;
-    if (player1Energy) player1Energy.textContent = `❤️ ${this.players[0].vitalEnergy}%`;
     if (player2Score) player2Score.textContent = `${this.players[1].score} pts`;
-    if (player2Energy) player2Energy.textContent = `❤️ ${this.players[1].vitalEnergy}%`;
   }
 
   handleInitialCountdown(currentTime) {
@@ -318,7 +314,6 @@ export class GameManager {
     // Resetea los jugadores
     this.players.forEach((p) => {
       p.score = 0;
-      p.vitalEnergy = 100;
       p.foodsCollected = { healthy: 0, unhealthy: 0, gluten: 0 };
       p.correctQuestions = 0;
     });
@@ -452,14 +447,14 @@ export class GameManager {
   }
 
   showPlayersInfo() {
-    const playersInfo = document.getElementById('game-center-row');
+    const playersInfo = document.getElementById('game-center-column');
     if (playersInfo) {
       playersInfo.style.display = 'flex';
     }
   }
 
   hidePlayersInfo() {
-    const playersInfo = document.getElementById('game-center-row');
+    const playersInfo = document.getElementById('game-center-column');
     const timeCounter = document.getElementById('time-counter');
     if (playersInfo) {
       playersInfo.style.display = 'none';
@@ -738,10 +733,7 @@ export class GameManager {
     const score = document.createElement('p');
     score.textContent = `Puntuación: ${this.players[playerIndex].score}`;
 
-    const energy = document.createElement('p');
-    energy.textContent = `Energía Vital: ${this.players[playerIndex].vitalEnergy}%`;
-
-    playerDiv.append(title, score, energy);
+    playerDiv.append(title, score);
 
     // Agrega las estadísticas correspondientes a la etapa
     const stats = this.getStageStatsForPlayer(playerIndex);
@@ -781,7 +773,7 @@ export class GameManager {
           <div class="intro-text">
             Clara y Santiago son amigos, ambos celíacos, lo que significa que deben tener especial cuidado con lo que comen en su día a día.<br><br>
             En este juego te invitamos a ayudarlos: tendrás que seleccionar con atención los alimentos que aparecen en pantalla, algunos son seguros y otros contienen gluten.<br><br>
-            Si elegís uno con TACC tus puntos y tu energía bajan.<br><br>
+            Si elegís uno con TACC tus puntos bajan.<br><br>
             El objetivo no es sólo sumar puntos para ganar, sino aprender cómo es vivir con una condición alimentaria que requiere atención constante.<br><br>
             <b>¿Estás listo para cuidarte como lo hacen Clara y Santiago todos los días?</b>
           </div>

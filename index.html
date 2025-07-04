@@ -40,7 +40,7 @@
 
     <!-- aca tendria que ir el juego de prueba -->
     <div id="test-stage-message" style="display: none;" class="time-counter">
-      Acá iría una etapa de prueba
+      ¿Estás listo para comenzar?
     </div>
 
     <!-- Contador de tiempo para el 3,2,1... -->
@@ -48,20 +48,21 @@
       <span id="time-display"></span>
     </div>
 
-    <div class="game-center-row" id="game-center-row" style="display: none;">
-      <div class="player-info player-1" id="player-info-left">
-        <span class="player-name">Jugador 1</span>
-        <span class="player-score" id="player1-score">0 pts</span>
-        <span class="player-energy" id="player1-energy">❤️ 100%</span>
-      </div>
-      <div class="video-canvas-container">
-        <video autoplay hidden></video>
-        <canvas></canvas>
-      </div>
-      <div class="player-info player-2" id="player-info-right">
-        <span class="player-name">Jugador 2</span>
-        <span class="player-score" id="player2-score">0 pts</span>
-        <span class="player-energy" id="player2-energy">❤️ 100%</span>
+    <div class="game-center-column" id="game-center-column" style="display: none;">
+      <div class="video-and-info-wrapper">
+        <div class="video-canvas-container" id="video-wrapper">
+          <canvas></canvas>
+        </div>
+        <div class="player-info-row">
+          <div class="player-info player-1" id="player-info-left">
+            <span class="player-name">Jugador 1</span>
+            <span class="player-score" id="player1-score">0 pts</span>
+          </div>
+          <div class="player-info player-2" id="player-info-right">
+            <span class="player-name">Jugador 2</span>
+            <span class="player-score" id="player2-score">0 pts</span>
+          </div>
+        </div>
       </div>
     </div>
 
