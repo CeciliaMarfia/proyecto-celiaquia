@@ -20,12 +20,10 @@ export class Camera {
   }
 
   updateDimensions(sourceWidth, sourceHeight) {
-    // Guarda dimensiones del contenedor
-    const container = document.getElementById('game-container');
+    const container = document.getElementById('video-wrapper');
     container.style.width = sourceWidth + 'px';
     container.style.height = sourceHeight + 'px';
 
-    // Usa dimensiones del contenedor para asignarle al video y al canvas asi no hay que hacer conversiones
     this.video.width = sourceWidth;
     this.video.height = sourceHeight;
 
@@ -37,6 +35,7 @@ export class Camera {
       canvas.style.height = sourceHeight + 'px';
     }
   }
+
 
   start(canvasInstance) {
     var self = this;
