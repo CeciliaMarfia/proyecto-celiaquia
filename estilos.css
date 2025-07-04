@@ -205,7 +205,7 @@ button {
 }
 
 .btn-primary {
-  background-color: #3498db;
+  background-color: #daa243;
   color: white;
 }
 
@@ -656,7 +656,7 @@ Cartel explicativo de etapas
 }
 
 .intro-overlay .intro-btn {
-  background: linear-gradient(135deg, #3498db, #2980b9);
+  background: linear-gradient(135deg, #4caf50, #4caf50);
   color: white;
   font-size: 1.3rem;
   padding: 1.2rem 3rem;
@@ -683,7 +683,7 @@ Cartel explicativo de etapas
 }
 
 .intro-overlay .intro-btn:hover {
-  background: linear-gradient(135deg, #2980b9, #1f5f8b);
+  background: linear-gradient(135deg, #e1b96e, #c48c25);
   transform: translateY(-3px);
   box-shadow: 0 12px 35px rgba(52, 152, 219, 0.4);
 }
@@ -750,12 +750,12 @@ Cartel explicativo de etapas
 }
 
 .stage-results-buttons .btn-primary {
-  background: linear-gradient(135deg, #3498db, #2980b9);
+  background: linear-gradient(135deg, #daa243, #daa243);
   color: white;
 }
 
 .stage-results-buttons .btn-primary:hover {
-  background: linear-gradient(135deg, #2980b9, #1f5f8b);
+  background: linear-gradient(135deg, #e4cb9f, #daa243);
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
 }
