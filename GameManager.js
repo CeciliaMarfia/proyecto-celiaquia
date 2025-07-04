@@ -3,6 +3,7 @@ import { FoodItem } from './FoodItem.js';
 import { QuestionItem } from './QuestionItem.js';
 import { foodImages } from './foodImagesList.js';
 import { HandDetector } from './HandDetector.js';
+import { QuestionsList } from './QuestionsList.js';
 
 export class GameManager {
   constructor(canvas) {
@@ -40,30 +41,7 @@ export class GameManager {
     this.selectionStartTime = null;
     this.selectionThreshold = 3000; // 3 segundos para seleccionar
     this.questions = [
-      {
-        id: 1,
-        question:
-          "Clara va a usar el utensilio de su hermana con el que cortó pan. ¿Lo puede usar?",
-        options: ["Sí, si lo lava bien", "No, nunca", "Sí, si es de plástico"],
-        correctAnswer: 0,
-      },
-      {
-        id: 2,
-        question:
-          "¿Es seguro guardar alimentos sin TACC junto a alimentos con TACC en la heladera?",
-        options: [
-          "No, nunca",
-          "Sí, si están en diferentes estantes",
-          "Sí, si están en recipientes cerrados",
-        ],
-        correctAnswer: 2,
-      },
-      {
-        id: 3,
-        question: "¿Cuál de las siguientes situaciones puede causar contaminación cruzada con gluten?",
-        options: ["C) Usar la misma tostadora para pan con gluten y pan sin TACC", "Usar utensilios distintos para alimentos con y sin gluten", "Cocinar alimentos sin TACC en una sartén limpia"],
-        correctAnswer: 1,
-      },
+      ...QuestionsList,
     ];
 
     // Agregar listener para redimensionamiento
