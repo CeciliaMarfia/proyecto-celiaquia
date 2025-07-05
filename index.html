@@ -1,82 +1,91 @@
 <!DOCTYPE html>
 <html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>¡Aventura Sin TACC! - Juego sobre Celiaquía</title>
+    <link rel="stylesheet" href="estilos.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
 
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>¡Aventura Sin TACC! - Juego sobre Celiaquía</title>
-  <link rel="stylesheet" href="estilos.css">
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-</head>
-
-<body>
-  <div id="game-container" class="game-container">
-    <div class="game-header">
-      <div class="controls-group">
-        <div id="initial-controls" style="display: flex;">
-          <button id="b-start-webcam" class="btn-primary">
-            <span class="btn-icon">📹</span> Iniciar Cámara
-          </button>
-        </div>
-        <div id="pre-game-controls" style="display: none;">
-          <button id="b-start-game" class="btn-success">
-            <span class="btn-icon">🎮</span> ¡Comenzar Juego!
-          </button>
-        </div>
-        <div id="game-controls" style="display: none;">
-          <button id="b-end-game" class="btn-danger">
-            <span class="btn-icon">🚫</span> Salir del juego
-          </button>
-        </div>
-      </div>
-
-      <h1>¡Aventura Sin TACC! 🌾</h1>
-
-      <div class="fps-counter">
-        FPS: <span id="fps" class="fps-counter__value">0</span>
-      </div>
-    </div>
-
-    <!-- aca tendria que ir el juego de prueba -->
-<div id="test-stage-message" class="time-counter" style="display: none; color: white; background-color: #daa243;">
-      ¿Estás listo para comenzar?
-    </div>
-
-    <!-- Contador de tiempo para el 3,2,1... -->
-    <div id="time-counter" style="display: none;">
-      <span id="time-display"></span>
-    </div>
-
-    <div class="game-center-column" id="game-center-column" style="display: none;">
-      <div class="video-and-info-wrapper">
-        <div class="video-canvas-container" id="video-wrapper">
-          <canvas></canvas>
-        </div>
-        <div class="player-info-row">
-          <div class="player-info player-1" id="player-info-left">
-            <span class="player-name">Jugador 1</span>
-            <span class="player-score" id="player1-score">0 pts</span>
+  <body>
+    <div id="game-container" class="game-container">
+      <div class="game-header">
+        <div class="controls-group">
+          <div id="initial-controls" style="display: flex">
+            <button id="b-start-webcam" class="btn-primary">
+              <span class="btn-icon">📹</span> Iniciar Cámara
+            </button>
           </div>
-          <div class="player-info player-2" id="player-info-right">
-            <span class="player-name">Jugador 2</span>
-            <span class="player-score" id="player2-score">0 pts</span>
+          <div id="pre-game-controls" style="display: none">
+            <button id="b-start-game" class="btn-success">
+              <span class="btn-icon">🎮</span> ¡Comenzar Juego!
+            </button>
+          </div>
+          <div id="game-controls" style="display: none">
+            <button id="b-end-game" class="btn-danger">
+              <span class="btn-icon">🚫</span> Salir del juego
+            </button>
           </div>
         </div>
+
+        <h1>¡Aventura Sin TACC! 🌾</h1>
+
+        <div class="fps-counter">
+          FPS: <span id="fps" class="fps-counter__value">0</span>
+        </div>
       </div>
+
+      <!-- aca tendria que ir el juego de prueba -->
+      <div
+        id="test-stage-message"
+        class="stage-ready-message"
+        style="display: none"
+      >
+        ¡Cámara lista!
+      </div>
+
+      <!-- Contador de tiempo para el 3,2,1... -->
+      <div id="time-counter" style="display: none">
+        <span id="time-display"></span>
+      </div>
+
+      <div
+        class="game-center-column"
+        id="game-center-column"
+        style="display: none"
+      >
+        <div class="video-and-info-wrapper">
+          <div class="video-canvas-container" id="video-wrapper">
+            <canvas></canvas>
+          </div>
+          <div class="player-info-row">
+            <div class="player-info player-1" id="player-info-left">
+              <span class="player-name">Jugador 1</span>
+              <span class="player-score" id="player1-score">0 pts</span>
+            </div>
+            <div class="player-info player-2" id="player-info-right">
+              <span class="player-name">Jugador 2</span>
+              <span class="player-score" id="player2-score">0 pts</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <video autoplay hidden></video>
+      <canvas></canvas>
     </div>
 
-    <video autoplay hidden></video>
-    <canvas></canvas>
-  </div>
-
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose-detection"></script>
-  <script type="module" src="JuegoCeliaquia.js"></script>
-</body>
-
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose-detection"></script>
+    <script type="module" src="JuegoCeliaquia.js"></script>
+  </body>
 </html>

@@ -989,3 +989,21 @@ Cartel explicativo de etapas
   border-radius: 10px;
   box-shadow: var(--shadow-md);
 }
+
+/* estilo para el mensaje del inicio ("¡Cámara lista!") --> borrar después */
+.stage-ready-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5000;
+  background-color: #daa243;
+  color: white;
+  padding: 2rem 4rem;
+  border-radius: 20px;
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: fadeInScale 0.4s ease-out;
+}
