@@ -12,11 +12,11 @@ export class GameManager {
     this.allFoodItems = [];
     this.players = [new Player(1), new Player(2)];
     this.lastFoodSpawn = 0;
-    this.foodSpawnInterval = 500; // ms entre spawns
+    this.foodSpawnInterval = 600; // ms entre spawns
     this.gameStarted = false;
     this.gameEnded = false;
     this.gameStartTime = 0;
-    this.stageDuration = 20000; // 20 segundos por etapa
+    this.stageDuration = 60000; // 60 segundos por etapa
     this.currentStage = 1; // 1: Identificación, 2: Saludable, 3: Contaminación
     this.isInCountdown = false; // Estado para controlar el conteo inicial de cada etapa
     this.countdownStartTime = 0; // Tiempo de inicio del conteo
