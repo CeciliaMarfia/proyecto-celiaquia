@@ -356,8 +356,8 @@ export class GameManager {
         videoSrc = 'videos/video_preEtapa.mp4';
       }
       */
-      video.src = 'videos/video_preEtapa.mp4';
-      video.muted = true; // sacar
+      video.src = 'videos/video_etapa1.mp4';
+      video.muted = false;
       video.playsInline = true;
       video.setAttribute('autoplay', '');
       video.setAttribute('preload', 'auto');

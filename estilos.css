@@ -24,6 +24,7 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
 body {
@@ -42,9 +43,9 @@ body {
   position: fixed;
 
   height: 95px;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: flex-start;
   padding: 1rem 2rem 0.5rem 1.5rem;
   background: #f9f7f7f4;
   box-sizing: border-box;
@@ -56,6 +57,8 @@ body {
   font-size: 2.5rem;
   color: var(--primary-color);
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  justify-self: center;
 }
 
 /* Instrucciones */
@@ -176,7 +179,7 @@ body {
 /* Estilos para los grupos de controles */
 .controls-group {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 0.4rem;
   width: 100%;
   max-width: 400px;
@@ -186,7 +189,7 @@ body {
 button {
   padding: 0.4rem 0.6rem;
   font-size: 0.8rem;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 600;
   cursor: pointer;
   border: none;
@@ -227,10 +230,10 @@ button:hover {
 /* Contador FPS */
 .fps-counter {
   box-shadow: var(--shadow-sm);
-  margin-left: 2.5rem;
   color: #666;
   font-weight: bold;
   display: flex;
+  justify-self: flex-end;
 }
 
 /* Para que el fps no mueva el resto del header cuando cambia de valor */
@@ -277,13 +280,13 @@ button:hover {
 
 .player-result {
   background-color: rgba(255, 255, 255, 0.1);
-  padding: 2rem;
+  padding: 1rem;
   border-radius: var(--border-radius);
   width: 50%;
   /* Cada jugador ocupa la mitad del espacio */
   max-width: 500px;
-  backdrop-filter: blur(5px);
   box-sizing: border-box;
+  justify-content: center;
 }
 
 .food-stats {
@@ -292,7 +295,7 @@ button:hover {
 
 .food-stat {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   margin: 0.5rem 0;
   padding: 0.5rem;
   background: rgba(255, 255, 255, 0.05);
@@ -300,7 +303,6 @@ button:hover {
 }
 
 .game-message {
-  margin-top: 2rem;
   font-size: 1.2rem;
   line-height: 1.6;
   max-width: 80%;
@@ -446,7 +448,6 @@ button:hover {
 }
 
 /* Fade-in y fade-out para el video de etapa */
-/* Video de etapa centrado */
 .stage-video-container {
   /* esto queda por encima del header , arreglar para que se vea el boton de skip y mute */
   position: absolute;
@@ -466,12 +467,10 @@ button:hover {
 }
 
 .stage-video {
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  border-radius: var(--border-radius);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
 }
 
 .video-controls {
@@ -617,39 +616,39 @@ Cartel explicativo de etapas
   max-width: 1200px;
   width: 95vw;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 3rem;
+  gap: 2rem;
   padding: 1.5rem;
   min-height: fit-content;
 }
 
 .intro-content {
-  flex: 1;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
+  align-items: center;
 }
 
 .intro-sidebar {
-  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 200px;
+  width: 100%;
 }
 
 .intro-overlay .intro-text {
   font-size: 1.3rem;
   color: #2C3E50;
   width: 100%;
+  margin-top: 50px;
   margin-bottom: 0;
-  text-align: left;
+  text-align: center;
+  justify-content: center;
   line-height: 1.6;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.7);
-  padding: 2rem 1.5rem;
   box-shadow: 0 0 20px rgba(52, 152, 219, 0.08);
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -1005,5 +1004,4 @@ Cartel explicativo de etapas
   font-weight: bold;
   text-align: center;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  animation: fadeInScale 0.4s ease-out;
 }
