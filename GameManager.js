@@ -16,7 +16,7 @@ export class GameManager {
     this.gameStarted = false;
     this.gameEnded = false;
     this.gameStartTime = 0;
-    this.stageDuration = 60000; // 60 segundos por etapa
+    this.stageDuration = 10000; // 60 segundos por etapa
     this.currentStage = 1; // 1: Identificación, 2: Saludable, 3: Contaminación
     this.isInCountdown = false; // Estado para controlar el conteo inicial de cada etapa
     this.countdownStartTime = 0; // Tiempo de inicio del conteo
@@ -188,6 +188,7 @@ export class GameManager {
     if (elapsed >= countdownDuration) {
       // Terminó el conteo, x lo tanto empieza el juego
       this.isInCountdown = false; // Para que no se muestre el contador de nuevo!!!!!
+      timeCounter.style.visibility = 'hidden';
       timeCounter.style.display = 'none';
       this.allFoodItems = []; // Limpia los alimentos de la etapa anterior
       this.currentQuestion = [null, null]; // Resetea las preguntas
@@ -202,7 +203,21 @@ export class GameManager {
     // Muestra el número correspondiente (3, 2, 1)
     const remainingTime = Math.ceil((countdownDuration - elapsed) / 1000);
     timeDisplay.textContent = remainingTime;
+    timeCounter.style.visibility = 'visible';
     timeCounter.style.display = 'block';
+    timeCounter.style.zIndex = '9999';
+    timeCounter.style.position = 'fixed';
+    timeCounter.style.top = '50%';
+    timeCounter.style.left = '50%';
+    timeCounter.style.transform = 'translate(-50%, -50%)';
+    timeCounter.style.background = 'rgba(0, 0, 0, 0.8)';
+    timeCounter.style.color = 'white';
+    timeCounter.style.padding = '2rem 4rem';
+    timeCounter.style.borderRadius = '20px';
+    timeCounter.style.fontSize = '4rem';
+    timeCounter.style.fontWeight = 'bold';
+    timeCounter.style.textAlign = 'center';
+    timeCounter.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.3)';
 
     // Dibuja fondo blanco durante el conteo
     this.ctx.fillStyle = '#f5f5f5';
@@ -219,8 +234,23 @@ export class GameManager {
     // Muestra contador al final (últimos 3 segundos)
     if (remaining <= 3 && remaining > 0) {
       timeDisplay.textContent = remaining;
+      timeCounter.style.visibility = 'visible';
       timeCounter.style.display = 'block';
+      timeCounter.style.zIndex = '9999';
+      timeCounter.style.position = 'fixed';
+      timeCounter.style.top = '50%';
+      timeCounter.style.left = '50%';
+      timeCounter.style.transform = 'translate(-50%, -50%)';
+      timeCounter.style.background = 'rgba(0, 0, 0, 0.8)';
+      timeCounter.style.color = 'white';
+      timeCounter.style.padding = '2rem 4rem';
+      timeCounter.style.borderRadius = '20px';
+      timeCounter.style.fontSize = '4rem';
+      timeCounter.style.fontWeight = 'bold';
+      timeCounter.style.textAlign = 'center';
+      timeCounter.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.3)';
     } else {
+      timeCounter.style.visibility = 'hidden';
       timeCounter.style.display = 'none';
     }
   }
