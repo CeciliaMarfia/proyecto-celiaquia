@@ -6,7 +6,7 @@ export class QuestionItem {
     this.options = options;
     this.correctAnswer = correctAnswer;
     this.width = 500; // Aumentado para mejor legibilidad
-    this.height = 80; // Aumentado para mejor interacción
+    this.height = 300; // Altura fija para mejor distribución
     this.isActive = true;
     this.selectedOption = null;
     this.selectionStartTime = null;
@@ -20,30 +20,19 @@ export class QuestionItem {
   draw(ctx) {
     if (!this.isActive) return;
 
-    // --- Medir alto de la pregunta dinámicamente ---
-    ctx.save();
-    const questionFontSize = Math.max(18, Math.min(24, Math.floor(this.height/12)));
-    ctx.font = `bold ${questionFontSize}px Nunito`;
-    const questionLines = this.wrapText(ctx, this.question, this.width - 60);
-    const questionLineHeight = questionFontSize + 6;
-    const questionHeight = questionLines.length * questionLineHeight;
-    ctx.restore();
-
-    // Medir alto de opciones
-    const optionFontSize = Math.max(16, Math.min(20, Math.floor(this.height/15)));
-    const optionHeight = optionFontSize + 20;
-    const optionSpacing = Math.max(10, Math.floor(this.height/20));
-    const optionsHeight = this.options.length * optionHeight + (this.options.length - 1) * optionSpacing;
-
-    // Margen superior e inferior
-    const marginTop = Math.max(20, Math.floor(this.height/10));
-    const marginBottom = Math.max(20, Math.floor(this.height/10));
-
-    // Calcula el alto total
-    const boxH = marginTop + questionHeight + 20 + optionsHeight + marginBottom;
+    // Diseño con altura fija
     const boxX = this.x;
     const boxY = this.y;
     const boxW = this.width;
+    const boxH = this.height; // Usar exactamente la altura asignada
+
+    // Tamaños fijos para mejor control
+    const questionFontSize = 22;
+    const optionFontSize = 20;
+    const optionHeight = 40;
+    const optionSpacing = 10;
+    const marginTop = 20;
+    const marginBottom = 20;
 
     // Fondo
     ctx.save();
@@ -66,35 +55,36 @@ export class QuestionItem {
     ctx.fillStyle = "#2C3E50";
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
-    ctx.shadowColor = "transparent";
-    // Dibuja cada línea de la pregunta
-    questionLines.forEach((line, i) => {
-      ctx.fillText(
-        line,
-        -(this.x + this.width / 2),
-        this.y + marginTop + i * questionLineHeight,
-        this.width - 60
-      );
-    });
+    ctx.fillText(
+      this.question,
+      -(this.x + this.width / 2),
+      this.y + marginTop,
+      this.width - 60
+    );
     ctx.restore();
 
     // Dibuja opciones
     this.options.forEach((option, index) => {
-      const optionY = this.y + marginTop + questionHeight + 20 + index * (optionHeight + optionSpacing);
+      const optionY = optionsStartY + index * (optionHeight + optionSpacing);
+      
+      // Verifica que la opción no se salga del área asignada
+      if (optionY + optionHeight > this.y + this.height - marginBottom) {
+        return; // No dibujar si se sale del área
+      }
+      
       // Feedback visual SOLO para la opción seleccionada
       let feedbackColor = null;
       if (this.feedbackActive && index === this.feedbackSelected) {
         feedbackColor = this.feedbackResult ? "#4CAF50" : "#F44336"; // Verde si es correcta, rojo si no
       }
+      
+      // Fondo de la opción
       ctx.save();
       ctx.beginPath();
       ctx.roundRect(this.x + 30, optionY, this.width - 60, optionHeight, 12);
       ctx.fillStyle = feedbackColor || "rgba(248, 249, 250, 0.9)";
       ctx.strokeStyle = feedbackColor ? feedbackColor : "#dee2e6";
       ctx.lineWidth = 1.5;
-      ctx.shadowColor = "rgba(0, 0, 0, 0.05)";
-      ctx.shadowBlur = 4;
-      ctx.shadowOffsetY = 1;
       ctx.fill();
       ctx.stroke();
       ctx.restore();
@@ -121,15 +111,6 @@ export class QuestionItem {
         !this.feedbackActive
       ) {
         ctx.save();
-        ctx.fillStyle = "rgba(52, 152, 219, 0.1)";
-        ctx.fillRect(
-          this.x + 40,
-          optionY + optionHeight - 8,
-          this.width - 80,
-          6
-        );
-
-        // Barra de progreso
         ctx.fillStyle = "rgba(52, 152, 219, 0.8)";
         ctx.fillRect(
           this.x + 40,
@@ -165,16 +146,16 @@ export class QuestionItem {
   getOptionPositions(ctx) {
     const positions = [];
     
-    // Calcula altura de la pregunta - tiene que haber una manera mas simple de hacer esto.... chequear
-    const questionFontSize = Math.max(18, Math.min(24, Math.floor(this.height/12)));
-    const questionLineHeight = questionFontSize + 6;
-    const questionLines = this.wrapText(ctx, this.question, this.width - 60);
+    // Calcula altura de la pregunta
+    const questionFontSize = Math.max(20, Math.min(28, Math.floor(this.height/10)));
+    const questionLineHeight = questionFontSize + 8;
+    const questionLines = this.wrapText(ctx, this.question, this.width - 80);
     const questionHeight = questionLines.length * questionLineHeight;
     
-    const marginTop = Math.max(20, Math.floor(this.height/10));
-    const optionFontSize = Math.max(16, Math.min(20, Math.floor(this.height/15)));
-    const optionHeight = optionFontSize + 20;
-    const optionSpacing = Math.max(10, Math.floor(this.height/20));
+    const marginTop = Math.max(25, Math.floor(this.height/12));
+    const optionFontSize = Math.max(18, Math.min(24, Math.floor(this.height/12)));
+    const optionHeight = optionFontSize + 24;
+    const optionSpacing = Math.max(15, Math.floor(this.height/15));
     
     for (let i = 0; i < this.options.length; i++) {
       const optionY = this.y + marginTop + questionHeight + 20 + i * (optionHeight + optionSpacing);

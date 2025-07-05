@@ -16,7 +16,7 @@ export class GameManager {
     this.gameStarted = false;
     this.gameEnded = false;
     this.gameStartTime = 0;
-    this.stageDuration = 10000; // 60 segundos por etapa
+    this.stageDuration = 60000; // 60 segundos por etapa
     this.currentStage = 1; // 1: Identificación, 2: Saludable, 3: Contaminación
     this.isInCountdown = false; // Estado para controlar el conteo inicial de cada etapa
     this.countdownStartTime = 0; // Tiempo de inicio del conteo
@@ -341,7 +341,7 @@ export class GameManager {
   continueToNextStage() {
     this.clearStageResults(); // Elimina la tabla de resultados anterior
     this.currentStage++;
-    if (this.currentStage > 3) {
+    if (this.currentStage === 3) {
       this.endGame();
       return;
     }
@@ -660,35 +660,20 @@ export class GameManager {
     });
     // Preguntas una debajo de la otra y centradas
     if (this.currentStage === 3) {
-      const totalQuestions = this.currentQuestion.length;
       const canvasHeight = this.canvas.canvas.height;
       const canvasWidth = this.canvas.canvas.width;
 
-      // Calcula espaciado entre preguntas para que sean legibles
-      const minQuestionHeight = 200; // Altura mínima por pregunta
-      const spacingBetweenQuestions = 50; // Espacio entre preguntas
-      const totalMinHeight = totalQuestions * minQuestionHeight + (totalQuestions - 1) * spacingBetweenQuestions;
-      const availableHeight = canvasHeight - 80; // Dejar margen arriba y abajo
+      // Diseño fijo y simple: dividir la pantalla en dos
+      const questionHeight = Math.floor(canvasHeight / 2) - 50; // Mitad de la pantalla menos margen
+      const margin = 25; // Margen entre preguntas
 
-      let blockHeight, startY;
-
-      if (totalMinHeight <= availableHeight) {
-        // Si hay espacio suficiente, usar altura mínima con espaciado
-        blockHeight = minQuestionHeight + spacingBetweenQuestions;
-        startY = 40;
-      } else {
-        // Si no hay espacio, distribuir uniformemente
-        blockHeight = availableHeight / totalQuestions;
-        startY = 40;
-      }
-
-      for (let i = 0; i < totalQuestions; i++) {
+      for (let i = 0; i < this.currentQuestion.length; i++) {
         const q = this.currentQuestion[i];
         if (q) {
-          q.x = Math.max(20, canvasWidth * 0.05); // Mínimo 20px de margen
-          q.y = startY + i * blockHeight;
-          q.width = Math.min(canvasWidth - 40, canvasWidth * 0.9); // Máximo 90% del ancho
-          q.height = Math.max(150, blockHeight - spacingBetweenQuestions); // Altura mínima de 150px
+          q.x = 50; // Margen izquierdo
+          q.y = i * (questionHeight + margin) + 25; // Posición vertical fija
+          q.width = canvasWidth - 100; // Ancho completo menos márgenes
+          q.height = questionHeight; // Altura fija
           q.draw(this.ctx);
         }
       }
@@ -799,6 +784,33 @@ export class GameManager {
         this.showStageIntroduction();
       });
     };
+  }
+
+  getOptionPositions(ctx) {
+    const positions = [];
+
+    // Usa los mismos valores que en draw()
+    const optionFontSize = 20;
+    const optionHeight = 40;
+    const optionSpacing = 10;
+    const marginTop = 20;
+    const marginBottom = 20;
+    const questionAreaHeight = 60;
+    const optionsStartY = this.y + marginTop + questionAreaHeight + 10;
+
+    for (let i = 0; i < this.options.length; i++) {
+      const optionY = optionsStartY + i * (optionHeight + optionSpacing);
+      if (optionY + optionHeight > this.y + this.height - marginBottom) {
+        break;
+      }
+      positions.push({
+        x: this.x + 30,
+        y: optionY,
+        width: this.width - 60,
+        height: optionHeight
+      });
+    }
+    return positions;
   }
 
 }
