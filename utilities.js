@@ -50,9 +50,9 @@ const COLOR_PALETTE = [
  * Draw the keypoints and skeleton on the video.
  * @param poses A list of poses to render.
  */
-export function drawResultsPoses(ctx, poses) {
+export function drawResultsPoses(ctx, poses,playerIndex) {
   for (const pose of poses) {
-    drawResultPoses(ctx, pose);
+    drawResultPoses(ctx, pose,playerIndex);
   }
 }
 
@@ -163,13 +163,13 @@ const connections = [
  * Draw the keypoints on the video.
  * @param hands A list of hands to render.
  */
-export function drawResultsHands(ctx, hands) {
+export function drawResultsHands(ctx, hands, playerIndex) {
   // Sort by right to left hands.
-  hands.sort((hand1, hand2) => {
-    if (hand1.handedness < hand2.handedness) return 1;
-    if (hand1.handedness > hand2.handedness) return -1;
-    return 0;
-  });
+ // hands.sort((hand1, hand2) => {
+   // if (hand1.handedness < hand2.handedness) return 1;
+    //if (hand1.handedness > hand2.handedness) return -1;
+   // return 0;
+  //});
 
   // Pad hands to clear empty scatter GL plots.
   while (hands.length < 2) hands.push({});
@@ -177,7 +177,7 @@ export function drawResultsHands(ctx, hands) {
   for (let i = 0; i < hands.length; ++i) {
     // Third hand and onwards scatterGL context is set to null since we
     // don't render them.
-    drawResultHands(ctx, hands[i]);
+    drawResultHands(ctx, hands[i],playerIndex);
   }
 }
 
@@ -186,9 +186,9 @@ export function drawResultsHands(ctx, hands) {
  * @param hand A hand with keypoints to render.
  * @param ctxt Scatter GL context to render 3D keypoints to.
  */
-function drawResultHands(ctx, hand) {
+function drawResultHands(ctx, hand, playerIndex) {
   if (hand.keypoints != null) {
-    drawKeypointsHands(ctx, hand.keypoints, hand.handedness);
+    drawKeypointsHands(ctx, hand.keypoints, hand.handedness, playerIndex);
   }
 }
 
@@ -197,13 +197,18 @@ function drawResultHands(ctx, hand) {
  * @param keypoints A list of keypoints.
  * @param handedness Label of hand (either Left or Right).
  */
-function drawKeypointsHands(ctx, keypoints, handedness) {
+function drawKeypointsHands(ctx, keypoints, handedness, playerIndex) { // Agregar playerIndex
   const keypointsArray = keypoints;
   
-  // Colores fluo tipo Just Dance
-  const handColor = handedness === 'Left' ? '#ff0080' : '#00ff80'; // Rosa/Verde brillante
-  const shadowColor = handedness === 'Left' ? '#800040' : '#004020'; // Sombra más oscura
+  // Colores por jugador
+  const playerColors = [
+    ['#ff0080', '#ff0080'], // Jugador 1: ambas manos rosas
+    ['#00ff80', '#00ff80'], // Jugador 2: ambas manos verdes
+    // Podés agregar más colores para más jugadores
+  ];
   
+  const handColor = playerColors[playerIndex][0]; // Mismo color para ambas manos del jugador
+  const shadowColor = playerIndex === 0 ? '#800040' : '#004020'; // Sombra correspondiente
   ctx.lineWidth = 8; // Líneas más gruesas -- no llega a parecer un guante, acomodar
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
