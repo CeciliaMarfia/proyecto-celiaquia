@@ -96,7 +96,14 @@ async function runInference(canvas, camera) {
 
     // Dibuja todas las detecciones
     canvas.drawResultsPoses(poses);
-    canvas.renderHands(hands);
+    // Suponemos que hay hasta 4 manos, 2 por jugador (0 y 1)
+const handsJugador1 = hands.slice(0, 2);
+const handsJugador2 = hands.slice(2, 4);
+
+// Dibujar cada par de manos con su color de jugador
+canvas.renderHands(handsJugador1, 0); // Jugador 0 (por ejemplo, rosa)
+canvas.renderHands(handsJugador2, 1); // Jugador 1 (por ejemplo, verde)
+
     updateFPS();
   } catch (error) {
     console.error("Error en la detección:", error);

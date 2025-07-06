@@ -22,8 +22,8 @@ export class Canvas { //obtiene el contexto para dibujar
     return;
   }
 //dibuja las manos detectadas
-  renderHands(hands) {
-    drawResultsHands(this.ctx, hands);
+  renderHands(hands, playerIndex) {
+    drawResultsHands(this.ctx, hands,playerIndex);
   }
 //Dibuja el frame actual del video de la cámara en el canvas
   drawCameraFrame(camera) {
