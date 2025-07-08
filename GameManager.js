@@ -341,7 +341,7 @@ export class GameManager {
   continueToNextStage() {
     this.clearStageResults(); // Elimina la tabla de resultados anterior
     this.currentStage++;
-    if (this.currentStage === 3) {
+    if (this.currentStage === 3) { // Por ahora ocultamos la etapa 3, después volver a poner > 3
       this.endGame();
       return;
     }
@@ -660,20 +660,35 @@ export class GameManager {
     });
     // Preguntas una debajo de la otra y centradas
     if (this.currentStage === 3) {
+      const totalQuestions = this.currentQuestion.length;
       const canvasHeight = this.canvas.canvas.height;
       const canvasWidth = this.canvas.canvas.width;
 
-      // Diseño fijo y simple: dividir la pantalla en dos
-      const questionHeight = Math.floor(canvasHeight / 2) - 50; // Mitad de la pantalla menos margen
-      const margin = 25; // Margen entre preguntas
+      // Calcula espaciado entre preguntas para que sean legibles
+      const minQuestionHeight = 200; // Altura mínima por pregunta
+      const spacingBetweenQuestions = 50; // Espacio entre preguntas
+      const totalMinHeight = totalQuestions * minQuestionHeight + (totalQuestions - 1) * spacingBetweenQuestions;
+      const availableHeight = canvasHeight - 80; // Dejar margen arriba y abajo
 
-      for (let i = 0; i < this.currentQuestion.length; i++) {
+      let blockHeight, startY;
+
+      if (totalMinHeight <= availableHeight) {
+        // Si hay espacio suficiente, usar altura mínima con espaciado
+        blockHeight = minQuestionHeight + spacingBetweenQuestions;
+        startY = 40;
+      } else {
+        // Si no hay espacio, distribuir uniformemente
+        blockHeight = availableHeight / totalQuestions;
+        startY = 40;
+      }
+
+      for (let i = 0; i < totalQuestions; i++) {
         const q = this.currentQuestion[i];
         if (q) {
-          q.x = 50; // Margen izquierdo
-          q.y = i * (questionHeight + margin) + 25; // Posición vertical fija
-          q.width = canvasWidth - 100; // Ancho completo menos márgenes
-          q.height = questionHeight; // Altura fija
+          q.x = Math.max(20, canvasWidth * 0.05); // Mínimo 20px de margen
+          q.y = startY + i * blockHeight;
+          q.width = Math.min(canvasWidth - 40, canvasWidth * 0.9); // Máximo 90% del ancho
+          q.height = Math.max(150, blockHeight - spacingBetweenQuestions); // Altura mínima de 150px
           q.draw(this.ctx);
         }
       }
@@ -767,6 +782,7 @@ export class GameManager {
             Clara y Santiago son amigos, ambos celíacos, lo que significa que deben tener especial cuidado con lo que comen en su día a día 👀.<br><br>
             En este juego te invitamos a ayudarlos: tendrás que seleccionar con atención los alimentos que aparecen en pantalla, algunos son sin TACC y otros contienen gluten.🚫🌾<br><br>
             🎯El objetivo es capturar la mayor cantidad de alimentos sanos sin TACC que aparezcan <br><br>
+            Agarra los alimentos... <b> ¡con las manos! </b> <br><br>
             <b>¡Animate a cuidarte como lo hacen Clara y Santiago todos los días🤩!</b>
           </div>
         </div>
@@ -786,6 +802,7 @@ export class GameManager {
     };
   }
 
+  // esto creo que no lo usamos al final, chequear
   getOptionPositions(ctx) {
     const positions = [];
 
