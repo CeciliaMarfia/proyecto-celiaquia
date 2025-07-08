@@ -1,8 +1,8 @@
-import { Camera } from './Camera.js';
-import { Canvas } from './Canvas.js';
-import * as rec from './Recognition.js';
+import { Camera } from "./Camera.js";
+import { Canvas } from "./Canvas.js";
+import * as rec from "./Recognition.js";
 import { updateFPS } from "./fpsModule.js";
-import { GameManager } from './GameManager.js';
+import { GameManager } from "./GameManager.js";
 
 // Configuración principal
 export const camera = new Camera();
@@ -17,60 +17,62 @@ rec.loadPoseNet(poseDetection.SupportedModels.MoveNet, {
 });
 
 rec.loadHandNet(handPoseDetection.SupportedModels.MediaPipeHands, {
-  runtime: 'tfjs',
-  modelType: 'lite',
+  runtime: "tfjs",
+  modelType: "lite",
   maxHands: 4,
   detectorConfig: {
-    runtime: 'tfjs',
-  }
+    runtime: "tfjs",
+  },
 });
 
 // Event Listeners
-camera.getVideo().addEventListener('loadeddata', () => runInference(canvas, camera));
+camera
+  .getVideo()
+  .addEventListener("loadeddata", () => runInference(canvas, camera));
 
-document.getElementById('b-start-webcam').addEventListener('click', () => {
+document.getElementById("b-start-webcam").addEventListener("click", () => {
   camera.start(canvas);
   // Limpia cualquier resultado previo
-  const existingResults = document.querySelector('.stage-results');
+  const existingResults = document.querySelector(".stage-results");
   if (existingResults) {
     existingResults.remove();
   }
   // Oculta el botón de iniciar cámara y muestra el de comenzar juego
-  document.getElementById('initial-controls').style.display = 'none';
-  document.getElementById('pre-game-controls').style.display = 'flex';
-  document.getElementById('game-controls').style.display = 'none';
+  document.getElementById("initial-controls").style.display = "none";
+  document.getElementById("pre-game-controls").style.display = "flex";
+  document.getElementById("game-controls").style.display = "none";
 
   // Mostrar mensaje de prueba - que deberia ser el juego de prueba!!
-  const testMsg = document.getElementById('test-stage-message');
-  testMsg.style.display = 'block';
-  // El mensaje se queda fijo hasta que se presione "Comenzar Juego" 
+  const testMsg = document.getElementById("test-stage-message");
+  testMsg.style.display = "block";
+  // El mensaje se queda fijo hasta que se presione "Comenzar Juego"
 });
 
-document.getElementById('b-start-game').addEventListener('click', () => {
+document.getElementById("b-start-game").addEventListener("click", () => {
   window.gameManager.startGame();
   // Oculta el botón de comenzar juego y muestra los controles del juego
-  document.getElementById('pre-game-controls').style.display = 'none';
-  document.getElementById('game-controls').style.display = 'flex';
+  document.getElementById("pre-game-controls").style.display = "none";
+  document.getElementById("game-controls").style.display = "flex";
   // Oculta el mensaje de prueba cuando se inicia el juego
-  const testMsg = document.getElementById('test-stage-message');
-  testMsg.style.display = 'none';
+  const testMsg = document.getElementById("test-stage-message");
+  testMsg.style.display = "none";
 });
 
-document.getElementById('b-end-game').addEventListener('click', () => {
+document.getElementById("b-end-game").addEventListener("click", () => {
   window.gameManager.endGame();
   // Al terminar el juego, vuelve al estado inicial
-  document.getElementById('game-controls').style.display = 'none';
-  document.getElementById('initial-controls').style.display = 'flex';
+  document.getElementById("game-controls").style.display = "none";
+  document.getElementById("initial-controls").style.display = "flex";
   // Detiene la cámara
   camera.stop();
 });
 
 // Inicialización de los botones al cargar la página
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   // Asegura que solo el botón inicial esté visible
-  document.getElementById('initial-controls').style.display = 'flex';
-  document.getElementById('pre-game-controls').style.display = 'none';
-  document.getElementById('game-controls').style.display = 'none';
+  document.getElementById("initial-controls").style.display = "flex";
+  document.getElementById("pre-game-controls").style.display = "none";
+  document.getElementById("game-controls").style.display = "none";
 });
 
 // Bucle principal del juego
@@ -89,14 +91,25 @@ async function runInference(canvas, camera) {
     canvas.drawCameraFrame(camera);
 
     // Actualiza y dibuja el juego sólo cuando no está mostrando resultados de etapa
-    if (window.gameManager && !window.gameManager.gameEnded && !document.querySelector('.stage-results')) {
+    if (
+      window.gameManager &&
+      !window.gameManager.gameEnded &&
+      !document.querySelector(".stage-results")
+    ) {
       window.gameManager.update(Date.now(), hands);
       window.gameManager.draw();
     }
 
     // Dibuja todas las detecciones
     canvas.drawResultsPoses(poses);
-    canvas.renderHands(hands);
+
+    // Suponemos que hay hasta 4 manos, 2 por jugador (0 y 1)
+    const handsJugador1 = hands.slice(0, 2);
+    const handsJugador2 = hands.slice(2, 4);
+
+    // Dibuja cada par de manos con su color de jugador
+    canvas.renderHands(handsJugador1, 0); // Jugador 0 (por ejemplo, rosa)
+    canvas.renderHands(handsJugador2, 1); // Jugador 1 (por ejemplo, verde)
     updateFPS();
   } catch (error) {
     console.error("Error en la detección:", error);

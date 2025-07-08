@@ -67,10 +67,7 @@ export class FoodItem {
         y > this.y &&
         y < this.y + this.height;
       if (isInside) {
-        console.log("hay colision en foodItem");
         return true;
-      } else {
-        console.log("no hay colision en foodItem");
       }
     }
     return false;
