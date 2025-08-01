@@ -12,7 +12,7 @@ export class GameManager {
     this.allFoodItems = [];
     this.players = [new Player(1), new Player(2)];
     this.lastFoodSpawn = 0;
-    this.foodSpawnInterval = 500; // ms entre spawns
+    this.foodSpawnInterval = 600; // ms entre spawns
     this.gameStarted = false;
     this.gameEnded = false;
     this.gameStartTime = 0;
