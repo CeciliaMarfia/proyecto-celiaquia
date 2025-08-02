@@ -596,29 +596,44 @@ export class GameManager {
   createCollectionEffect(food) {
     const effect = document.createElement('div');
     effect.className = 'food-collected';
-    // Como el canvas está espejado con scaleX(-1) invertimos la coordenada X asi el efecto se ve en la posicion correcta
+
+    let points = 0;
+    if (this.currentStage === 1) {
+      if (food.type === 1) points = 10; // sin tacc saludable: +10
+      else if (food.type === 2) points = 3; // sin tacc no saludable: +3
+      else if (food.type === 3) points = -10; // con tacc: -10
+    } else if (this.currentStage === 2) {
+      if (food.type === 1) points = 7; // sin tacc saludable: +7
+      else if (food.type === 2) points = -10; // sin tacc no saludable: -10
+    }
+
+    //  Tamanio del circulo y para el número (y simbolo) adentro
+    effect.style.width = '80px';
+    effect.style.height = '80px';
+    effect.style.lineHeight = '80px';
+    effect.style.fontSize = '2.3rem';
+    effect.style.textAlign = 'center';
+    effect.textContent = points > 0 ? `+${points}` : `${points}`; // falta el -
+    effect.style.color = '#fff';
+    effect.style.fontWeight = 'bold';
+
+    // Como el canvas está espejado con scaleX(-1) invertimos la coordenada X asi el efecto se ve en la posicion correcta   
     const coordX = this.canvas.canvas.width - (food.x + food.width / 2);
     const coordY = food.y + food.height / 2;
 
-    effect.style.left = `${coordX}px`;
-    effect.style.top = `${coordY}px`;
-    effect.style.backgroundColor = this.getFoodColor(food.type);
     const videoContainer = document.querySelector('.video-canvas-container');
     if (videoContainer) {
-      // Calcula la posición relativa al contenedor
       const rect = videoContainer.getBoundingClientRect();
       const canvasRect = this.canvas.canvas.getBoundingClientRect();
-
-      // Calcula coordenadas relativas a videoContainer
       const offsetX = canvasRect.left - rect.left;
       const offsetY = canvasRect.top - rect.top;
-
-      effect.style.left = `${coordX - offsetX}px`;
-      effect.style.top = `${coordY - offsetY}px`;
+      effect.style.left = `${coordX - offsetX - 45}px`; // Para centrar el círculo
+      effect.style.top = `${coordY - offsetY - 45}px`;
+      effect.style.backgroundColor = this.getFoodColor(food.type);
       videoContainer.appendChild(effect);
     }
 
-    setTimeout(() => effect.remove(), 500);
+    setTimeout(() => effect.remove(), 1500);
   }
 
   getFoodColor(type) {
