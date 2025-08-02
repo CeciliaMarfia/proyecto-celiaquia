@@ -238,13 +238,19 @@ export class GameManager {
     const title = document.createElement('h1');
     title.textContent = `¡Etapa ${this.currentStage} Completada!`;
 
+    // Determina el ganador
+    const p1 = this.players[0].score;
+    const p2 = this.players[1].score;
+    let winnerIndex = -1;
+    if (p1 > p2) winnerIndex = 0;
+    else if (p2 > p1) winnerIndex = 1;
+
     // Contenedor para los jugadores
     const playersContainer = document.createElement('div');
     playersContainer.className = 'players-results-container';
 
-
-    const player1Div = this.createPlayerResult('Jugador 1', 0);
-    const player2Div = this.createPlayerResult('Jugador 2', 1);
+    const player1Div = this.createPlayerResult('Jugador 1', 0, winnerIndex === 0);
+    const player2Div = this.createPlayerResult('Jugador 2', 1, winnerIndex === 1);
 
     playersContainer.append(player1Div, player2Div);
 
@@ -703,7 +709,7 @@ export class GameManager {
   }
 
   // Método auxiliar para crear la sección de cada jugador
-  createPlayerResult(playerName, playerIndex) {
+  createPlayerResult(playerName, playerIndex, isWinner) {
     const playerDiv = document.createElement('div');
     playerDiv.className = 'player-result';
 
@@ -712,6 +718,11 @@ export class GameManager {
 
     const score = document.createElement('p');
     score.textContent = `Puntuación: ${this.players[playerIndex].score}`;
+
+    // Efecto para el ganador
+    if (isWinner) {
+      playerDiv.classList.add('winner');
+    }
 
     playerDiv.append(title, score);
 
