@@ -4,22 +4,28 @@ import { QuestionItem } from './QuestionItem.js';
 import { foodImages } from './foodImagesList.js';
 import { HandDetector } from './HandDetector.js';
 import { QuestionsList } from './QuestionsList.js';
+import { CountdownDisplay } from './CountdownDisplay.js';
 
 export class GameManager {
   constructor(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.canvas.getContext('2d');
-    this.allFoodItems = [];
-    this.players = [new Player(1), new Player(2)];
-    this.lastFoodSpawn = 0;
-    this.foodSpawnInterval = 600; // ms entre spawns
-    this.gameStarted = false;
-    this.gameEnded = false;
-    this.gameStartTime = 0;
-    this.stageDuration = 20000; // 20 segundos por etapa
-    this.currentStage = 1; // 1: Identificación, 2: Saludable, 3: Contaminación
+
+    this.countdown = new CountdownDisplay();
     this.isInCountdown = false; // Estado para controlar el conteo inicial de cada etapa
     this.countdownStartTime = 0; // Tiempo de inicio del conteo
+
+    this.gameStartTime = 0;
+    this.stageDuration = 20000; // 20 segundos por etapa
+    this.allFoodItems = [];
+    this.foodSpawnInterval = 600; // ms entre spawns
+    this.lastFoodSpawn = 0;
+
+    this.players = [new Player(1), new Player(2)];
+
+    this.gameStarted = false;
+    this.gameEnded = false;
+    this.currentStage = 1; // 1: Identificación, 2: Saludable, 3: Contaminación
     this.blockedByIntro = true;
     this.stageSettings = {
       1: {
@@ -35,6 +41,7 @@ export class GameManager {
         description: "Contaminación cruzada y situaciones cotidianas 🔍",
       },
     };
+
     this.currentQuestion = [null, null];
     this.lastQuestionId = [null, null];
     this.answeredQuestions = new Set();
@@ -182,13 +189,11 @@ export class GameManager {
   handleInitialCountdown(currentTime) {
     const elapsed = currentTime - this.countdownStartTime;
     const countdownDuration = 3000; // 3 segundos total
-    const timeDisplay = document.getElementById('time-display');
-    const timeCounter = document.getElementById('time-counter');
 
     if (elapsed >= countdownDuration) {
       // Terminó el conteo, x lo tanto empieza el juego
       this.isInCountdown = false; // Para que no se muestre el contador de nuevo!!!!!
-      timeCounter.style.display = 'none';
+      this.countdown.hide(); // Oculta el contador, logica ahora manejada x la clase CountdownDisplay
       this.allFoodItems = []; // Limpia los alimentos de la etapa anterior
       this.currentQuestion = [null, null]; // Resetea las preguntas
       this.gameStartTime = currentTime; // Reinicia el tiempo de la etapa
@@ -200,9 +205,8 @@ export class GameManager {
     }
 
     // Muestra el número correspondiente (3, 2, 1)
-    const remainingTime = Math.ceil((countdownDuration - elapsed) / 1000);
-    timeDisplay.textContent = remainingTime;
-    timeCounter.style.display = 'block';
+    const remaining = Math.ceil((countdownDuration - elapsed) / 1000);
+    this.countdown.show(remaining);
 
     // Dibuja fondo blanco durante el conteo
     this.ctx.fillStyle = '#f5f5f5';
@@ -211,24 +215,23 @@ export class GameManager {
 
   handleTimeCounter(currentTime) {
     const remaining = Math.ceil((this.stageDuration - (currentTime - this.gameStartTime)) / 1000);
-    const timeDisplay = document.getElementById('time-display');
-    const timeCounter = document.getElementById('time-counter');
 
-    if (remaining <= 0) return;
+    if (remaining <= 0) {
+      this.countdown.hide();
+      return;
+    }
 
     // Muestra contador al final (últimos 3 segundos)
-    if (remaining <= 3 && remaining > 0) {
-      timeDisplay.textContent = remaining;
-      timeCounter.style.display = 'block';
+    if (remaining <= 3) {
+      this.countdown.show(remaining);
     } else {
-      timeCounter.style.display = 'none';
+      this.countdown.hide();
     }
   }
 
   showStageResults() {
     this.clearStageResults();
     this.hidePlayersInfo();
-    this.hideTimer();
 
     const resultsDiv = document.createElement('div');
     resultsDiv.className = 'stage-results';
@@ -285,6 +288,12 @@ export class GameManager {
   resetStageValues() {
     // Resetea todos los valores del juego
     this.allFoodItems = [];
+
+    // Limpiar cache de las preguntas existentes antes de resetear
+    this.currentQuestion.forEach(q => {
+      if (q) q.clearLayoutCache();
+    });
+
     this.currentQuestion = [null, null];
     this.answeredQuestions = new Set();
     this.lastQuestionId = [null, null];
@@ -462,6 +471,11 @@ export class GameManager {
         const newQ = this.createNewQuestion(availableQuestions);
         this.currentQuestion[playerIdx] = newQ;
         this.lastQuestionId[playerIdx] = newQ ? newQ.id : null;
+
+        // Limpiar cache cuando se crea una nueva pregunta
+        if (newQ) {
+          newQ.clearLayoutCache();
+        }
       }
     }
     // Detectar colisiones con las manos (cada jugador responde solo su caja)
@@ -476,9 +490,7 @@ export class GameManager {
           if (q.checkCollision(handX, handY, this.ctx)) {
             const selectedOption = q.selectedOption;
             const isCorrect = selectedOption === q.correctAnswer;
-            q.feedbackActive = true;
-            q.feedbackResult = isCorrect;
-            q.feedbackSelected = selectedOption;
+            q.showFeedback(selectedOption, isCorrect);
             // Contar preguntas correctas
             if (isCorrect) {
               if (!this.players[playerIdx].correctQuestions) {
@@ -572,19 +584,13 @@ export class GameManager {
   detectCollisions(hands) {
     if (!hands || hands.length === 0) return;
 
-    // console.log("Detectando colisiones con cant manos:", hands.length);
-
     // Procesa las manos del jugador 1 (primeras dos manos detectadas)
     const player1Hands = hands.slice(0, 2);
     this.processPlayerHands(player1Hands, 0);
 
-    // console.log("Manos del jugador 1 procesadas:", player1Hands.length);
-
     // Procesa las manos del jugador 2 (siguientes dos manos detectadas)
     const player2Hands = hands.slice(2, 4);
     this.processPlayerHands(player2Hands, 1);
-
-    // console.log("Manos del jugador 2 procesadas:", player2Hands.length);
   }
 
   createCollectionEffect(food) {
@@ -620,56 +626,37 @@ export class GameManager {
   }
 
   draw() {
-    // En la etapa 3 dibuja un fondo blanco en lugar de la cámara
-    if (this.currentStage === 3) {
-      this.ctx.fillStyle = '#f5f5f5'; // Fondo beige claro
-      this.ctx.fillRect(0, 0, this.canvas.canvas.width, this.canvas.canvas.height);
-    }
     this.activeFoods.forEach((food) => {
       food.draw(this.ctx);
     });
-    // Preguntas una debajo de la otra y centradas
+
     if (this.currentStage === 3) {
-      const totalQuestions = this.currentQuestion.length;
-      const canvasHeight = this.canvas.canvas.height;
-      const canvasWidth = this.canvas.canvas.width;
+      this.ctx.fillStyle = '#f5f5f5'; // Dibuja un fondo blanco en lugar de la cámara
+      this.ctx.fillRect(0, 0, this.canvas.canvas.width, this.canvas.canvas.height);
 
-      // Calcula espaciado entre preguntas para que sean legibles
-      const minQuestionHeight = 200; // Altura mínima por pregunta
-      const spacingBetweenQuestions = 50; // Espacio entre preguntas
-      const totalMinHeight = totalQuestions * minQuestionHeight + (totalQuestions - 1) * spacingBetweenQuestions;
-      const availableHeight = canvasHeight - 80; // Dejar margen arriba y abajo
-
-      let blockHeight, startY;
-
-      if (totalMinHeight <= availableHeight) {
-        // Si hay espacio suficiente, usar altura mínima con espaciado
-        blockHeight = minQuestionHeight + spacingBetweenQuestions;
-        startY = 40;
-      } else {
-        // Si no hay espacio, distribuir uniformemente
-        blockHeight = availableHeight / totalQuestions;
-        startY = 40;
-      }
-
-      for (let i = 0; i < totalQuestions; i++) {
-        const q = this.currentQuestion[i];
-        if (q) {
-          q.x = Math.max(20, canvasWidth * 0.05); // Mínimo 20px de margen
-          q.y = startY + i * blockHeight;
-          q.width = Math.min(canvasWidth - 40, canvasWidth * 0.9); // Máximo 90% del ancho
-          q.height = Math.max(150, blockHeight - spacingBetweenQuestions); // Altura mínima de 150px
-          q.draw(this.ctx);
+      // Usamos un cacheKey para recalcular solo si cambia el tamaño del canvas
+      const canvasKey = `${this.canvas.canvas.width}x${this.canvas.canvas.height}`;
+      this.currentQuestion.forEach(q => {
+        if (q && (!q.layoutCache || q.layoutCache.key !== canvasKey)) {
+          q.clearLayoutCache();
         }
-      }
-    }
-  }
+      });
 
-  hideTimer() {
-    // Oculta el contador de tiempo para evitar interferencias
-    const timeCounter = document.getElementById('time-counter');
-    if (timeCounter) {
-      timeCounter.style.display = 'none';
+      const firstQuestion = this.currentQuestion.find(q => q !== null);
+      if (firstQuestion) {
+        const positions = firstQuestion.calculateQuestionsLayout(
+          this.currentQuestion,
+          this.canvas.canvas.width,
+          this.canvas.canvas.height,
+          this.ctx
+        );
+        this.currentQuestion.forEach((q, i) => {
+          if (q && positions[i]) {
+            q.relocateQuestion(positions[i].x, positions[i].y, positions[i].width);
+            q.draw(this.ctx);
+          }
+        });
+      }
     }
   }
 
