@@ -22,7 +22,7 @@ export class Canvas {
     // drawResultsPoses(this.ctx, poses);
     return;
   }
-  //dibuja las manos detectadas
+//dibuja las manos detectadas
   renderHands(hands, playerIndex) {
     drawResultsHands(this.ctx, hands, playerIndex);
   }
