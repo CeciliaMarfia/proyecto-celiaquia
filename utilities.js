@@ -195,13 +195,13 @@ const connections = [
  * Draw the keypoints on the video.
  * @param hands A list of hands to render.
  */
-export function drawResultsHands(ctx, hands) {
+export function drawResultsHands(ctx, hands, playerIndex) {
   // Sort by right to left hands.
-  hands.sort((hand1, hand2) => {
-    if (hand1.handedness < hand2.handedness) return 1;
-    if (hand1.handedness > hand2.handedness) return -1;
-    return 0;
-  });
+ // hands.sort((hand1, hand2) => {
+   // if (hand1.handedness < hand2.handedness) return 1;
+    //if (hand1.handedness > hand2.handedness) return -1;
+   // return 0;
+  //});
 
   // Pad hands to clear empty scatter GL plots.
   while (hands.length < 2) hands.push({});
@@ -209,7 +209,7 @@ export function drawResultsHands(ctx, hands) {
   for (let i = 0; i < hands.length; ++i) {
     // Third hand and onwards scatterGL context is set to null since we
     // don't render them.
-    drawResultHands(ctx, hands[i]);
+    drawResultHands(ctx, hands[i],playerIndex);
   }
 }
 
@@ -218,9 +218,9 @@ export function drawResultsHands(ctx, hands) {
  * @param hand A hand with keypoints to render.
  * @param ctxt Scatter GL context to render 3D keypoints to.
  */
-function drawResultHands(ctx, hand) {
+function drawResultHands(ctx, hand, playerIndex) {
   if (hand.keypoints != null) {
-    drawKeypointsHands(ctx, hand.keypoints, hand.handedness);
+    drawKeypointsHands(ctx, hand.keypoints, hand.handedness, playerIndex);
   }
 }
 
