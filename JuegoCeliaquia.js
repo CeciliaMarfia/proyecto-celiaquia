@@ -9,8 +9,8 @@ import { GameManager } from './GameManager.js';
 export const camera = new Camera();
 const canvas = new Canvas();
 
-// Colores de referencia para los símbolos de los jugadores
-const PLAYER_SYMBOLS = [
+// Colores de referencia para los símbolos de los jugadores - CHEQUEAR si quieren estos dos colores; sino cambiar los valores rgb y googlear cuales irian
+export const PLAYER_SYMBOLS = [
   { name: "rojo", rgb: [200, 30, 30] }, // Jugador 1: rojo
   { name: "azul", rgb: [30, 30, 200] }  // Jugador 2: azul
 ];
@@ -191,7 +191,7 @@ async function runInference(canvas, camera) {
 
     // Filtro las manos para que solo las identificadas como de jugadores se dibujen
     const handsToDraw = hands.filter((_, i) => handToPlayer[i] !== null); // el _ es para que se ignore ese argumento
-    canvas.renderHands(handsToDraw);
+    canvas.renderHands(handsToDraw, handToPlayer);
 
     updateFPS();
   } catch (error) {

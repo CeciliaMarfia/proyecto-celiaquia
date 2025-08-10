@@ -1,3 +1,5 @@
+import { PLAYER_SYMBOLS } from './JuegoCeliaquia.js';
+
 //---------------------------------------------------------
 //----------------------DRAW POSES-------------------------
 //---------------------------------------------------------
@@ -15,7 +17,7 @@ const MOVENET_CONFIG = {
   enableTracking: false
 };
 
-STATE.modelConfig = {...MOVENET_CONFIG};
+STATE.modelConfig = { ...MOVENET_CONFIG };
 STATE.model = poseDetection.SupportedModels.MoveNet;
 
 const params = { STATE, DEFAULT_LINE_WIDTH, DEFAULT_RADIUS };
@@ -45,7 +47,7 @@ const COLOR_PALETTE = [
   '#9a6324', '#000075', '#f58231', '#4363d8', '#ffd8b1', '#dcbeff', '#808000',
   '#ffe119', '#911eb4', '#bfef45', '#f032e6', '#3cb44b', '#a9a9a9'
 ];
- 
+
 /**
  * Draw the keypoints and skeleton on the video.
  * @param poses A list of poses to render.
@@ -73,7 +75,7 @@ function drawResultPoses(ctx, pose) {
  */
 function drawKeypointsPoses(ctx, keypoints) {
   const keypointInd =
-      poseDetection.util.getKeypointIndexBySide(params.STATE.model);
+    poseDetection.util.getKeypointIndexBySide(params.STATE.model);
   ctx.fillStyle = 'Red';
   ctx.strokeStyle = 'White';
   ctx.lineWidth = params.DEFAULT_LINE_WIDTH;
@@ -113,15 +115,15 @@ function drawKeypointPoses(ctx, keypoint) {
 function drawSkeletonPoses(ctx, keypoints, poseId) {
   // Each poseId is mapped to a color in the color palette.
   const color = params.STATE.modelConfig.enableTracking && poseId != null ?
-      COLOR_PALETTE[poseId % 20] :
-      'White';
+    COLOR_PALETTE[poseId % 20] :
+    'White';
   ctx.fillStyle = color;
   ctx.strokeStyle = color;
   ctx.lineWidth = params.DEFAULT_LINE_WIDTH;
 
   poseDetection.util.getAdjacentPairs(params.STATE.model).forEach(([
-                                                                    i, j
-                                                                  ]) => {
+    i, j
+  ]) => {
     const kp1 = keypoints[i];
     const kp2 = keypoints[j];
 
@@ -152,18 +154,18 @@ const fingerLookupIndices = {
 }; // for rendering each finger as a polyline
 
 const connections = [
-  [0, 1], [1, 2], [2, 3], [3,4],
+  [0, 1], [1, 2], [2, 3], [3, 4],
   [0, 5], [5, 6], [6, 7], [7, 8],
   [0, 9], [9, 10], [10, 11], [11, 12],
-  [0, 13], [13,14], [14, 15], [15, 16],
-  [0, 17], [17, 18],[18, 19], [19,20]
+  [0, 13], [13, 14], [14, 15], [15, 16],
+  [0, 17], [17, 18], [18, 19], [19, 20]
 ];
 
 /**
  * Draw the keypoints on the video.
  * @param hands A list of hands to render.
  */
-export function drawResultsHands(ctx, hands) {
+export function drawResultsHands(ctx, hands, handToPlayer) {
   // Sort by right to left hands.
   hands.sort((hand1, hand2) => {
     if (hand1.handedness < hand2.handedness) return 1;
@@ -175,9 +177,15 @@ export function drawResultsHands(ctx, hands) {
   while (hands.length < 2) hands.push({});
 
   for (let i = 0; i < hands.length; ++i) {
-    // Third hand and onwards scatterGL context is set to null since we
-    // don't render them.
-    drawResultHands(ctx, hands[i]);
+    if (hands[i].keypoints != null) {
+      // Determina el color según el jugador asignado
+      let handColor = '#cccccc'; // color por defecto
+      if (handToPlayer && handToPlayer[i] !== null) {
+        const rgb = PLAYER_SYMBOLS[handToPlayer[i]].rgb;
+        handColor = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
+      }
+      drawKeypointsHands(ctx, hands[i].keypoints, handColor);
+    }
   }
 }
 
@@ -186,28 +194,29 @@ export function drawResultsHands(ctx, hands) {
  * @param hand A hand with keypoints to render.
  * @param ctxt Scatter GL context to render 3D keypoints to.
  */
+/*
 function drawResultHands(ctx, hand) {
   if (hand.keypoints != null) {
     drawKeypointsHands(ctx, hand.keypoints, hand.handedness);
   }
 }
+*/
 
 /**
  * Draw the keypoints on the video.
  * @param keypoints A list of keypoints.
  * @param handedness Label of hand (either Left or Right).
  */
-function drawKeypointsHands(ctx, keypoints, handedness) {
+function drawKeypointsHands(ctx, keypoints, handColor) {
   const keypointsArray = keypoints;
-  
-  // Colores fluo tipo Just Dance
-  const handColor = handedness === 'Left' ? '#ff0080' : '#00ff80'; // Rosa/Verde brillante
-  const shadowColor = handedness === 'Left' ? '#800040' : '#004020'; // Sombra más oscura
-  
+
+  // Usa el color recibido
+  const shadowColor = handColor === 'red' ? '#800040' : handColor === 'blue' ? '#004020' : '#222';
+
   ctx.lineWidth = 8; // Líneas más gruesas -- no llega a parecer un guante, acomodar
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
-  
+
   ctx.strokeStyle = shadowColor;
   const fingers = Object.keys(fingerLookupIndices);
   for (let i = 0; i < fingers.length; i++) {
@@ -215,26 +224,26 @@ function drawKeypointsHands(ctx, keypoints, handedness) {
     const points = fingerLookupIndices[finger].map(idx => keypoints[idx]);
     drawPathHands(ctx, points, false);
   }
-  
+
   ctx.strokeStyle = handColor;
   for (let i = 0; i < fingers.length; i++) {
     const finger = fingers[i];
     const points = fingerLookupIndices[finger].map(idx => keypoints[idx]);
     drawPathHands(ctx, points, false);
   }
-  
+
   // Dibuja puntos de articulaciones
   ctx.fillStyle = handColor;
   ctx.strokeStyle = '#ffffff';
   ctx.lineWidth = 3;
-  
+
   for (let i = 0; i < keypointsArray.length; i++) {
     const x = keypointsArray[i].x;
     const y = keypointsArray[i].y;
-    
+
     // Punto principal
     drawPointHands(ctx, x, y, 8);
-    
+
     // Efecto de brillo
     ctx.fillStyle = '#ffffff';
     drawPointHands(ctx, x, y, 4);
