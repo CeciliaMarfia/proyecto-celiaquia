@@ -5,8 +5,21 @@ import { updateFPS } from "./fpsModule.js";
 import { GameManager } from './GameManager.js';
 
 // Configuración principal
+
 export const camera = new Camera();
 const canvas = new Canvas();
+
+// Colores de referencia para los símbolos de los jugadores
+const PLAYER_SYMBOLS = [
+  { name: "rojo", rgb: [200, 30, 30] }, // Jugador 1: rojo
+  { name: "azul", rgb: [30, 30, 200] }  // Jugador 2: azul
+];
+
+/* Distancia mínima para considerar un color como válido - si no hay coincidencia, no se asigna la mano a un jugador
+  - Bajar el umbral si queremos que se amas estricto (se asignan menos manos) 
+  - Subir el umbral si queremos que acepte colores mas parecidos (se asignan menos manos) */
+const COLOR_THRESHOLD = 120;
+
 window.gameManager = new GameManager(canvas); // Variable global para acceder al GameManager
 window.gameManager.camera = camera; // Referencia al objeto Camera en el GameManager
 
@@ -73,6 +86,47 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('game-controls').style.display = 'none';
 });
 
+function getAverageColor(ctx, x, y, w, h) {
+  const imageData = ctx.getImageData(x, y, w, h).data;
+  let r = 0, g = 0, b = 0, count = 0;
+  for (let i = 0; i < imageData.length; i += 4) {
+    r += imageData[i];
+    g += imageData[i + 1];
+    b += imageData[i + 2];
+    count++;
+  }
+  return [Math.round(r / count), Math.round(g / count), Math.round(b / count)];
+}
+
+function colorDistance(c1, c2) {
+  return Math.sqrt(
+    Math.pow(c1[0] - c2[0], 2) +
+    Math.pow(c1[1] - c2[1], 2) +
+    Math.pow(c1[2] - c2[2], 2)
+  );
+}
+
+function findClosestPose(hand, poses) {
+  let minDist = Infinity, closestPose = null;
+  const hx = hand.keypoints[0].x;
+  const hy = hand.keypoints[0].y;
+  poses.forEach(pose => {
+    // Usa el centro del pecho (promedio de hombros)
+    const leftShoulder = pose.keypoints.find(kp => kp.name === 'left_shoulder');
+    const rightShoulder = pose.keypoints.find(kp => kp.name === 'right_shoulder');
+    if (leftShoulder && rightShoulder) {
+      const cx = (leftShoulder.x + rightShoulder.x) / 2;
+      const cy = (leftShoulder.y + rightShoulder.y) / 2;
+      const dist = Math.hypot(hx - cx, hy - cy);
+      if (dist < minDist) {
+        minDist = dist;
+        closestPose = pose;
+      }
+    }
+  });
+  return closestPose;
+}
+
 // Bucle principal del juego
 async function runInference(canvas, camera) {
   const image = camera.getVideo();
@@ -88,15 +142,57 @@ async function runInference(canvas, camera) {
     });
     canvas.drawCameraFrame(camera);
 
+    // Asigna manos a jugadores según símbolo/color - necesitamos el canvas del video
+    const videoCtx = canvas.ctx;
+
+    // Mapeo tipo: índice de mano -> índice de jugador
+    const handToPlayer = [];
+
+    hands.forEach((hand, i) => {
+      // Usa el kp del pecho/hombros para identificar el color del jugador
+      const pose = findClosestPose(hand, poses);
+      let color = [0, 0, 0];
+      if (pose) {
+        const leftShoulder = pose.keypoints.find(kp => kp.name === 'left_shoulder');
+        const rightShoulder = pose.keypoints.find(kp => kp.name === 'right_shoulder');
+        if (leftShoulder && rightShoulder) {
+          const cx = (leftShoulder.x + rightShoulder.x) / 2;
+          const cy = (leftShoulder.y + rightShoulder.y) / 2;
+          color = getAverageColor(videoCtx, cx - 15, cy - 15, 30, 30);
+        }
+      }
+
+      // Calcula la distancia a cada color para asignar el jugador
+      // Asigna el jugador con el color más cercano
+      // Se asume que los colores de los jugadores están bien definidos en PLAYER_SYMBOLS
+      // y que no hay más de 2 jugadores (si cambiamos eso, recordar ajustar esto!!!!!!!).
+      let minDist = Infinity, assignedPlayer = null;
+      PLAYER_SYMBOLS.forEach((player, idx) => {
+        const dist = colorDistance(color, player.rgb);
+        if (dist < minDist) {
+          minDist = dist;
+          assignedPlayer = idx;
+        }
+      });
+      // Solo asigna si el color es parecido
+      handToPlayer[i] = minDist < COLOR_THRESHOLD ? assignedPlayer : null;
+
+      console.log('Color promedio:', color, 'Distancia rojo:', colorDistance(color, PLAYER_SYMBOLS[0].rgb), 'Distancia azul:', colorDistance(color, PLAYER_SYMBOLS[1].rgb));
+    });
+
     // Actualiza y dibuja el juego sólo cuando no está mostrando resultados de etapa
     if (window.gameManager && !window.gameManager.gameEnded && !document.querySelector('.stage-results')) {
-      window.gameManager.update(Date.now(), hands);
+      window.gameManager.update(Date.now(), hands, handToPlayer);
       window.gameManager.draw();
     }
 
     // Dibuja todas las detecciones
     canvas.drawResultsPoses(poses);
-    canvas.renderHands(hands);
+
+    // Filtro las manos para que solo las identificadas como de jugadores se dibujen
+    const handsToDraw = hands.filter((_, i) => handToPlayer[i] !== null); // el _ es para que se ignore ese argumento
+    canvas.renderHands(handsToDraw);
+
     updateFPS();
   } catch (error) {
     console.error("Error en la detección:", error);

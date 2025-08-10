@@ -135,7 +135,7 @@ export class GameManager {
     document.getElementById('game-container').appendChild(messageDiv);
   }
 
-  update(currentTime, hands) {
+  update(currentTime, hands, handToPlayer) {
     if (!this.gameStarted || this.gameEnded || this.blockedByIntro) return;
 
     // Si está en conteo inicial, sólo maneja el contador
@@ -173,7 +173,7 @@ export class GameManager {
 
       // Detecta colisiones si hay por lo menos una mano detectada
       if (hands && hands.length >= 1) {
-        this.detectCollisions(hands);
+        this.detectCollisions(hands, handToPlayer);
       }
     }
   }
@@ -587,16 +587,16 @@ export class GameManager {
     });
   }
 
-  detectCollisions(hands) {
+  detectCollisions(hands, handToPlayer) {
     if (!hands || hands.length === 0) return;
 
-    // Procesa las manos del jugador 1 (primeras dos manos detectadas)
-    const player1Hands = hands.slice(0, 2);
-    this.processPlayerHands(player1Hands, 0);
-
-    // Procesa las manos del jugador 2 (siguientes dos manos detectadas)
-    const player2Hands = hands.slice(2, 4);
-    this.processPlayerHands(player2Hands, 1);
+    // Asigna cada mano al jugador correcto segun handToPlayer
+    hands.forEach((hand, i) => {
+        const playerIdx = handToPlayer && handToPlayer[i] !== undefined ? handToPlayer[i] : (i < 2 ? 0 : 1);
+        if(playerIdx !== null) {
+          this.processPlayerHands([hand], playerIdx);
+        }
+    });
   }
 
   createCollectionEffect(food) {
