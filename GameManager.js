@@ -603,6 +603,17 @@ export class GameManager {
     const effect = document.createElement('div');
     effect.className = 'food-collected';
 
+    // Reproducir sonido según el tipo de comida
+    const sound = new Audio();
+    if (food.type === 1) {
+      sound.src = 'sounds/good-food.mp3'; // sonido positivo para comida saludable
+    } else if (food.type === 2) {
+      sound.src = 'sounds/neutral-food.mp3'; // sonido neutral para comida no saludable
+    } else {
+      sound.src = 'sounds/bad-food.mp3'; // sonido negativo para comida con gluten
+    }
+    sound.play();
+
     let points = 0;
     if (this.currentStage === 1) {
       if (food.type === 1) points = 10; // sin tacc saludable: +10
@@ -643,7 +654,7 @@ export class GameManager {
   }
 
   getFoodColor(type) {
-    return type === 1 ? "#4CAF50" : type === 2 ? "#FFC107" : "#F44336";
+    return type === 1 ? "#2ECC71" : type === 2 ? "#7b5a9fff" : "#E67E22";
   }
 
   draw() {
