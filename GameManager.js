@@ -4,22 +4,28 @@ import { QuestionItem } from './QuestionItem.js';
 import { foodImages } from './foodImagesList.js';
 import { HandDetector } from './HandDetector.js';
 import { QuestionsList } from './QuestionsList.js';
+import { CountdownDisplay } from './CountdownDisplay.js';
 
 export class GameManager {
   constructor(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.canvas.getContext('2d');
-    this.allFoodItems = [];
-    this.players = [new Player(1), new Player(2)];
-    this.lastFoodSpawn = 0;
-    this.foodSpawnInterval = 600; // ms entre spawns
-    this.gameStarted = false;
-    this.gameEnded = false;
-    this.gameStartTime = 0;
-    this.stageDuration = 60000; // 60 segundos por etapa
-    this.currentStage = 1; // 1: Identificación, 2: Saludable, 3: Contaminación
+
+    this.countdown = new CountdownDisplay();
     this.isInCountdown = false; // Estado para controlar el conteo inicial de cada etapa
     this.countdownStartTime = 0; // Tiempo de inicio del conteo
+
+    this.gameStartTime = 0;
+    this.stageDuration = 20000; // 20 segundos por etapa
+    this.allFoodItems = [];
+    this.foodSpawnInterval = 600; // ms entre spawns
+    this.lastFoodSpawn = 0;
+
+    this.players = [new Player(1), new Player(2)];
+
+    this.gameStarted = false;
+    this.gameEnded = false;
+    this.currentStage = 1; // 1: Identificación, 2: Saludable, 3: Contaminación
     this.blockedByIntro = true;
     this.stageSettings = {
       1: {
@@ -35,6 +41,7 @@ export class GameManager {
         description: "Contaminación cruzada y situaciones cotidianas 🔍",
       },
     };
+
     this.currentQuestion = [null, null];
     this.lastQuestionId = [null, null];
     this.answeredQuestions = new Set();
@@ -182,14 +189,11 @@ export class GameManager {
   handleInitialCountdown(currentTime) {
     const elapsed = currentTime - this.countdownStartTime;
     const countdownDuration = 3000; // 3 segundos total
-    const timeDisplay = document.getElementById('time-display');
-    const timeCounter = document.getElementById('time-counter');
 
     if (elapsed >= countdownDuration) {
       // Terminó el conteo, x lo tanto empieza el juego
       this.isInCountdown = false; // Para que no se muestre el contador de nuevo!!!!!
-      timeCounter.style.visibility = 'hidden';
-      timeCounter.style.display = 'none';
+      this.countdown.hide(); // Oculta el contador, logica ahora manejada x la clase CountdownDisplay
       this.allFoodItems = []; // Limpia los alimentos de la etapa anterior
       this.currentQuestion = [null, null]; // Resetea las preguntas
       this.gameStartTime = currentTime; // Reinicia el tiempo de la etapa
@@ -201,23 +205,8 @@ export class GameManager {
     }
 
     // Muestra el número correspondiente (3, 2, 1)
-    const remainingTime = Math.ceil((countdownDuration - elapsed) / 1000);
-    timeDisplay.textContent = remainingTime;
-    timeCounter.style.visibility = 'visible';
-    timeCounter.style.display = 'block';
-    timeCounter.style.zIndex = '9999';
-    timeCounter.style.position = 'fixed';
-    timeCounter.style.top = '50%';
-    timeCounter.style.left = '50%';
-    timeCounter.style.transform = 'translate(-50%, -50%)';
-    timeCounter.style.background = 'rgba(0, 0, 0, 0.8)';
-    timeCounter.style.color = 'white';
-    timeCounter.style.padding = '2rem 4rem';
-    timeCounter.style.borderRadius = '20px';
-    timeCounter.style.fontSize = '4rem';
-    timeCounter.style.fontWeight = 'bold';
-    timeCounter.style.textAlign = 'center';
-    timeCounter.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.3)';
+    const remaining = Math.ceil((countdownDuration - elapsed) / 1000);
+    this.countdown.show(remaining);
 
     // Dibuja fondo blanco durante el conteo
     this.ctx.fillStyle = '#f5f5f5';
@@ -226,52 +215,42 @@ export class GameManager {
 
   handleTimeCounter(currentTime) {
     const remaining = Math.ceil((this.stageDuration - (currentTime - this.gameStartTime)) / 1000);
-    const timeDisplay = document.getElementById('time-display');
-    const timeCounter = document.getElementById('time-counter');
 
-    if (remaining <= 0) return;
+    if (remaining <= 0) {
+      this.countdown.hide();
+      return;
+    }
 
     // Muestra contador al final (últimos 3 segundos)
-    if (remaining <= 3 && remaining > 0) {
-      timeDisplay.textContent = remaining;
-      timeCounter.style.visibility = 'visible';
-      timeCounter.style.display = 'block';
-      timeCounter.style.zIndex = '9999';
-      timeCounter.style.position = 'fixed';
-      timeCounter.style.top = '50%';
-      timeCounter.style.left = '50%';
-      timeCounter.style.transform = 'translate(-50%, -50%)';
-      timeCounter.style.background = 'rgba(0, 0, 0, 0.8)';
-      timeCounter.style.color = 'white';
-      timeCounter.style.padding = '2rem 4rem';
-      timeCounter.style.borderRadius = '20px';
-      timeCounter.style.fontSize = '4rem';
-      timeCounter.style.fontWeight = 'bold';
-      timeCounter.style.textAlign = 'center';
-      timeCounter.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.3)';
+    if (remaining <= 3) {
+      this.countdown.show(remaining);
     } else {
-      timeCounter.style.visibility = 'hidden';
-      timeCounter.style.display = 'none';
+      this.countdown.hide();
     }
   }
 
   showStageResults() {
     this.clearStageResults();
     this.hidePlayersInfo();
-    this.hideTimer();
 
     const resultsDiv = document.createElement('div');
     resultsDiv.className = 'stage-results';
     const title = document.createElement('h1');
     title.textContent = `¡Etapa ${this.currentStage} Completada!`;
 
+    // Determina el ganador
+    const p1 = this.players[0].score;
+    const p2 = this.players[1].score;
+    let winnerIndex = -1;
+    if (p1 > p2) winnerIndex = 0;
+    else if (p2 > p1) winnerIndex = 1;
+
     // Contenedor para los jugadores
     const playersContainer = document.createElement('div');
     playersContainer.className = 'players-results-container';
 
-
-    const player1Div = this.createPlayerResult('Jugador 1', 0);
-    const player2Div = this.createPlayerResult('Jugador 2', 1);
+    const player1Div = this.createPlayerResult('Jugador 1', 0, winnerIndex === 0);
+    const player2Div = this.createPlayerResult('Jugador 2', 1, winnerIndex === 1);
 
     playersContainer.append(player1Div, player2Div);
 
@@ -315,6 +294,12 @@ export class GameManager {
   resetStageValues() {
     // Resetea todos los valores del juego
     this.allFoodItems = [];
+
+    // Limpiar cache de las preguntas existentes antes de resetear
+    this.currentQuestion.forEach(q => {
+      if (q) q.clearLayoutCache();
+    });
+
     this.currentQuestion = [null, null];
     this.answeredQuestions = new Set();
     this.lastQuestionId = [null, null];
@@ -492,6 +477,11 @@ export class GameManager {
         const newQ = this.createNewQuestion(availableQuestions);
         this.currentQuestion[playerIdx] = newQ;
         this.lastQuestionId[playerIdx] = newQ ? newQ.id : null;
+
+        // Limpiar cache cuando se crea una nueva pregunta
+        if (newQ) {
+          newQ.clearLayoutCache();
+        }
       }
     }
     // Detectar colisiones con las manos (cada jugador responde solo su caja)
@@ -506,9 +496,7 @@ export class GameManager {
           if (q.checkCollision(handX, handY, this.ctx)) {
             const selectedOption = q.selectedOption;
             const isCorrect = selectedOption === q.correctAnswer;
-            q.feedbackActive = true;
-            q.feedbackResult = isCorrect;
-            q.feedbackSelected = selectedOption;
+            q.showFeedback(selectedOption, isCorrect);
             // Contar preguntas correctas
             if (isCorrect) {
               if (!this.players[playerIdx].correctQuestions) {
@@ -602,47 +590,56 @@ export class GameManager {
   detectCollisions(hands) {
     if (!hands || hands.length === 0) return;
 
-    // console.log("Detectando colisiones con cant manos:", hands.length);
-
     // Procesa las manos del jugador 1 (primeras dos manos detectadas)
     const player1Hands = hands.slice(0, 2);
     this.processPlayerHands(player1Hands, 0);
 
-    // console.log("Manos del jugador 1 procesadas:", player1Hands.length);
-
     // Procesa las manos del jugador 2 (siguientes dos manos detectadas)
     const player2Hands = hands.slice(2, 4);
     this.processPlayerHands(player2Hands, 1);
-
-    // console.log("Manos del jugador 2 procesadas:", player2Hands.length);
   }
 
   createCollectionEffect(food) {
     const effect = document.createElement('div');
     effect.className = 'food-collected';
-    // Como el canvas está espejado con scaleX(-1) invertimos la coordenada X asi el efecto se ve en la posicion correcta
+
+    let points = 0;
+    if (this.currentStage === 1) {
+      if (food.type === 1) points = 10; // sin tacc saludable: +10
+      else if (food.type === 2) points = 3; // sin tacc no saludable: +3
+      else if (food.type === 3) points = -10; // con tacc: -10
+    } else if (this.currentStage === 2) {
+      if (food.type === 1) points = 7; // sin tacc saludable: +7
+      else if (food.type === 2) points = -10; // sin tacc no saludable: -10
+    }
+
+    //  Tamanio del circulo y para el número (y simbolo) adentro
+    effect.style.width = '80px';
+    effect.style.height = '80px';
+    effect.style.lineHeight = '80px';
+    effect.style.fontSize = '2.3rem';
+    effect.style.textAlign = 'center';
+    effect.textContent = points > 0 ? `+${points}` : `${points}`; // falta el -
+    effect.style.color = '#fff';
+    effect.style.fontWeight = 'bold';
+
+    // Como el canvas está espejado con scaleX(-1) invertimos la coordenada X asi el efecto se ve en la posicion correcta   
     const coordX = this.canvas.canvas.width - (food.x + food.width / 2);
     const coordY = food.y + food.height / 2;
 
-    effect.style.left = `${coordX}px`;
-    effect.style.top = `${coordY}px`;
-    effect.style.backgroundColor = this.getFoodColor(food.type);
     const videoContainer = document.querySelector('.video-canvas-container');
     if (videoContainer) {
-      // Calcula la posición relativa al contenedor
       const rect = videoContainer.getBoundingClientRect();
       const canvasRect = this.canvas.canvas.getBoundingClientRect();
-
-      // Calcula coordenadas relativas a videoContainer
       const offsetX = canvasRect.left - rect.left;
       const offsetY = canvasRect.top - rect.top;
-
-      effect.style.left = `${coordX - offsetX}px`;
-      effect.style.top = `${coordY - offsetY}px`;
+      effect.style.left = `${coordX - offsetX - 45}px`; // Para centrar el círculo
+      effect.style.top = `${coordY - offsetY - 45}px`;
+      effect.style.backgroundColor = this.getFoodColor(food.type);
       videoContainer.appendChild(effect);
     }
 
-    setTimeout(() => effect.remove(), 500);
+    setTimeout(() => effect.remove(), 1500);
   }
 
   getFoodColor(type) {
@@ -650,41 +647,37 @@ export class GameManager {
   }
 
   draw() {
-    // En la etapa 3 dibuja un fondo blanco en lugar de la cámara
-    if (this.currentStage === 3) {
-      this.ctx.fillStyle = '#f5f5f5'; // Fondo beige claro
-      this.ctx.fillRect(0, 0, this.canvas.canvas.width, this.canvas.canvas.height);
-    }
     this.activeFoods.forEach((food) => {
       food.draw(this.ctx);
     });
-    // Preguntas una debajo de la otra y centradas
+
     if (this.currentStage === 3) {
-      const canvasHeight = this.canvas.canvas.height;
-      const canvasWidth = this.canvas.canvas.width;
+      this.ctx.fillStyle = '#f5f5f5'; // Dibuja un fondo blanco en lugar de la cámara
+      this.ctx.fillRect(0, 0, this.canvas.canvas.width, this.canvas.canvas.height);
 
-      // Diseño fijo y simple: dividir la pantalla en dos
-      const questionHeight = Math.floor(canvasHeight / 2) - 50; // Mitad de la pantalla menos margen
-      const margin = 25; // Margen entre preguntas
-
-      for (let i = 0; i < this.currentQuestion.length; i++) {
-        const q = this.currentQuestion[i];
-        if (q) {
-          q.x = 50; // Margen izquierdo
-          q.y = i * (questionHeight + margin) + 25; // Posición vertical fija
-          q.width = canvasWidth - 100; // Ancho completo menos márgenes
-          q.height = questionHeight; // Altura fija
-          q.draw(this.ctx);
+      // Usamos un cacheKey para recalcular solo si cambia el tamaño del canvas
+      const canvasKey = `${this.canvas.canvas.width}x${this.canvas.canvas.height}`;
+      this.currentQuestion.forEach(q => {
+        if (q && (!q.layoutCache || q.layoutCache.key !== canvasKey)) {
+          q.clearLayoutCache();
         }
-      }
-    }
-  }
+      });
 
-  hideTimer() {
-    // Oculta el contador de tiempo para evitar interferencias
-    const timeCounter = document.getElementById('time-counter');
-    if (timeCounter) {
-      timeCounter.style.display = 'none';
+      const firstQuestion = this.currentQuestion.find(q => q !== null);
+      if (firstQuestion) {
+        const positions = firstQuestion.calculateQuestionsLayout(
+          this.currentQuestion,
+          this.canvas.canvas.width,
+          this.canvas.canvas.height,
+          this.ctx
+        );
+        this.currentQuestion.forEach((q, i) => {
+          if (q && positions[i]) {
+            q.relocateQuestion(positions[i].x, positions[i].y, positions[i].width);
+            q.draw(this.ctx);
+          }
+        });
+      }
     }
   }
 
@@ -716,7 +709,7 @@ export class GameManager {
   }
 
   // Método auxiliar para crear la sección de cada jugador
-  createPlayerResult(playerName, playerIndex) {
+  createPlayerResult(playerName, playerIndex, isWinner) {
     const playerDiv = document.createElement('div');
     playerDiv.className = 'player-result';
 
@@ -725,6 +718,11 @@ export class GameManager {
 
     const score = document.createElement('p');
     score.textContent = `Puntuación: ${this.players[playerIndex].score}`;
+
+    // Efecto para el ganador
+    if (isWinner) {
+      playerDiv.classList.add('winner');
+    }
 
     playerDiv.append(title, score);
 
