@@ -797,4 +797,31 @@ export class GameManager {
     };
   }
 
+  getOptionPositions(ctx) {
+    const positions = [];
+
+    // Usa los mismos valores que en draw()
+    const optionFontSize = 20;
+    const optionHeight = 40;
+    const optionSpacing = 10;
+    const marginTop = 20;
+    const marginBottom = 20;
+    const questionAreaHeight = 60;
+    const optionsStartY = this.y + marginTop + questionAreaHeight + 10;
+
+    for (let i = 0; i < this.options.length; i++) {
+      const optionY = optionsStartY + i * (optionHeight + optionSpacing);
+      if (optionY + optionHeight > this.y + this.height - marginBottom) {
+        break;
+      }
+      positions.push({
+        x: this.x + 30,
+        y: optionY,
+        width: this.width - 60,
+        height: optionHeight
+      });
+    }
+    return positions;
+  }
+
 }
