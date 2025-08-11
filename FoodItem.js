@@ -46,7 +46,20 @@ export class FoodItem {
     try {
       // Asegura que la imagen esté cargada y sea válida
       if (this.image.complete && this.image.naturalWidth !== 0) {
-        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        // Guardar el estado actual del contexto
+        ctx.save();
+        
+        // Trasladar al punto donde queremos dibujar
+        ctx.translate(this.x + this.width, this.y);
+        
+        // Escalar negativamente en X para voltear horizontalmente
+        ctx.scale(-1, 1);
+        
+        // Dibujar la imagen (ahora desde 0,0 porque ya trasladamos el contexto)
+        ctx.drawImage(this.image, 0, 0, this.width, this.height);
+        
+        // Restaurar el estado original del contexto
+        ctx.restore();
       }
     } catch (error) {
       console.error("Error dibujando:", error);
