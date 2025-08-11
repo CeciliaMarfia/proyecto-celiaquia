@@ -16,7 +16,7 @@ export const PLAYER_SYMBOLS = [
 ];
 
 /* Distancia mínima para considerar un color como válido - si no hay coincidencia, no se asigna la mano a un jugador
-  - Bajar el umbral si queremos que se amas estricto (se asignan menos manos) 
+  - Bajar el umbral si queremos que sea mas estricto (se asignan menos manos) 
   - Subir el umbral si queremos que acepte colores mas parecidos (se asignan menos manos) */
 const COLOR_THRESHOLD = 120;
 
@@ -111,13 +111,18 @@ function findClosestPose(hand, poses) {
   const hx = hand.keypoints[0].x;
   const hy = hand.keypoints[0].y;
   poses.forEach(pose => {
-    // Usa el centro del pecho (promedio de hombros)
-    const leftShoulder = pose.keypoints.find(kp => kp.name === 'left_shoulder');
-    const rightShoulder = pose.keypoints.find(kp => kp.name === 'right_shoulder');
-    if (leftShoulder && rightShoulder) {
-      const cx = (leftShoulder.x + rightShoulder.x) / 2;
-      const cy = (leftShoulder.y + rightShoulder.y) / 2;
-      const dist = Math.hypot(hx - cx, hy - cy);
+    // Use left and right wrist keypoints
+    const leftWrist = pose.keypoints.find(kp => kp.name === 'left_wrist');
+    const rightWrist = pose.keypoints.find(kp => kp.name === 'right_wrist');
+    if (leftWrist) {
+      const dist = Math.hypot(hx - leftWrist.x, hy - leftWrist.y);
+      if (dist < minDist) {
+        minDist = dist;
+        closestPose = pose;
+      }
+    }
+    if (rightWrist) {
+      const dist = Math.hypot(hx - rightWrist.x, hy - rightWrist.y);
       if (dist < minDist) {
         minDist = dist;
         closestPose = pose;
