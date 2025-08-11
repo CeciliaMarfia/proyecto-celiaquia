@@ -17,7 +17,7 @@ export const PLAYER_SYMBOLS = [
 
 /* Distancia mínima para considerar un color como válido - si no hay coincidencia, no se asigna la mano a un jugador
   - Bajar el umbral si queremos que se amas estricto (se asignan menos manos) 
-  - Subir el umbral si queremos que acepte colores mas parecidos (se asignan menos manos) */
+  - Subir el umbral si queremos que acepte colores mas parecidos (se asignan mas manos) */
 const COLOR_THRESHOLD = 120;
 
 window.gameManager = new GameManager(canvas); // Variable global para acceder al GameManager
