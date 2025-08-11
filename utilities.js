@@ -1,3 +1,5 @@
+import { PLAYER_SYMBOLS } from './JuegoCeliaquia.js';
+
 //---------------------------------------------------------
 //----------------------DRAW POSES-------------------------
 //---------------------------------------------------------
@@ -63,6 +65,7 @@ const COLOR_PALETTE = [
   "#a9a9a9",
 ];
 
+
 /**
  * Draw the keypoints and skeleton on the video.
  * @param poses A list of poses to render.
@@ -89,11 +92,10 @@ function drawResultPoses(ctx, pose) {
  * @param keypoints A list of keypoints.
  */
 function drawKeypointsPoses(ctx, keypoints) {
-  const keypointInd = poseDetection.util.getKeypointIndexBySide(
-    params.STATE.model
-  );
-  ctx.fillStyle = "Red";
-  ctx.strokeStyle = "White";
+  const keypointInd =
+    poseDetection.util.getKeypointIndexBySide(params.STATE.model);
+  ctx.fillStyle = 'Red';
+  ctx.strokeStyle = 'White';
   ctx.lineWidth = params.DEFAULT_LINE_WIDTH;
 
   for (const i of keypointInd.middle) {
@@ -169,33 +171,18 @@ const fingerLookupIndices = {
 }; // for rendering each finger as a polyline
 
 const connections = [
-  [0, 1],
-  [1, 2],
-  [2, 3],
-  [3, 4],
-  [0, 5],
-  [5, 6],
-  [6, 7],
-  [7, 8],
-  [0, 9],
-  [9, 10],
-  [10, 11],
-  [11, 12],
-  [0, 13],
-  [13, 14],
-  [14, 15],
-  [15, 16],
-  [0, 17],
-  [17, 18],
-  [18, 19],
-  [19, 20],
+  [0, 1], [1, 2], [2, 3], [3, 4],
+  [0, 5], [5, 6], [6, 7], [7, 8],
+  [0, 9], [9, 10], [10, 11], [11, 12],
+  [0, 13], [13, 14], [14, 15], [15, 16],
+  [0, 17], [17, 18], [18, 19], [19, 20]
 ];
 
 /**
  * Draw the keypoints on the video.
  * @param hands A list of hands to render.
  */
-export function drawResultsHands(ctx, hands, playerIndex) {
+export function drawResultsHands(ctx, hands, handToPlayer) {
   // Sort by right to left hands.
  // hands.sort((hand1, hand2) => {
    // if (hand1.handedness < hand2.handedness) return 1;
@@ -207,9 +194,15 @@ export function drawResultsHands(ctx, hands, playerIndex) {
   while (hands.length < 2) hands.push({});
 
   for (let i = 0; i < hands.length; ++i) {
-    // Third hand and onwards scatterGL context is set to null since we
-    // don't render them.
-    drawResultHands(ctx, hands[i],playerIndex);
+    if (hands[i].keypoints != null) {
+      // Determina el color según el jugador asignado
+      let handColor = '#cccccc'; // color por defecto
+      if (handToPlayer && handToPlayer[i] !== null) {
+        const rgb = PLAYER_SYMBOLS[handToPlayer[i]].rgb;
+        handColor = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
+      }
+      drawKeypointsHands(ctx, hands[i].keypoints, handColor);
+    }
   }
 }
 
@@ -218,33 +211,28 @@ export function drawResultsHands(ctx, hands, playerIndex) {
  * @param hand A hand with keypoints to render.
  * @param ctxt Scatter GL context to render 3D keypoints to.
  */
-function drawResultHands(ctx, hand, playerIndex) {
+/*
+function drawResultHands(ctx, hand) {
   if (hand.keypoints != null) {
     drawKeypointsHands(ctx, hand.keypoints, hand.handedness, playerIndex);
   }
 }
+*/
 
 /**
  * Draw the keypoints on the video.
  * @param keypoints A list of keypoints.
  * @param handedness Label of hand (either Left or Right).
  */
-function drawKeypointsHands(ctx, keypoints, handedness, playerIndex) {
-  // Agregar playerIndex
+function drawKeypointsHands(ctx, keypoints, handColor) {
   const keypointsArray = keypoints;
 
-  // Colores por jugador
-  const playerColors = [
-    ["#ff0080", "#ff0080"], // Jugador 1: ambas manos rosas
-    ["#00ff80", "#00ff80"], // Jugador 2: ambas manos verdes
-  ];
-
-  const handColor = playerColors[playerIndex][0]; // Mismo color para ambas manos del jugador
-  const shadowColor = playerIndex === 0 ? "#800040" : "#004020"; // Sombra correspondiente
+  // Usa el color recibido
+  const shadowColor = handColor === 'red' ? '#800040' : handColor === 'blue' ? '#004020' : '#222';
 
   ctx.lineWidth = 8; // Líneas más gruesas -- no llega a parecer un guante, acomodar
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
 
   ctx.strokeStyle = shadowColor;
   const fingers = Object.keys(fingerLookupIndices);

@@ -23,8 +23,8 @@ export class Canvas {
     return;
   }
 //dibuja las manos detectadas
-  renderHands(hands, playerIndex) {
-    drawResultsHands(this.ctx, hands, playerIndex);
+  renderHands(hands, handToPlayer) {
+    drawResultsHands(this.ctx, hands, handToPlayer);
   }
   //Dibuja el frame actual del video de la cámara en el canvas
   drawCameraFrame(camera) {

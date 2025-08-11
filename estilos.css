@@ -289,6 +289,25 @@ button:hover {
   justify-content: center;
 }
 
+.player-result.winner {
+  border: 3px solid gold;
+  box-shadow: 0 0 20px gold, 0 0 40px #fff70077;
+  position: relative;
+  animation: winner-glow 1s infinite alternate;
+}
+
+.winner-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 2rem;
+}
+
+@keyframes winner-glow {
+  0% { box-shadow: 0 0 20px gold, 0 0 40px #fff70077; }
+  100% { box-shadow: 0 0 40px gold, 0 0 80px #fff70077; }
+}
+
 .food-stats {
   margin-top: 1rem;
 }

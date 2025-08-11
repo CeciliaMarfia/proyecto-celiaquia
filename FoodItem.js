@@ -8,7 +8,7 @@ export class FoodItem {
     this.image.onload = () => {
       // Calcular proporciones manteniendo el aspecto ratio
       const aspectRatio = this.image.naturalWidth / this.image.naturalHeight;
-      const baseSize = 100; // Aumentado de 60 a 100
+      const baseSize = 150; // Duplicado el tamaño base para hacer los alimentos más grandes
 
       if (aspectRatio > 1) {
         // Imagen más ancha que alta
@@ -21,13 +21,13 @@ export class FoodItem {
       }
 
       // Aplicar escala aleatoria manteniendo las proporciones
-      const scale = 0.9 + Math.random() * 0.3; // Ajustado para que no sean muy pequeñas
+      const scale = 0.9 + Math.random() * 0.2; // Ajustada la variación para mantener un tamaño más consistente
       this.width *= scale;
       this.height *= scale;
     };
     this.image.src = imageSrc;
-    this.width = 100; // Tamaño inicial antes de cargar
-    this.height = 100;
+    this.width = 150; // Tamaño inicial antes de cargar, duplicado
+    this.height = 150;
     this.isActive = true;
     this.spawnTime = Date.now();
     this.lifetime = 4000 + Math.random() * 3000; // 4-7 segundos
@@ -46,7 +46,20 @@ export class FoodItem {
     try {
       // Asegura que la imagen esté cargada y sea válida
       if (this.image.complete && this.image.naturalWidth !== 0) {
-        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        // Guardar el estado actual del contexto
+        ctx.save();
+        
+        // Trasladar al punto donde queremos dibujar
+        ctx.translate(this.x + this.width, this.y);
+        
+        // Escalar negativamente en X para voltear horizontalmente
+        ctx.scale(-1, 1);
+        
+        // Dibujar la imagen (ahora desde 0,0 porque ya trasladamos el contexto)
+        ctx.drawImage(this.image, 0, 0, this.width, this.height);
+        
+        // Restaurar el estado original del contexto
+        ctx.restore();
       }
     } catch (error) {
       console.error("Error dibujando:", error);
