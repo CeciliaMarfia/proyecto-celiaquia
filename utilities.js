@@ -191,19 +191,6 @@ export function drawResultsHands(ctx, hands, handToPlayer) {
 
 /**
  * Draw the keypoints on the video.
- * @param hand A hand with keypoints to render.
- * @param ctxt Scatter GL context to render 3D keypoints to.
- */
-/*
-function drawResultHands(ctx, hand) {
-  if (hand.keypoints != null) {
-    drawKeypointsHands(ctx, hand.keypoints, hand.handedness, playerIndex);
-  }
-}
-*/
-
-/**
- * Draw the keypoints on the video.
  * @param keypoints A list of keypoints.
  * @param handedness Label of hand (either Left or Right).
  */

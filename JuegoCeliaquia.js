@@ -106,27 +106,6 @@ function colorDistance(c1, c2) {
   );
 }
 
-function findClosestPose(hand, poses) {
-  let minDist = Infinity, closestPose = null;
-  const hx = hand.keypoints[0].x;
-  const hy = hand.keypoints[0].y;
-  poses.forEach(pose => {
-    // Usa el centro del pecho (promedio de hombros)
-    const leftShoulder = pose.keypoints.find(kp => kp.name === 'left_shoulder');
-    const rightShoulder = pose.keypoints.find(kp => kp.name === 'right_shoulder');
-    if (leftShoulder && rightShoulder) {
-      const cx = (leftShoulder.x + rightShoulder.x) / 2;
-      const cy = (leftShoulder.y + rightShoulder.y) / 2;
-      const dist = Math.hypot(hx - cx, hy - cy);
-      if (dist < minDist) {
-        minDist = dist;
-        closestPose = pose;
-      }
-    }
-  });
-  return closestPose;
-}
-
 // Bucle principal del juego
 async function runInference(canvas, camera) {
   const image = camera.getVideo();
@@ -141,57 +120,158 @@ async function runInference(canvas, camera) {
       // flipHorizontal: true
     });
     canvas.drawCameraFrame(camera);
+    const debugCtx = canvas.ctx;
+    // Debug: muestra cuántas poses se detectaron
+    if (window.gameManager && !window.gameManager.gameEnded) {
+      
+      debugCtx.fillStyle = 'white';
+      debugCtx.font = '16px Arial';
+      debugCtx.fillText(`Poses detectadas: ${poses.length}`, 10, 50);
+      debugCtx.fillText(`Manos detectadas: ${hands.length}`, 10, 70);
+    }
 
-    // Asigna manos a jugadores según símbolo/color - necesitamos el canvas del video
-    const videoCtx = canvas.ctx;
-
-    // Mapeo tipo: índice de mano -> índice de jugador
-    const handToPlayer = [];
-
-    hands.forEach((hand, i) => {
-      // Usa el kp del pecho/hombros para identificar el color del jugador
-      const pose = findClosestPose(hand, poses);
-      let color = [0, 0, 0];
-      if (pose) {
-        const leftShoulder = pose.keypoints.find(kp => kp.name === 'left_shoulder');
-        const rightShoulder = pose.keypoints.find(kp => kp.name === 'right_shoulder');
-        if (leftShoulder && rightShoulder) {
-          const cx = (leftShoulder.x + rightShoulder.x) / 2;
-          const cy = (leftShoulder.y + rightShoulder.y) / 2;
-          color = getAverageColor(videoCtx, cx - 15, cy - 15, 30, 30);
-        }
+    // Detecta el color del torso UNA VEZ y lo aplica a TODAS las manos
+    
+    // Busca la primera pose válida para detectar el color del torso
+    let torsoColor = [0, 0, 0];
+    let torsoDetected = false;
+    let debugInfo = null;
+    
+    for (let pose of poses) {
+      const leftShoulder = pose.keypoints.find(kp => kp.name === 'left_shoulder');
+      const rightShoulder = pose.keypoints.find(kp => kp.name === 'right_shoulder');
+      const leftHip = pose.keypoints.find(kp => kp.name === 'left_hip');
+      const rightHip = pose.keypoints.find(kp => kp.name === 'right_hip');
+      
+      if (leftShoulder && rightShoulder && leftHip && rightHip) {
+        // Define el área del torso
+        const torsoLeft = Math.min(leftShoulder.x, leftHip.x);
+        const torsoRight = Math.max(rightShoulder.x, rightHip.x);
+        const torsoTop = Math.min(leftShoulder.y, rightShoulder.y);
+        const torsoBottom = Math.max(leftHip.y, rightHip.y);
+        
+        // Muestrea el color del torso
+        const torsoWidth = torsoRight - torsoLeft;
+        const torsoHeight = torsoBottom - torsoTop;
+        torsoColor = getAverageColor(debugCtx, torsoLeft, torsoTop, torsoWidth, torsoHeight);
+        torsoDetected = true;
+        
+        // Guarda info para debug
+        debugInfo = { torsoLeft, torsoRight, torsoTop, torsoBottom, torsoColor };
+        break; // Solo necesitamos la primera pose válida
       }
-
-      // Calcula la distancia a cada color para asignar el jugador
-      // Asigna el jugador con el color más cercano
-      // Se asume que los colores de los jugadores están bien definidos en PLAYER_SYMBOLS
-      // y que no hay más de 2 jugadores (si cambiamos eso, recordar ajustar esto!!!!!!!).
+    }
+    
+    // Debug visual del torso
+    if (window.gameManager && !window.gameManager.gameEnded && debugInfo) {
+      const debugCtx = canvas.ctx;
+      const { torsoLeft, torsoRight, torsoTop, torsoBottom, torsoColor } = debugInfo;
+      
+      // Dibuja los puntos clave detectados
+      const leftShoulder = poses[0].keypoints.find(kp => kp.name === 'left_shoulder');
+      const rightShoulder = poses[0].keypoints.find(kp => kp.name === 'right_shoulder');
+      const leftHip = poses[0].keypoints.find(kp => kp.name === 'left_hip');
+      const rightHip = poses[0].keypoints.find(kp => kp.name === 'right_hip');
+      
+      if (leftShoulder && rightShoulder && leftHip && rightHip) {
+        debugCtx.fillStyle = 'yellow';
+        debugCtx.beginPath();
+        debugCtx.arc(leftShoulder.x, leftShoulder.y, 5, 0, 2 * Math.PI);
+        debugCtx.fill();
+        debugCtx.fillText('LS', leftShoulder.x + 8, leftShoulder.y);
+        
+        debugCtx.fillStyle = 'orange';
+        debugCtx.beginPath();
+        debugCtx.arc(rightShoulder.x, rightShoulder.y, 5, 0, 2 * Math.PI);
+        debugCtx.fill();
+        debugCtx.fillText('RS', rightShoulder.x + 8, rightShoulder.y);
+        
+        debugCtx.fillStyle = 'cyan';
+        debugCtx.beginPath();
+        debugCtx.arc(leftHip.x, leftHip.y, 5, 0, 2 * Math.PI);
+        debugCtx.fill();
+        debugCtx.fillText('LH', leftHip.x + 8, leftHip.y);
+        
+        debugCtx.fillStyle = 'magenta';
+        debugCtx.beginPath();
+        debugCtx.arc(rightHip.x, rightHip.y, 5, 0, 2 * Math.PI);
+        debugCtx.fill();
+        debugCtx.fillText('RH', rightHip.x + 8, rightHip.y);
+      }
+      
+      // Color del borde según si se detectó color de jugador
+      const redDist = colorDistance(torsoColor, PLAYER_SYMBOLS[0].rgb);
+      const blueDist = colorDistance(torsoColor, PLAYER_SYMBOLS[1].rgb);
+      const minDist = Math.min(redDist, blueDist);
+      
+      if (minDist < COLOR_THRESHOLD) {
+        debugCtx.strokeStyle = 'green'; // Verde si se detectó jugador
+      } else {
+        debugCtx.strokeStyle = 'red'; // Rojo si no se detectó
+      }
+      
+      debugCtx.lineWidth = 3;
+      debugCtx.strokeRect(torsoLeft, torsoTop, torsoRight - torsoLeft, torsoBottom - torsoTop);
+      
+      // Muestra el color detectado y la distancia
+      debugCtx.fillStyle = 'white';
+      debugCtx.font = '14px Arial';
+      debugCtx.fillText(`Color: [${torsoColor.join(', ')}]`, torsoLeft, torsoTop - 5);
+      debugCtx.fillText(`Dist: R:${Math.round(redDist)} B:${Math.round(blueDist)}`, torsoLeft, torsoTop - 20);
+      
+      // Debug adicional
+      debugCtx.fillStyle = 'lime';
+      debugCtx.font = '12px Arial';
+      debugCtx.fillText(`Torso: L:${Math.round(torsoLeft)} R:${Math.round(torsoRight)} T:${Math.round(torsoTop)} B:${Math.round(torsoBottom)}`, 10, 30);
+    }
+    
+    // Ahora asigna TODAS las manos al mismo jugador si se detectó torso
+    const handToPlayer = [];
+    
+    if (torsoDetected) {
+      // Calcula qué jugador es basándose en el color del torso
       let minDist = Infinity, assignedPlayer = null;
       PLAYER_SYMBOLS.forEach((player, idx) => {
-        const dist = colorDistance(color, player.rgb);
+        const dist = colorDistance(torsoColor, player.rgb);
         if (dist < minDist) {
           minDist = dist;
           assignedPlayer = idx;
         }
       });
-      // Solo asigna si el color es parecido
-      handToPlayer[i] = minDist < COLOR_THRESHOLD ? assignedPlayer : null;
-
-      console.log('Color promedio:', color, 'Distancia rojo:', colorDistance(color, PLAYER_SYMBOLS[0].rgb), 'Distancia azul:', colorDistance(color, PLAYER_SYMBOLS[1].rgb));
-    });
+      
+      // Si el color del torso es válido, asigna TODAS las manos a ese jugador
+      if (minDist < COLOR_THRESHOLD) {
+        hands.forEach((_, i) => {
+          handToPlayer[i] = assignedPlayer;
+        });
+        
+        console.log(`✅ Torso detectado: Color [${torsoColor.join(', ')}] | Asignando ${hands.length} manos a ${PLAYER_SYMBOLS[assignedPlayer].name}`);
+      } else {
+        console.log(`❌ Torso detectado pero color no válido: [${torsoColor.join(', ')}] | Distancia mínima: ${minDist} > umbral: ${COLOR_THRESHOLD}`);
+        hands.forEach((_, i) => {
+          handToPlayer[i] = null;
+        });
+      }
+    } else {
+      console.log(`❌ No se detectó torso válido`);
+      hands.forEach((_, i) => {
+        handToPlayer[i] = null;
+      });
+    }
 
     // Actualiza y dibuja el juego sólo cuando no está mostrando resultados de etapa
     if (window.gameManager && !window.gameManager.gameEnded && !document.querySelector('.stage-results')) {
-      window.gameManager.update(Date.now(), hands, handToPlayer);
+      // Solo pasa las manos identificadas como jugadores al GameManager
+      const handsToDraw = hands.filter((_, i) => handToPlayer[i] !== null);
+      const filteredHandToPlayer = handToPlayer.filter(playerId => playerId !== null);
+      window.gameManager.update(Date.now(), handsToDraw, filteredHandToPlayer);
       window.gameManager.draw();
     }
 
-    // Dibuja todas las detecciones
-    canvas.drawResultsPoses(poses);
-
-    // Filtro las manos para que solo las identificadas como de jugadores se dibujen
+    // Dibuja solo las manos identificadas como jugadores
     const handsToDraw = hands.filter((_, i) => handToPlayer[i] !== null); // el _ es para que se ignore ese argumento
-    canvas.renderHands(handsToDraw, handToPlayer);
+    const filteredHandToPlayer = handToPlayer.filter(playerId => playerId !== null);
+    canvas.renderHands(handsToDraw, filteredHandToPlayer);
 
     updateFPS();
   } catch (error) {
