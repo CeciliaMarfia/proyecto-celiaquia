@@ -16,7 +16,7 @@ export class GameManager {
     this.countdownStartTime = 0; // Tiempo de inicio del conteo
 
     this.gameStartTime = 0;
-    this.stageDuration = 20000; // 20 segundos por etapa
+    this.stageDuration = 120000; // 2min por etapa
     this.allFoodItems = [];
     this.foodSpawnInterval = 600; // ms entre spawns
     this.lastFoodSpawn = 0;
@@ -165,7 +165,7 @@ export class GameManager {
 
     // En etapa 3, maneja preguntas
     if (this.currentStage === 3) {
-      this.handleQuestions(currentTime, hands);
+      this.handleQuestions(currentTime, hands, handToPlayer);
     } else {
       // Actualiza alimentos y filtra inactivos
       this.allFoodItems.forEach((food) => food.update(currentTime));
@@ -326,7 +326,7 @@ export class GameManager {
   continueToNextStage() {
     this.clearStageResults(); // Elimina la tabla de resultados anterior
     this.currentStage++;
-    if (this.currentStage > 3) {
+    if (this.currentStage > 1) { // Solo se muestra la etapa 1!!!!!!
       this.endGame();
       return;
     }
@@ -457,7 +457,7 @@ export class GameManager {
     }
   }
 
-  handleQuestions(currentTime, hands) {
+  handleQuestions(currentTime, hands, handToPlayer) {
     // Dos preguntas, una por jugador
     for (let playerIdx = 0; playerIdx < 2; playerIdx++) {
       if (!this.currentQuestion[playerIdx]) {
@@ -485,34 +485,36 @@ export class GameManager {
       }
     }
     // Detectar colisiones con las manos (cada jugador responde solo su caja)
-    if (hands && hands.length > 0) {
-      for (let playerIdx = 0; playerIdx < 2; playerIdx++) {
-        const hand = hands[playerIdx * 2]; // Mano principal de cada jugador
-        const q = this.currentQuestion[playerIdx];
-        if (hand && hand.keypoints && hand.keypoints.length > 0 && hand.score > 0.7 && q && !q.feedbackActive) {
-          // Invertir la coordenada X porque el canvas está espejado
-          const handX = this.canvas.canvas.width - hand.keypoints[8].x;
-          const handY = hand.keypoints[8].y;
-          if (q.checkCollision(handX, handY, this.ctx)) {
-            const selectedOption = q.selectedOption;
-            const isCorrect = selectedOption === q.correctAnswer;
-            q.showFeedback(selectedOption, isCorrect);
-            // Contar preguntas correctas
-            if (isCorrect) {
-              if (!this.players[playerIdx].correctQuestions) {
-                this.players[playerIdx].correctQuestions = 0;
+    if (hands && hands.length > 0 && handToPlayer) {
+      hands.forEach((hand, i) => {
+        const playerIdx = handToPlayer[i];
+        if (playerIdx === 0 || playerIdx === 1) {
+          const q = this.currentQuestion[playerIdx];
+          if (hand && hand.keypoints && hand.keypoints.length > 0 && hand.score > 0.7 && q && !q.feedbackActive) {
+            // Invertir la coordenada X porque el canvas está espejado
+            const handX = this.canvas.canvas.width - hand.keypoints[8].x;
+            const handY = hand.keypoints[8].y;
+            if (q.checkCollision(handX, handY, this.ctx)) {
+              const selectedOption = q.selectedOption;
+              const isCorrect = selectedOption === q.correctAnswer;
+              q.showFeedback(selectedOption, isCorrect);
+              // Contar preguntas correctas
+              if (isCorrect) {
+                if (!this.players[playerIdx].correctQuestions) {
+                  this.players[playerIdx].correctQuestions = 0;
+                }
+                this.players[playerIdx].correctQuestions++;
               }
-              this.players[playerIdx].correctQuestions++;
+              // Mostrar feedback visual durante 1 segundo, luego eliminar la pregunta
+              setTimeout(() => {
+                this.players[playerIdx].score += isCorrect ? 10 : 0;
+                this.answeredQuestions.add(`${playerIdx}_${q.id}`);
+                this.currentQuestion[playerIdx] = null;
+              }, 1000);
             }
-            // Mostrar feedback visual durante 1 segundo, luego eliminar la pregunta
-            setTimeout(() => {
-              this.players[playerIdx].score += isCorrect ? 10 : 0;
-              this.answeredQuestions.add(`${playerIdx}_${q.id}`);
-              this.currentQuestion[playerIdx] = null;
-            }, 1000);
           }
         }
-      }
+      });
     }
   }
 
@@ -592,10 +594,10 @@ export class GameManager {
 
     // Asigna cada mano al jugador correcto segun handToPlayer
     hands.forEach((hand, i) => {
-        const playerIdx = handToPlayer && handToPlayer[i] !== undefined ? handToPlayer[i] : (i < 2 ? 0 : 1);
-        if(playerIdx !== null) {
-          this.processPlayerHands([hand], playerIdx);
-        }
+      const playerIdx = handToPlayer && handToPlayer[i] !== undefined ? handToPlayer[i] : (i < 2 ? 0 : 1);
+      if (playerIdx !== null) {
+        this.processPlayerHands([hand], playerIdx);
+      }
     });
   }
 
