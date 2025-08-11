@@ -52,9 +52,9 @@ const COLOR_PALETTE = [
  * Draw the keypoints and skeleton on the video.
  * @param poses A list of poses to render.
  */
-export function drawResultsPoses(ctx, poses) {
+export function drawResultsPoses(ctx, poses,playerIndex) {
   for (const pose of poses) {
-    drawResultPoses(ctx, pose);
+    drawResultPoses(ctx, pose,playerIndex);
   }
 }
 
@@ -167,11 +167,11 @@ const connections = [
  */
 export function drawResultsHands(ctx, hands, handToPlayer) {
   // Sort by right to left hands.
-  hands.sort((hand1, hand2) => {
-    if (hand1.handedness < hand2.handedness) return 1;
-    if (hand1.handedness > hand2.handedness) return -1;
-    return 0;
-  });
+ // hands.sort((hand1, hand2) => {
+   // if (hand1.handedness < hand2.handedness) return 1;
+    //if (hand1.handedness > hand2.handedness) return -1;
+   // return 0;
+  //});
 
   // Pad hands to clear empty scatter GL plots.
   while (hands.length < 2) hands.push({});
@@ -197,7 +197,7 @@ export function drawResultsHands(ctx, hands, handToPlayer) {
 /*
 function drawResultHands(ctx, hand) {
   if (hand.keypoints != null) {
-    drawKeypointsHands(ctx, hand.keypoints, hand.handedness);
+    drawKeypointsHands(ctx, hand.keypoints, hand.handedness, playerIndex);
   }
 }
 */
