@@ -248,8 +248,8 @@ export class GameManager {
     const playersContainer = document.createElement('div');
     playersContainer.className = 'players-results-container';
 
-    const player1Div = this.createPlayerResult('Jugador 1', 0, winnerIndex === 0);
-    const player2Div = this.createPlayerResult('Jugador 2', 1, winnerIndex === 1);
+    const player1Div = this.createPlayerResult('Jugador Rojo', 0, winnerIndex === 0);
+    const player2Div = this.createPlayerResult('Jugador Azul', 1, winnerIndex === 1);
 
     playersContainer.append(player1Div, player2Div);
 
