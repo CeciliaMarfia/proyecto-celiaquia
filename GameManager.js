@@ -112,7 +112,6 @@ export class GameManager {
 
     // Vuelve al estado inicial de los botones
     document.getElementById('initial-controls').style.display = 'flex';
-    document.getElementById('pre-game-controls').style.display = 'none';
     document.getElementById('game-controls').style.display = 'none';
   }
 
@@ -570,16 +569,12 @@ export class GameManager {
   // Método auxiliar para procesar las manos de un jugador
   processPlayerHands(playerHands, playerIndex) {
     playerHands.forEach((hand) => {
-      console.log("entro al for each 'player hands' ");
       if (hand.keypoints && hand.keypoints.length > 0 && hand.score > 0.7) {
         // Verificación de keypoints y solo considera detecciones con alta confianza
         // Detección con toda la mano (dedos y palma)
         const detectedHand = new HandDetector(hand);
-        if (this.activeFoods.length > 0) console.log("hay active foods"); else console.log("no hay active foods...");
         this.activeFoods.forEach((food) => {
-          console.log("comida activa");
           if (food.checkCollision(detectedHand)) {
-            console.log("Colisión detectada!!!!!");
             food.isActive = false;
             this.players[playerIndex].collectFood(food.type, this.currentStage);
             this.createCollectionEffect(food);
@@ -783,7 +778,7 @@ export class GameManager {
           </div>
         </div>
         <div class="intro-sidebar">
-          <button class="intro-btn">¡Comenzar!</button>
+          <button class="intro-btn">🎮 Comenzar Juego</button>
         </div>
       </div>
     `;
@@ -796,34 +791,6 @@ export class GameManager {
         this.showStageIntroduction();
       });
     };
-  }
-
-  // esto creo que no lo usamos al final, chequear
-  getOptionPositions(ctx) {
-    const positions = [];
-
-    // Usa los mismos valores que en draw()
-    const optionFontSize = 20;
-    const optionHeight = 40;
-    const optionSpacing = 10;
-    const marginTop = 20;
-    const marginBottom = 20;
-    const questionAreaHeight = 60;
-    const optionsStartY = this.y + marginTop + questionAreaHeight + 10;
-
-    for (let i = 0; i < this.options.length; i++) {
-      const optionY = optionsStartY + i * (optionHeight + optionSpacing);
-      if (optionY + optionHeight > this.y + this.height - marginBottom) {
-        break;
-      }
-      positions.push({
-        x: this.x + 30,
-        y: optionY,
-        width: this.width - 60,
-        height: optionHeight
-      });
-    }
-    return positions;
   }
 
 }

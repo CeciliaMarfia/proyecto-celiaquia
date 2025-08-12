@@ -196,7 +196,7 @@ export function drawResultsHands(ctx, hands, handToPlayer) {
   for (let i = 0; i < hands.length; ++i) {
     if (hands[i].keypoints != null) {
       // Determina el color según el jugador asignado
-      let handColor = '#cccccc'; // color por defecto
+      let handColor;
       if (handToPlayer && handToPlayer[i] !== null) {
         const rgb = PLAYER_SYMBOLS[handToPlayer[i]].rgb;
         handColor = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
