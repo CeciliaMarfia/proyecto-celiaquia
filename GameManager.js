@@ -18,7 +18,7 @@ export class GameManager {
     this.gameStartTime = 0;
     this.stageDuration = 120000; // 2min por etapa
     this.allFoodItems = [];
-    this.foodSpawnInterval = 600; // ms entre spawns
+    this.foodSpawnInterval = 500; // ms entre spawns
     this.lastFoodSpawn = 0;
 
     this.players = [new Player(1), new Player(2)];
