@@ -52,19 +52,15 @@ document.getElementById("b-start-webcam").addEventListener("click", () => {
   }
   // Oculta el botón de iniciar cámara y muestra el de comenzar juego
   document.getElementById("initial-controls").style.display = "none";
-  document.getElementById("pre-game-controls").style.display = "flex";
   document.getElementById("game-controls").style.display = "none";
 
-  // Mostrar mensaje de prueba - que deberia ser el juego de prueba!!
-  const testMsg = document.getElementById("test-stage-message");
-  testMsg.style.display = "block";
-  // El mensaje se queda fijo hasta que se presione "Comenzar Juego"
+  window.gameManager.showIntroOverlay();
 });
 
 document.getElementById("b-start-game").addEventListener("click", () => {
   window.gameManager.startGame();
   // Oculta el botón de comenzar juego y muestra los controles del juego
-  document.getElementById("pre-game-controls").style.display = "none";
+
   document.getElementById("game-controls").style.display = "flex";
   // Oculta el mensaje de prueba cuando se inicia el juego
   const testMsg = document.getElementById("test-stage-message");
@@ -84,7 +80,6 @@ document.getElementById("b-end-game").addEventListener("click", () => {
 document.addEventListener("DOMContentLoaded", () => {
   // Asegura que solo el botón inicial esté visible
   document.getElementById("initial-controls").style.display = "flex";
-  document.getElementById("pre-game-controls").style.display = "none";
   document.getElementById("game-controls").style.display = "none";
 });
 
