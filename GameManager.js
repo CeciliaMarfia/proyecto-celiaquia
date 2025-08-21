@@ -305,9 +305,7 @@ export class GameManager {
 
     // Resetea los jugadores
     this.players.forEach((p) => {
-      p.score = 0;
-      p.foodsCollected = { healthy: 0, unhealthy: 0, gluten: 0 };
-      p.correctQuestions = 0;
+      p.reset()
     });
   }
 
