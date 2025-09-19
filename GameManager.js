@@ -454,7 +454,7 @@ export class GameManager {
     }
   }
 
-  handleQuestions(currentTime, hands, handToPlayer) {
+  handleQuestions(hands, handToPlayer) {
     // Dos preguntas, una por jugador
     for (let playerIdx = 0; playerIdx < 2; playerIdx++) {
       if (!this.currentQuestion[playerIdx]) {
@@ -691,21 +691,25 @@ export class GameManager {
     const stats = [];
     const player = this.players[playerIndex];
 
-    if (this.currentStage === 1) {
-      // Etapa 1: Saludables, No saludables, Con gluten
+    if(this.currentStage === 1 || this.currentStage === 2) {
+      const total =
+        player.foodsCollected.healthy +
+        player.foodsCollected.unhealthy +
+        player.foodsCollected.gluten;
+
+      // Porcentajes
+      const healthyPercentage = total > 0 ? Math.round((player.foodsCollected.healthy / total) * 100) : 0;
+      const unhealthyPercentage = total > 0 ? Math.round((player.foodsCollected.unhealthy / total) * 100) : 0;
+      const glutenPercentage = total > 0 ? Math.round((player.foodsCollected.gluten / total) * 100) : 0;
+
       stats.push(
-        this.createFoodStat("healthy", "Saludables", player.foodsCollected.healthy),
-        this.createFoodStat("unhealthy", "No saludables", player.foodsCollected.unhealthy),
-        this.createFoodStat("gluten", "Con gluten", player.foodsCollected.gluten)
+        this.createFoodStat("healthy", "Saludables", `${healthyPercentage}%`),
+        this.createFoodStat("unhealthy", "No saludables", `${unhealthyPercentage}%`),
+        this.createFoodStat("gluten", "Con gluten", `${glutenPercentage}%`)
       );
-    } else if (this.currentStage === 2) {
-      // Etapa 2: Saludables, No saludables
-      stats.push(
-        this.createFoodStat("healthy", "Saludables", player.foodsCollected.healthy),
-        this.createFoodStat("unhealthy", "No saludables", player.foodsCollected.unhealthy)
-      );
-    } else if (this.currentStage === 3) {
-      // Etapa 3: Preguntas correctas
+    }
+
+    if (this.currentStage === 3) {
       const correctQuestions = document.createElement('p');
       correctQuestions.textContent = `Preguntas correctas: ${player.correctQuestions || 0}`;
       stats.push(correctQuestions);
