@@ -103,6 +103,10 @@ export class GameManager {
 
     this.gameEnded = true; // Para evitar que se sigan mostrando cosas
 
+    // Oculta todos los contadores
+    this.countdown.hideStageTimer();
+    this.countdown.hideInitialCountdown();
+
     if (typeof this.camera !== 'undefined') {
       this.camera.stop();
     }
@@ -193,6 +197,7 @@ export class GameManager {
       // Terminó el conteo, x lo tanto empieza el juego
       this.isInCountdown = false; // Para que no se muestre el contador de nuevo!!!!!
       this.countdown.hide(); // Oculta el contador, logica ahora manejada x la clase CountdownDisplay
+      this.countdown.showStageTimer(); // Muestra el contador de tiempo de la etapa
       this.allFoodItems = []; // Limpia los alimentos de la etapa anterior
       this.currentQuestion = [null, null]; // Resetea las preguntas
       this.gameStartTime = currentTime; // Reinicia el tiempo de la etapa
@@ -213,24 +218,22 @@ export class GameManager {
   }
 
   handleTimeCounter(currentTime) {
-    const remaining = Math.ceil((this.stageDuration - (currentTime - this.gameStartTime)) / 1000);
+    const remainingMs = this.stageDuration - (currentTime - this.gameStartTime);
+    const remainingSeconds = Math.ceil(remainingMs / 1000);
 
-    if (remaining <= 0) {
+    if (remainingSeconds <= 0) {
+      this.countdown.hideStageTimer();
       this.countdown.hide();
       return;
     }
 
-    // Muestra contador al final (últimos 3 segundos)
-    if (remaining <= 3) {
-      this.countdown.show(remaining);
-    } else {
-      this.countdown.hide();
-    }
+    // Actualiza el contador de etapa
+    this.countdown.updateStageTime(remainingMs);
   }
 
   showStageResults() {
     this.clearStageResults();
-    this.hidePlayersInfo();
+    this.hidePlayersInfo(); // Acá se ocultarían los contadores
 
     const resultsDiv = document.createElement('div');
     resultsDiv.className = 'stage-results';
@@ -441,17 +444,20 @@ export class GameManager {
     if (playersInfo) {
       playersInfo.style.display = 'flex';
     }
+
+    // Muestra el contador de tiempo
+    this.countdown.showStageTimer();
   }
 
   hidePlayersInfo() {
     const playersInfo = document.getElementById('game-center-column');
-    const timeCounter = document.getElementById('time-counter');
     if (playersInfo) {
       playersInfo.style.display = 'none';
     }
-    if (timeCounter) {
-      timeCounter.style.display = 'none';
-    }
+
+    // Oculta el contador de tiempo
+    this.countdown.hideStageTimer();
+    this.countdown.hideInitialCountdown();
   }
 
   handleQuestions(currentTime, hands, handToPlayer) {

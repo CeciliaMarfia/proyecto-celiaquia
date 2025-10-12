@@ -1,37 +1,65 @@
 export class CountdownDisplay {
     constructor() {
-        this.timeCounter = document.getElementById('time-counter');
-        this.timeDisplay = document.getElementById('time-display');
+        // Contador 3,2,1... (C1)
+        this.countdownOverlay = document.getElementById('time-counter');
+        this.countdownDisplay = document.getElementById('time-display');
 
-        this.baseStyles = {
-            zIndex: '9999',
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            background: 'rgba(0, 0, 0, 0.8)',
-            color: 'white',
-            padding: '2rem 4rem',
-            borderRadius: '20px',
-            fontSize: '4rem',
-            fontWeight: 'bold',
-            textAlign: 'center',
-            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
-        };
+        // Contador de  etapa (C2)
+        this.stageTimer = document.getElementById('stage-timer');
+        this.timerValue = document.getElementById('timer-value');
+    }
+
+    // C1
+    showInitialCountdown(time) {
+        this.countdownDisplay.textContent = time;
+        this.countdownOverlay.style.display = 'block';
+    }
+
+    // C1
+    hideInitialCountdown() {
+        this.countdownOverlay.style.display = 'none';
+    }
+
+    // C2
+    showStageTimer() {
+        if (this.stageTimer) {
+            this.stageTimer.style.display = 'flex';
+        }
+    }
+
+    // C2
+    hideStageTimer() {
+        if (this.stageTimer) {
+            this.stageTimer.style.display = 'none';
+            this.stageTimer.classList.remove('warning');
+        }
+    }
+
+    // Actualiza C2
+    updateStageTime(milliseconds) {
+        if (!this.timerValue) return;
+
+        const totalSeconds = Math.ceil(milliseconds / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+
+        // Formato tipo MM:SS
+        const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        this.timerValue.textContent = formattedTime;
+
+        // Agrega clase de advertencia cuando quedan 10 segundos o menos
+        if (totalSeconds <= 10 && totalSeconds > 0) {
+            this.stageTimer.classList.add('warning');
+        } else {
+            this.stageTimer.classList.remove('warning');
+        }
     }
 
     show(time) {
-        this.timeDisplay.textContent = time;
-        Object.assign(this.timeCounter.style, this.baseStyles, {
-            visibility: 'visible',
-            display: 'block',
-        });
+        this.showInitialCountdown(time);
     }
 
     hide() {
-        Object.assign(this.timeCounter.style, {
-            visibility: 'hidden',
-            display: 'none',
-        });
+        this.hideInitialCountdown();
     }
 }  
