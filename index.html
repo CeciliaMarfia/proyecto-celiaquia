@@ -1,77 +1,81 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>¡Aventura Sin TACCtica! - Juego sobre Celiaquía</title>
-    <link rel="stylesheet" href="estilos.css" />
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>¡Aventura Sin TACCtica! - Juego sobre Celiaquía</title>
+  <link rel="stylesheet" href="estilos.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
-  </head>
+</head>
 
-  <body>
-    <div id="game-container" class="game-container">
-      <div class="game-header">
-        <div class="controls-group">
-          <div id="initial-controls" style="display: flex">
-            <button id="b-start-webcam" class="btn-primary">
-              <span class="btn-icon">📹</span> Iniciar Cámara
-            </button>
-          </div>
-          <div id="game-controls" style="display: none">
-            <button id="b-end-game" class="btn-danger">
-              <span class="btn-icon">🚫</span> Salir del juego
-            </button>
-          </div>
+<body>
+  <div id="game-container" class="game-container">
+    <div class="game-header">
+      <div class="controls-group">
+        <div id="initial-controls" style="display: flex">
+          <button id="b-start-webcam" class="btn-primary">
+            <span class="btn-icon">📹</span> Iniciar Cámara
+          </button>
         </div>
-
-        <h1>¡Aventura Sin TACCtica! 🌾</h1>
-
-        <div class="fps-counter">
-          FPS: <span id="fps" class="fps-counter__value">0</span>
+        <div id="game-controls" style="display: none">
+          <button id="b-end-game" class="btn-danger">
+            <span class="btn-icon">🚫</span> Salir del juego
+          </button>
         </div>
       </div>
 
-      <!-- Contador de tiempo para el 3,2,1... -->
-      <div id="time-counter" style="display: none">
-        <span id="time-display"></span>
-      </div>
+      <h1>¡Aventura Sin TACCtica! 🌾</h1>
 
-      <div
-        class="game-center-column"
-        id="game-center-column"
-        style="display: none"
-      >
-        <div class="video-and-info-wrapper">
-          <div class="video-canvas-container" id="video-wrapper">
-            <canvas></canvas>
-          </div>
-          <div class="player-info-row">
-            <div class="player-info player-1" id="player-info-left">
-              <span class="player-name">Jugador Rojo</span>
-              <span class="player-score" id="player1-score">0 pts</span>
-            </div>
-            <div class="player-info player-2" id="player-info-right">
-              <span class="player-name">Jugador Azul</span>
-              <span class="player-score" id="player2-score">0 pts</span>
-            </div>
-          </div>
-        </div>
+      <div class="fps-counter">
+        FPS: <span id="fps" class="fps-counter__value">0</span>
       </div>
-
-      <video autoplay hidden></video>
-      <canvas></canvas>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose-detection"></script>
-    <script type="module" src="JuegoCeliaquia.js"></script>
-  </body>
+    <!-- Contador inicial (C1) -->
+    <div id="time-counter" style="display: none; z-index: 9999; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.8); color: white; padding: 2rem 4rem; border-radius: 20px; font-size: 4rem; font-weight: bold; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);">
+      <span id="time-display"></span>
+    </div>
+
+    <div class="game-center-column" id="game-center-column" style="display: none">
+      <div class="video-and-info-wrapper">
+        <div class="video-canvas-container" id="video-wrapper">
+          <canvas></canvas>
+        </div>
+        <div class="player-info-row">
+          <div class="player-info player-1" id="player-info-left">
+            <span class="player-name">Jugador Rojo</span>
+            <span class="player-score" id="player1-score">0 pts</span>
+          </div>
+
+          <!-- Contador de etapa (C2) -->
+          <div class="stage-timer" id="stage-timer" style="display: none">
+            <!-- <span class="timer-label">Tiempo restante</span> -->
+            <span class="timer-value" id="timer-value"></span>
+          </div>
+
+          <div class="player-info player-2" id="player-info-right">
+            <span class="player-name">Jugador Azul</span>
+            <span class="player-score" id="player2-score">0 pts</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <video autoplay hidden></video>
+    <canvas></canvas>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose-detection"></script>
+  <script type="module" src="JuegoCeliaquia.js"></script>
+</body>
 </html>
