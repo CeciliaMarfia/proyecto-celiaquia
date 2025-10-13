@@ -9,7 +9,7 @@ import { CountdownDisplay } from './CountdownDisplay.js';
 export class GameManager {
   constructor(canvas) {
     this.canvas = canvas;
-    this.ctx = canvas.canvas.getContext('2d');
+    this.ctx = canvas.getCtx();
 
     this.countdown = new CountdownDisplay();
     this.isInCountdown = false; // Estado para controlar el conteo inicial de cada etapa
