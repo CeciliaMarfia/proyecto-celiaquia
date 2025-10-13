@@ -326,7 +326,7 @@ export class GameManager {
   continueToNextStage() {
     this.clearStageResults(); // Elimina la tabla de resultados anterior
     this.currentStage++;
-    if (this.currentStage > 1) { // Solo se muestra la etapa 1!!!!!!
+    if (this.currentStage > 2) { // Solo muestra las primeras 2 etapas 
       this.endGame();
       return;
     }
@@ -362,16 +362,14 @@ export class GameManager {
 
       const video = document.createElement('video');
       video.className = 'stage-video';
-      // Seleccionar video según la etapa
-      /*
+      // Selecciona el video según la etapa
       let videoSrc = '';
       if (this.currentStage === 1) {
-        videoSrc = 'videos/video_preEtapa.mp4';
-      } else {
-        videoSrc = 'videos/video_preEtapa.mp4';
+        videoSrc = 'videos/VideoClara.mp4';
+      } else if (this.currentStage === 2) {
+        videoSrc = 'videos/VideoSantiago.mp4';
       }
-      */
-      video.src = 'videos/video_etapa1.mp4';
+      video.src = videoSrc;
       video.muted = false;
       video.playsInline = true;
       video.setAttribute('autoplay', '');
