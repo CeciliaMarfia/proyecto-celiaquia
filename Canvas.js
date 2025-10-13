@@ -4,7 +4,7 @@ export class Canvas {
   // Obtiene el contexto para dibujar
   constructor() {
     this.canvas = document.querySelector("canvas");
-    this.ctx = this.canvas.getContext("2d");
+    this.ctx = this.canvas.getContext("2d", { willReadFrequently: true });
   }
 
   // Toma las dimensiones del canvas
