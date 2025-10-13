@@ -546,14 +546,46 @@ export class GameManager {
     const images = foodImages[randomType];
     if (!images || images.length === 0) return;
 
-    // Genera una posición aleatoria
-    const x = Math.random() * (this.canvas.canvas.width - 60);
-    const y = Math.random() * (this.canvas.canvas.height - 60);
+    // ---- Limita la cantidad máxima de alimentos activos ----
+    const maxActiveFood = 12; // Máximo de alimentos en pantalla
+    if (this.activeFoods.length >= maxActiveFood) {
+      return; // No genera más alimentos si ya hay muchos para que no se sature
+    }
+
+    // ---- Coordenadas de alimentos: tienen una distancia mínima entre ellos ----
+    let position = null;
+    let attempts = 0;
+    const maxAttempts = 15; // Limita intentos para evitar bucle infinito
+    const minDistance = 170; // Distancia mínima entre alimentos
+
+    while (attempts < maxAttempts && !position) {
+      const x = Math.random() * (this.canvas.canvas.width - 180) + 15;
+      const y = Math.random() * (this.canvas.canvas.height - 180) + 15;
+
+      // Verifica si esta posición está muy cerca de algún alimento activo
+      const tooClose = this.activeFoods.some(food => {
+        const dx = food.x - x;
+        const dy = food.y - y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        return distance < minDistance;
+      });
+
+      if (!tooClose) {
+        position = { x, y };
+      }
+
+      attempts++;
+    }
+
+    // Si no encontró posición después de varios intentos, NO crea el alimento
+    if (!position) {
+      return; // Evita el spawn y espera al siguiente ciclo
+    }
 
     // Imagen aleatoria del tipo
     const imageName = images[Math.floor(Math.random() * images.length)];
     const imagePath = `images/foodImages/${imageName}`;
-    this.allFoodItems.push(new FoodItem(x, y, randomType, imagePath));
+    this.allFoodItems.push(new FoodItem(position.x, position.y, randomType, imagePath));
   }
 
   getAvailableFoodTypes() {
@@ -697,7 +729,7 @@ export class GameManager {
     const stats = [];
     const player = this.players[playerIndex];
 
-    if(this.currentStage === 1 || this.currentStage === 2) {
+    if (this.currentStage === 1 || this.currentStage === 2) {
       const total =
         player.foodsCollected.healthy +
         player.foodsCollected.unhealthy +
