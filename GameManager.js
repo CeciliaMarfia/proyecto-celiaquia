@@ -757,7 +757,7 @@ export class GameManager {
   // Método auxiliar para crear la sección de cada jugador
   createPlayerResult(playerName, playerIndex, isWinner) {
     const playerDiv = document.createElement('div');
-    playerDiv.className = 'player-result';
+    playerDiv.className = `player-result player-${playerIndex + 1}`; // playerIndex 0 -> player-1
 
     const title = document.createElement('h3');
     title.textContent = playerName;
