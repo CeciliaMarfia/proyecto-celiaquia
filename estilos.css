@@ -54,7 +54,7 @@ body {
 
 .game-header h1 {
   margin: 0;
-  font-size: 2.5rem;
+  font-size: 2rem;
   color: var(--primary-color);
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
   text-align: center;
@@ -870,14 +870,21 @@ Cartel explicativo de etapas
   /* mismo ancho que player info para el jugador 2 */
 }
 
-.player-name {
+.player-name-red {
   font-size: 16px;
   opacity: 0.9;
+  color:blue
+}
+
+.player-name-blue {
+  font-size: 16px;
+  opacity: 0.9;
+  color:red
 }
 
 .player-score {
   font-size: 20px;
-  color: #4CAF50;
+  color: #8a938a;
 }
 
 /* Mensaje final del juego */
@@ -1026,7 +1033,7 @@ Estilos para los contadores
 .timer-value {
   font-size: 60px;
   font-weight: 700;
-  color: #4CAF50;
+  color: #8a938a;
   font-family: 'Courier New', monospace;
 }
 
