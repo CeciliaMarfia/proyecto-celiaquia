@@ -649,7 +649,7 @@ export class GameManager {
     if (this.currentStage === 1) {
       if (food.type === 1) points = 10; // sin tacc saludable: +10
       else if (food.type === 2) points = 3; // sin tacc no saludable: +3
-      else if (food.type === 3) points = -10; // con tacc: -10
+      else if (food.type === 3) points = -15; // con tacc: -15
     } else if (this.currentStage === 2) {
       if (food.type === 1) points = 7; // sin tacc saludable: +7
       else if (food.type === 2) points = -10; // sin tacc no saludable: -10

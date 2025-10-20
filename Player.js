@@ -40,7 +40,7 @@ export class Player {
         this.foodsCollected.unhealthy++;
         break;
       case 3: // CTACC (solo aparece en etapa 1)
-        this.score = Math.max(0, this.score - 10);
+        this.score = Math.max(0, this.score - 15);
         this.foodsCollected.gluten++;
         break;
     }
