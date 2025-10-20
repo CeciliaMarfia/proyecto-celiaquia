@@ -16,7 +16,7 @@ export class GameManager {
     this.countdownStartTime = 0; // Tiempo de inicio del conteo
 
     this.gameStartTime = 0;
-    this.stageDuration = 120000; // 2min por etapa
+    this.stageDuration = 12000; // 2min por etapa
     this.allFoodItems = [];
     this.foodSpawnInterval = 500; // ms entre spawns
     this.lastFoodSpawn = 0;
@@ -816,7 +816,7 @@ export class GameManager {
   // Método auxiliar para crear la sección de cada jugador
   createPlayerResult(playerName, playerIndex, isWinner) {
     const playerDiv = document.createElement('div');
-    playerDiv.className = 'player-result';
+    playerDiv.className = `player-result player-${playerIndex + 1}`; // playerIndex 0 -> player-1
 
     const title = document.createElement('h3');
     title.textContent = playerName;
