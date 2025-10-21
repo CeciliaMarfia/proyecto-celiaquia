@@ -302,6 +302,8 @@ button:hover {
 .player-result.winner {
   box-shadow: 0 8px 30px rgba(0,0,0,0.18), 0 0 18px rgba(255,255,255,0.06) inset;
   transform: translateY(-4px);
+  position: relative;
+  animation: winner-glow 1s infinite alternate;
 }
 
 .player-result .food-stats { margin-top: 0.6rem; display: flex; flex-direction: column; gap: 0.4rem; }
