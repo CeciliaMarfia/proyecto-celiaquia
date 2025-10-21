@@ -832,9 +832,6 @@ export class GameManager {
     });
 
     if (this.currentStage === 3) {
-      // this.ctx.fillStyle = '#f5f5f5'; // Dibuja un fondo blanco en lugar de la cámara
-      this.ctx.fillRect(0, 0, this.canvas.canvas.width, this.canvas.canvas.height);
-
       // Dibujar imagen de foco si está activa
       if (this.waitingForFocusTouch && this.focusImage.isActive) {
         this.focusImage.draw(this.ctx);
