@@ -1,5 +1,6 @@
 import { Player } from './Player.js';
 import { FoodItem } from './FoodItem.js';
+import { FocusImage } from './FocusImage.js';
 import { QuestionItem } from './QuestionItem.js';
 import { foodImages } from './foodImagesList.js';
 import { HandDetector } from './HandDetector.js';
@@ -16,7 +17,7 @@ export class GameManager {
     this.countdownStartTime = 0; // Tiempo de inicio del conteo
 
     this.gameStartTime = 0;
-    this.stageDuration = 120000; // 2min por etapa
+    this.stageDuration = 120000; // 2min por etapa // si se saca un 0 queda en 12seg
     this.allFoodItems = [];
     this.foodSpawnInterval = 500; // ms entre spawns
     this.lastFoodSpawn = 0;
@@ -42,6 +43,13 @@ export class GameManager {
       },
     };
 
+    this.exclusionZone = {
+      x: 100,      // posición X en el canvas
+      y: 100,      // posición Y en el canvas
+      width: 300,  // ancho del rectángulo
+      height: 200  // alto del rectángulo
+    };
+
     this.currentQuestion = [null, null];
     this.lastQuestionId = [null, null];
     this.answeredQuestions = new Set();
@@ -50,6 +58,11 @@ export class GameManager {
     this.questions = [
       ...QuestionsList,
     ];
+
+    // Control de imagen de foco en etapa 3
+    this.focusImage = new FocusImage(this.canvas);
+    this.waitingForFocusTouch = false;
+    this.focusTouchedBy = null; // Índice del jugador que tocó el foco (0 o 1)
 
     // Agregar listener para redimensionamiento
     window.addEventListener('resize', () => {
@@ -166,9 +179,16 @@ export class GameManager {
       this.lastFoodSpawn = currentTime;
     }
 
-    // En etapa 3, maneja preguntas
+    // En etapa 3, maneja imagen de foco y preguntas
     if (this.currentStage === 3) {
-      this.handleQuestions(currentTime, hands, handToPlayer);
+      // Si está esperando que toquen el foco
+      if (this.waitingForFocusTouch) {
+        this.focusImage.update();
+        this.handleFocusImageTouch(hands, handToPlayer);
+      } else {
+        // Ya tocaron el foco, maneja la pregunta
+        this.handleQuestions(hands, handToPlayer);
+      }
     } else {
       // Actualiza alimentos y filtra inactivos
       this.allFoodItems.forEach((food) => food.update(currentTime));
@@ -202,6 +222,14 @@ export class GameManager {
       this.currentQuestion = [null, null]; // Resetea las preguntas
       this.gameStartTime = currentTime; // Reinicia el tiempo de la etapa
       this.lastFoodSpawn = currentTime; // Reinicia el tiempo de spawn de alimentos
+
+      // Si es etapa 3, activar la imagen de foco
+      if (this.currentStage === 3) {
+        this.waitingForFocusTouch = true;
+        this.focusTouchedBy = null;
+        this.focusImage.activate(this.canvas.canvas.width, this.canvas.canvas.height);
+      }
+
       this.draw(); // Dibuja el estado inicial del juego
       this.showCanvas(); // Se vuelve a mostrar el canvas
       this.showPlayersInfo(); // Aparece la info de los jugadores
@@ -229,6 +257,61 @@ export class GameManager {
 
     // Actualiza el contador de etapa
     this.countdown.updateStageTime(remainingMs);
+  }
+
+  handleFocusImageTouch(hands, handToPlayer) {
+    if (!hands || hands.length === 0) return;
+
+    hands.forEach((hand, i) => {
+      if (hand && hand.keypoints && hand.keypoints.length > 0 && hand.score > 0.7) {
+        const playerIdx = handToPlayer && handToPlayer[i] !== undefined ? handToPlayer[i] : null;
+        if (playerIdx === 0 || playerIdx === 1) {
+          // Invertir coordenada X por el espejo del canvas
+          const handX = this.canvas.canvas.width - hand.keypoints[8].x;
+          const handY = hand.keypoints[8].y;
+
+          if (this.focusImage.checkCollision(handX, handY)) {
+            // El jugador tocó la imagen de foco
+            this.focusTouchedBy = playerIdx;
+            this.waitingForFocusTouch = false;
+            this.focusImage.deactivate();
+
+            // Reproducir sonido de confirmación
+            const sound = new Audio('sounds/good-food.mp3');
+            sound.play();
+
+            // Crear la pregunta para este jugador específico
+            this.createQuestionForPlayer(playerIdx);
+          }
+        }
+      }
+    });
+  }
+
+  createQuestionForPlayer(playerIdx) {
+    // Obtener preguntas disponibles
+    const lastQ = this.lastQuestionId[playerIdx];
+    let availableQuestions = this.questions.filter(
+      (q) => !this.answeredQuestions.has(`${playerIdx}_${q.id}`)
+    );
+
+    if (availableQuestions.length === 0) {
+      this.answeredQuestions.clear();
+      availableQuestions = this.questions.slice();
+    }
+
+    // Filtrar la última pregunta usada
+    if (lastQ && availableQuestions.length > 1) {
+      availableQuestions = availableQuestions.filter((q) => q.id !== lastQ);
+    }
+
+    const newQ = this.createNewQuestion(availableQuestions);
+    this.currentQuestion[playerIdx] = newQ;
+    this.lastQuestionId[playerIdx] = newQ ? newQ.id : null;
+
+    if (newQ) {
+      newQ.clearLayoutCache();
+    }
   }
 
   showStageResults() {
@@ -306,6 +389,11 @@ export class GameManager {
     this.answeredQuestions = new Set();
     this.lastQuestionId = [null, null];
 
+    // Resetear estado del foco
+    this.waitingForFocusTouch = false;
+    this.focusTouchedBy = null;
+    this.focusImage.deactivate();
+
     // Resetea los jugadores
     this.players.forEach((p) => {
       p.reset()
@@ -326,7 +414,7 @@ export class GameManager {
   continueToNextStage() {
     this.clearStageResults(); // Elimina la tabla de resultados anterior
     this.currentStage++;
-    if (this.currentStage > 2) { // Solo muestra las primeras 2 etapas 
+    if (this.currentStage > 3) {
       this.endGame();
       return;
     }
@@ -368,12 +456,15 @@ export class GameManager {
         videoSrc = 'videos/VideoClara.mp4';
       } else if (this.currentStage === 2) {
         videoSrc = 'videos/VideoSantiago.mp4';
+      } else if (this.currentStage === 3) {
+        videoSrc = 'videos/VideoStage3.mp4';
       }
       video.src = videoSrc;
       video.muted = false;
       video.playsInline = true;
       video.setAttribute('autoplay', '');
       video.setAttribute('preload', 'auto');
+
       // Agregar controles de video
       const controls = document.createElement('div');
       controls.className = 'video-controls';
@@ -459,63 +550,49 @@ export class GameManager {
   }
 
   handleQuestions(hands, handToPlayer) {
-    // Dos preguntas, una por jugador
-    for (let playerIdx = 0; playerIdx < 2; playerIdx++) {
-      if (!this.currentQuestion[playerIdx]) {
-        // Evitar repetir la última pregunta (no impide que se repita en absoluto, sólo que no se repita inmediatamente)
-        const lastQ = this.lastQuestionId[playerIdx];
-        let availableQuestions = this.questions.filter(
-          (q) => !this.answeredQuestions.has(`${playerIdx}_${q.id}`)
-        );
-        if (availableQuestions.length === 0) {
-          this.answeredQuestions.clear();
-          availableQuestions = this.questions.slice();
-        }
-        // Filtrar la última pregunta usada
-        if (lastQ && availableQuestions.length > 1) {
-          availableQuestions = availableQuestions.filter((q) => q.id !== lastQ);
-        }
-        const newQ = this.createNewQuestion(availableQuestions);
-        this.currentQuestion[playerIdx] = newQ;
-        this.lastQuestionId[playerIdx] = newQ ? newQ.id : null;
+    // Si hay un jugador específico respondiendo
+    if (this.focusTouchedBy !== null) {
+      const playerIdx = this.focusTouchedBy;
+      const q = this.currentQuestion[playerIdx];
 
-        // Limpiar cache cuando se crea una nueva pregunta
-        if (newQ) {
-          newQ.clearLayoutCache();
-        }
-      }
-    }
-    // Detectar colisiones con las manos (cada jugador responde solo su caja)
-    if (hands && hands.length > 0 && handToPlayer) {
-      hands.forEach((hand, i) => {
-        const playerIdx = handToPlayer[i];
-        if (playerIdx === 0 || playerIdx === 1) {
-          const q = this.currentQuestion[playerIdx];
-          if (hand && hand.keypoints && hand.keypoints.length > 0 && hand.score > 0.7 && q && !q.feedbackActive) {
-            // Invertir la coordenada X porque el canvas está espejado
-            const handX = this.canvas.canvas.width - hand.keypoints[8].x;
-            const handY = hand.keypoints[8].y;
-            if (q.checkCollision(handX, handY, this.ctx)) {
-              const selectedOption = q.selectedOption;
-              const isCorrect = selectedOption === q.correctAnswer;
-              q.showFeedback(selectedOption, isCorrect);
-              // Contar preguntas correctas
-              if (isCorrect) {
-                if (!this.players[playerIdx].correctQuestions) {
-                  this.players[playerIdx].correctQuestions = 0;
+      if (!q) return;
+
+      // Solo procesar la mano del jugador que tocó el foco
+      if (hands && hands.length > 0 && handToPlayer) {
+        hands.forEach((hand, i) => {
+          if (handToPlayer[i] === playerIdx) {
+            if (hand && hand.keypoints && hand.keypoints.length > 0 && hand.score > 0.7 && !q.feedbackActive) {
+              const handX = this.canvas.canvas.width - hand.keypoints[8].x;
+              const handY = hand.keypoints[8].y;
+
+              if (q.checkCollision(handX, handY, this.ctx)) {
+                const selectedOption = q.selectedOption;
+                const isCorrect = selectedOption === q.correctAnswer;
+                q.showFeedback(selectedOption, isCorrect);
+
+                if (isCorrect) {
+                  if (!this.players[playerIdx].correctQuestions) {
+                    this.players[playerIdx].correctQuestions = 0;
+                  }
+                  this.players[playerIdx].correctQuestions++;
                 }
-                this.players[playerIdx].correctQuestions++;
+
+                // Después del feedback, mostrar nuevo foco
+                setTimeout(() => {
+                  this.players[playerIdx].score += isCorrect ? 10 : 0;
+                  this.answeredQuestions.add(`${playerIdx}_${q.id}`);
+                  this.currentQuestion[playerIdx] = null;
+
+                  // Volver a mostrar la imagen de foco
+                  this.waitingForFocusTouch = true;
+                  this.focusTouchedBy = null;
+                  this.focusImage.activate(this.canvas.canvas.width, this.canvas.canvas.height);
+                }, 1000);
               }
-              // Mostrar feedback visual durante 1 segundo, luego eliminar la pregunta
-              setTimeout(() => {
-                this.players[playerIdx].score += isCorrect ? 10 : 0;
-                this.answeredQuestions.add(`${playerIdx}_${q.id}`);
-                this.currentQuestion[playerIdx] = null;
-              }, 1000);
             }
           }
-        }
-      });
+        });
+      }
     }
   }
 
@@ -530,7 +607,9 @@ export class GameManager {
     return new QuestionItem(x, y, question.question, question.options, question.correctAnswer);
   }
 
-  spawnFood() {
+
+  /*
+ spawnFood() {
     if (this.currentStage === 3) return; // No hay alimentos en etapa 3
 
     const availableTypes = this.getAvailableFoodTypes();
@@ -585,6 +664,62 @@ export class GameManager {
     const imagePath = `images/foodImages/${imageName}`;
     this.allFoodItems.push(new FoodItem(position.x, position.y, randomType, imagePath));
   }
+  */
+  // PARA ZONA SEGURA
+  spawnFood() {
+    if (this.currentStage === 3) return; // No hay alimentos en etapa 3
+
+    const availableTypes = this.getAvailableFoodTypes();
+    if (availableTypes.length === 0) return;
+
+    const randomType =
+      availableTypes[Math.floor(Math.random() * availableTypes.length)];
+
+    const images = foodImages[randomType];
+    if (!images || images.length === 0) return;
+
+    const maxActiveFood = 12;
+    if (this.activeFoods.length >= maxActiveFood) return;
+
+    let position = null;
+    let attempts = 0;
+    const maxAttempts = 15;
+    const minDistance = 170;
+
+    while (attempts < maxAttempts && !position) {
+      const x = Math.random() * (this.canvas.canvas.width - 180) + 15;
+      const y = Math.random() * (this.canvas.canvas.height - 180) + 15;
+
+      // Verifica distancia mínima con otras comidas
+      const tooClose = this.activeFoods.some(food => {
+        const dx = food.x - x;
+        const dy = food.y - y;
+        return Math.sqrt(dx * dx + dy * dy) < minDistance;
+      });
+
+      // Verifica que no esté dentro de la zona de exclusión
+      const insideExclusion = (
+        x + 150 > this.exclusionZone.x &&
+        x < this.exclusionZone.x + this.exclusionZone.width &&
+        y + 150 > this.exclusionZone.y &&
+        y < this.exclusionZone.y + this.exclusionZone.height
+      );
+
+      if (!tooClose && !insideExclusion) {
+        position = { x, y };
+      }
+
+      attempts++;
+    }
+
+    if (!position) return;
+
+    const imageName = images[Math.floor(Math.random() * images.length)];
+    const imagePath = `images/foodImages/${imageName}`;
+    this.allFoodItems.push(new FoodItem(position.x, position.y, randomType, imagePath));
+  }
+
+
 
   getAvailableFoodTypes() {
     // tipos: 1 = sin TACC saludable, 2 = sin TACC no saludable, 3 = con TACC
@@ -689,36 +824,34 @@ export class GameManager {
   }
 
   draw() {
+    // Dibujar la zona de exclusión
+    this.drawExclusionZone(this.ctx, this.exclusionZone);
+
     this.activeFoods.forEach((food) => {
       food.draw(this.ctx);
     });
 
     if (this.currentStage === 3) {
-      this.ctx.fillStyle = '#f5f5f5'; // Dibuja un fondo blanco en lugar de la cámara
-      this.ctx.fillRect(0, 0, this.canvas.canvas.width, this.canvas.canvas.height);
+      // Dibujar imagen de foco si está activa
+      if (this.waitingForFocusTouch && this.focusImage.isActive) {
+        this.focusImage.draw(this.ctx);
+      } else if (this.focusTouchedBy !== null) {
+        // Dibujar pregunta del jugador que tocó el foco
+        const canvasKey = `${this.canvas.canvas.width}x${this.canvas.canvas.height}`;
+        const q = this.currentQuestion[this.focusTouchedBy];
 
-      // Usamos un cacheKey para recalcular solo si cambia el tamaño del canvas
-      const canvasKey = `${this.canvas.canvas.width}x${this.canvas.canvas.height}`;
-      this.currentQuestion.forEach(q => {
-        if (q && (!q.layoutCache || q.layoutCache.key !== canvasKey)) {
-          q.clearLayoutCache();
-        }
-      });
-
-      const firstQuestion = this.currentQuestion.find(q => q !== null);
-      if (firstQuestion) {
-        const positions = firstQuestion.calculateQuestionsLayout(
-          this.currentQuestion,
-          this.canvas.canvas.width,
-          this.canvas.canvas.height,
-          this.ctx
-        );
-        this.currentQuestion.forEach((q, i) => {
-          if (q && positions[i]) {
-            q.relocateQuestion(positions[i].x, positions[i].y, positions[i].width);
-            q.draw(this.ctx);
+        if (q) {
+          if (!q.layoutCache || q.layoutCache.key !== canvasKey) {
+            q.clearLayoutCache();
           }
-        });
+
+          // Calcular posición centrada para una sola pregunta
+          q.calculateLayout(this.ctx);
+          const x = (this.canvas.canvas.width - q.config.width) / 2;
+          const y = (this.canvas.canvas.height - q.layout.totalHeight) / 2;
+          q.relocateQuestion(x, y, q.config.width);
+          q.draw(this.ctx);
+        }
       }
     }
   }
@@ -829,6 +962,17 @@ export class GameManager {
         this.showStageIntroduction();
       });
     };
+  }
+
+  // Zona segura
+  drawExclusionZone(ctx, zone) {
+    ctx.save();
+    ctx.strokeStyle = "rgba(0,255,0,0.8)"; // borde verde
+    ctx.fillStyle = "rgba(0,255,0,0.2)";   // relleno transparente
+    ctx.lineWidth = 2;
+    ctx.fillRect(zone.x, zone.y, zone.width, zone.height);
+    ctx.strokeRect(zone.x, zone.y, zone.width, zone.height);
+    ctx.restore();
   }
 
 }
