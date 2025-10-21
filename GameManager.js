@@ -43,12 +43,8 @@ export class GameManager {
       },
     };
 
-    this.exclusionZone = {
-      x: 100,      // posición X en el canvas
-      y: 100,      // posición Y en el canvas
-      width: 300,  // ancho del rectángulo
-      height: 200  // alto del rectángulo
-    };
+    // Zona de exclusión (se calcula dinámicamente en updateExclusionZone)
+    this.exclusionZone = { x: 0, y: 0, width: 0, height: 0 };
 
     this.currentQuestion = [null, null];
     this.lastQuestionId = [null, null];
@@ -80,10 +76,35 @@ export class GameManager {
     this.canvas.canvas.width = width;
     this.canvas.canvas.height = height;
 
+    // Ajusta zona de exclusión
+    this.updateExclusionZone();
+
     // Redibujar el estado actual solo si el juego está activo
     if (this.gameStarted && !this.gameEnded && !this.blockedByIntro) {
       this.draw();
     }
+  }
+
+  // Calcula la zona de exclusión tal que ocupa todo el ancho y un porcentaje
+  // del alto en el extremo superior del canvas. Se llama en resize y cuando
+  // se muestra el canvas.
+  updateExclusionZone() {
+    const canvasEl = this.canvas && this.canvas.canvas ? this.canvas.canvas : null;
+    if (!canvasEl) return;
+    const cw = canvasEl.width;
+    const ch = canvasEl.height;
+
+    // Altura de la zona: un porcentaje del alto del canvas (elegí 25% pero no parece ser taan exacta la proporción) pero con un
+    // mínimo y máximo razonable para distintas cámaras.
+    const pct = 0.25;
+    const minH = 80;
+    const maxH = Math.round(ch * 0.35);
+    const h = Math.max(minH, Math.min(Math.round(ch * pct), maxH));
+
+    this.exclusionZone.x = 0;
+    this.exclusionZone.y = 0;
+    this.exclusionZone.width = cw;
+    this.exclusionZone.height = h;
   }
 
   get activeFoods() {
@@ -231,6 +252,7 @@ export class GameManager {
       }
 
       this.draw(); // Dibuja el estado inicial del juego
+      this.updateExclusionZone();
       this.showCanvas(); // Se vuelve a mostrar el canvas
       this.showPlayersInfo(); // Aparece la info de los jugadores
       return;
@@ -440,6 +462,8 @@ export class GameManager {
   showCanvas() {
     const canvas = this.canvas && this.canvas.canvas ? this.canvas.canvas : null;
     if (canvas) canvas.style.visibility = 'visible';
+    // Asegura que la zona de exclusión coincide con el tamaño actual del canvas
+    this.updateExclusionZone();
   }
 
   showStageVideo() {
@@ -698,10 +722,11 @@ export class GameManager {
       });
 
       // Verifica que no esté dentro de la zona de exclusión
+      const safeSize = 140; // tamaño conservador para evitar solapamiento con la UI superior
       const insideExclusion = (
-        x + 150 > this.exclusionZone.x &&
+        x + safeSize > this.exclusionZone.x &&
         x < this.exclusionZone.x + this.exclusionZone.width &&
-        y + 150 > this.exclusionZone.y &&
+        y + safeSize > this.exclusionZone.y &&
         y < this.exclusionZone.y + this.exclusionZone.height
       );
 
@@ -967,8 +992,8 @@ export class GameManager {
   // Zona segura
   drawExclusionZone(ctx, zone) {
     ctx.save();
-    ctx.strokeStyle = "rgba(0,255,0,0.8)"; // borde verde
-    ctx.fillStyle = "rgba(0,255,0,0.2)";   // relleno transparente
+    ctx.strokeStyle = "rgba(205, 253, 205, 0.8)"; // borde verde
+    ctx.fillStyle = "rgba(192, 250, 192, 0.2)";   // relleno transparente
     ctx.lineWidth = 2;
     ctx.fillRect(zone.x, zone.y, zone.width, zone.height);
     ctx.strokeRect(zone.x, zone.y, zone.width, zone.height);
