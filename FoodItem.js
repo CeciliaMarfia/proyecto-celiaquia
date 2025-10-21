@@ -75,9 +75,9 @@ export class FoodItem {
     const keypoints = hand.getKeypoints();
 
     const pointsToCheck = [
-      keypoints[0],  // wrist
-      keypoints[4],  // thumb_tip
-      keypoints[8],  // index_tip
+      keypoints[0], // wrist
+      keypoints[4], // thumb_tip
+      keypoints[8], // index_tip
       keypoints[12], // middle_tip
       keypoints[16], // ring_tip
       keypoints[20], // pinky_tip
@@ -91,19 +91,26 @@ export class FoodItem {
     const hitboxWidth = this.width - 2 * marginX;
     const hitboxHeight = this.height - 2 * marginY;
 
-    const isInside = pointsToCheck.some(pt =>
-      pt.x > hitboxX &&
-      pt.x < hitboxX + hitboxWidth &&
-      pt.y > hitboxY &&
-      pt.y < hitboxY + hitboxHeight
+    const isInside = pointsToCheck.some(
+      (pt) =>
+        pt.x > hitboxX &&
+        pt.x < hitboxX + hitboxWidth &&
+        pt.y > hitboxY &&
+        pt.y < hitboxY + hitboxHeight
     );
 
     if (isInside) {
-      console.log("Collision detected with food item at x: " + this.x + ", y: " + this.y);
-      console.log("Hand points:", pointsToCheck.map(p => `(${p.x.toFixed(0)},${p.y.toFixed(0)})`).join(", "));
+      console.log(
+        "Collision detected with food item at x: " + this.x + ", y: " + this.y
+      );
+      console.log(
+        "Hand points:",
+        pointsToCheck
+          .map((p) => `(${p.x.toFixed(0)},${p.y.toFixed(0)})`)
+          .join(", ")
+      );
     }
 
     return isInside;
   }
-
 }
