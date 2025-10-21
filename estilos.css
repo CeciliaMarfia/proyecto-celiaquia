@@ -279,7 +279,6 @@ button:hover {
 }
 
 .player-result {
-  background-color: rgba(255, 255, 255, 0.1);
   padding: 1rem;
   border-radius: var(--border-radius);
   width: 50%;
@@ -287,14 +286,27 @@ button:hover {
   max-width: 500px;
   box-sizing: border-box;
   justify-content: center;
+  margin: 0.5rem;
+}
+
+.player-result.player-1 {
+  background: linear-gradient(135deg, #c94b4b 0%, #e07a7a 100%);
+  border: 1px solid rgba(200,50,50,0.15);
+}
+
+.player-result.player-2 {
+  background: linear-gradient(135deg, #4a90e2 0%, #78aefc 100%);
+  border: 1px solid rgba(70,120,200,0.12);
 }
 
 .player-result.winner {
-  border: 3px solid gold;
-  box-shadow: 0 0 20px gold, 0 0 40px #fff70077;
-  position: relative;
-  animation: winner-glow 1s infinite alternate;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.18), 0 0 18px rgba(255,255,255,0.06) inset;
+  transform: translateY(-4px);
 }
+
+.player-result .food-stats { margin-top: 0.6rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.player-result .food-stat .legend { width: 12px; height: 12px; display: inline-block; margin-right: 0.5rem; border-radius: 3px; vertical-align: middle; }
+
 
 .winner-icon {
   position: absolute;
@@ -884,7 +896,7 @@ Cartel explicativo de etapas
 
 .player-score {
   font-size: 20px;
-  color: #8a938a;
+  color: #c9cac9;
 }
 
 /* Mensaje final del juego */
@@ -1033,7 +1045,7 @@ Estilos para los contadores
 .timer-value {
   font-size: 60px;
   font-weight: 700;
-  color: #8a938a;
+  color: #edeb5f;
   font-family: 'Courier New', monospace;
 }
 
