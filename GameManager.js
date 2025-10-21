@@ -17,7 +17,7 @@ export class GameManager {
     this.countdownStartTime = 0; // Tiempo de inicio del conteo
 
     this.gameStartTime = 0;
-    this.stageDuration = 120000; // 2min por etapa
+    this.stageDuration = 120000; // 2min por etapa // si se saca un 0 queda en 12seg
     this.allFoodItems = [];
     this.foodSpawnInterval = 500; // ms entre spawns
     this.lastFoodSpawn = 0;
@@ -43,6 +43,13 @@ export class GameManager {
       },
     };
 
+    this.exclusionZone = {
+      x: 100,      // posición X en el canvas
+      y: 100,      // posición Y en el canvas
+      width: 300,  // ancho del rectángulo
+      height: 200  // alto del rectángulo
+    };
+
     this.currentQuestion = [null, null];
     this.lastQuestionId = [null, null];
     this.answeredQuestions = new Set();
@@ -53,7 +60,7 @@ export class GameManager {
     ];
 
     // Control de imagen de foco en etapa 3
-    this.focusImage = new FocusImage();
+    this.focusImage = new FocusImage(this.canvas);
     this.waitingForFocusTouch = false;
     this.focusTouchedBy = null; // Índice del jugador que tocó el foco (0 o 1)
 
@@ -383,9 +390,9 @@ export class GameManager {
     this.lastQuestionId = [null, null];
 
     // Resetear estado del foco
-  this.waitingForFocusTouch = false;
-  this.focusTouchedBy = null;
-  this.focusImage.deactivate();
+    this.waitingForFocusTouch = false;
+    this.focusTouchedBy = null;
+    this.focusImage.deactivate();
 
     // Resetea los jugadores
     this.players.forEach((p) => {
@@ -588,6 +595,7 @@ export class GameManager {
       }
     }
   }
+
   createNewQuestion(availableQuestions = this.questions) {
     const randomIndex = Math.floor(Math.random() * availableQuestions.length);
     const question = availableQuestions[randomIndex];
@@ -600,7 +608,8 @@ export class GameManager {
   }
 
 
-  spawnFood() {
+  /*
+ spawnFood() {
     if (this.currentStage === 3) return; // No hay alimentos en etapa 3
 
     const availableTypes = this.getAvailableFoodTypes();
@@ -655,6 +664,62 @@ export class GameManager {
     const imagePath = `images/foodImages/${imageName}`;
     this.allFoodItems.push(new FoodItem(position.x, position.y, randomType, imagePath));
   }
+  */
+  // PARA ZONA SEGURA
+  spawnFood() {
+    if (this.currentStage === 3) return; // No hay alimentos en etapa 3
+
+    const availableTypes = this.getAvailableFoodTypes();
+    if (availableTypes.length === 0) return;
+
+    const randomType =
+      availableTypes[Math.floor(Math.random() * availableTypes.length)];
+
+    const images = foodImages[randomType];
+    if (!images || images.length === 0) return;
+
+    const maxActiveFood = 12;
+    if (this.activeFoods.length >= maxActiveFood) return;
+
+    let position = null;
+    let attempts = 0;
+    const maxAttempts = 15;
+    const minDistance = 170;
+
+    while (attempts < maxAttempts && !position) {
+      const x = Math.random() * (this.canvas.canvas.width - 180) + 15;
+      const y = Math.random() * (this.canvas.canvas.height - 180) + 15;
+
+      // Verifica distancia mínima con otras comidas
+      const tooClose = this.activeFoods.some(food => {
+        const dx = food.x - x;
+        const dy = food.y - y;
+        return Math.sqrt(dx * dx + dy * dy) < minDistance;
+      });
+
+      // Verifica que no esté dentro de la zona de exclusión
+      const insideExclusion = (
+        x + 150 > this.exclusionZone.x &&
+        x < this.exclusionZone.x + this.exclusionZone.width &&
+        y + 150 > this.exclusionZone.y &&
+        y < this.exclusionZone.y + this.exclusionZone.height
+      );
+
+      if (!tooClose && !insideExclusion) {
+        position = { x, y };
+      }
+
+      attempts++;
+    }
+
+    if (!position) return;
+
+    const imageName = images[Math.floor(Math.random() * images.length)];
+    const imagePath = `images/foodImages/${imageName}`;
+    this.allFoodItems.push(new FoodItem(position.x, position.y, randomType, imagePath));
+  }
+
+
 
   getAvailableFoodTypes() {
     // tipos: 1 = sin TACC saludable, 2 = sin TACC no saludable, 3 = con TACC
@@ -759,12 +824,15 @@ export class GameManager {
   }
 
   draw() {
+    // Dibujar la zona de exclusión
+    this.drawExclusionZone(this.ctx, this.exclusionZone);
+
     this.activeFoods.forEach((food) => {
       food.draw(this.ctx);
     });
 
     if (this.currentStage === 3) {
-      this.ctx.fillStyle = '#f5f5f5'; // Dibuja un fondo blanco en lugar de la cámara
+      // this.ctx.fillStyle = '#f5f5f5'; // Dibuja un fondo blanco en lugar de la cámara
       this.ctx.fillRect(0, 0, this.canvas.canvas.width, this.canvas.canvas.height);
 
       // Dibujar imagen de foco si está activa
@@ -897,6 +965,17 @@ export class GameManager {
         this.showStageIntroduction();
       });
     };
+  }
+
+  // Zona segura
+  drawExclusionZone(ctx, zone) {
+    ctx.save();
+    ctx.strokeStyle = "rgba(0,255,0,0.8)"; // borde verde
+    ctx.fillStyle = "rgba(0,255,0,0.2)";   // relleno transparente
+    ctx.lineWidth = 2;
+    ctx.fillRect(zone.x, zone.y, zone.width, zone.height);
+    ctx.strokeRect(zone.x, zone.y, zone.width, zone.height);
+    ctx.restore();
   }
 
 }
