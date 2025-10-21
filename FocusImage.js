@@ -2,7 +2,7 @@ export class FocusImage {
   constructor(canvas) {
     this.canvas = canvas;
     this.image = new Image();
-    this.image.src = 'images/focusImage.png';
+    this.image.src = 'images/FocusImage.jpg';
     this.isActive = false;
     this.isLoaded = false;
     
