@@ -80,6 +80,7 @@ export class FoodItem {
         y > this.y &&
         y < this.y + this.height;
       if (isInside) {
+        console.log(`Colisión detectada en (${x}, ${y})`);
         return true;
       }
     }
