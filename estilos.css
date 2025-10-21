@@ -870,13 +870,13 @@ Cartel explicativo de etapas
   /* mismo ancho que player info para el jugador 2 */
 }
 
-.player-name-red {
+.player-name-blue {
   font-size: 16px;
   opacity: 0.9;
   color:blue
 }
 
-.player-name-blue {
+.player-name-red {
   font-size: 16px;
   opacity: 0.9;
   color:red
