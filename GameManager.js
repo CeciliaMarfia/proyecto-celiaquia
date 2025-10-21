@@ -178,6 +178,29 @@ export class GameManager {
       if (hands && hands.length >= 1) {
         this.detectCollisions(hands, handToPlayer);
       }
+
+      // --- DE PRUEBA ---
+      // Revisa alimentos que estén siendo sostenidos y recolectarlos si superan el umbral
+      const graceMs = 500; // si no se detecta toque en este tiempo, se considera que se soltó
+      this.activeFoods.slice().forEach((food) => {
+        // Si hay un jugador tocando y mantuvo el toque el tiempo suficiente -> recolectar
+        if (food.selectedBy !== null) {
+          // Si el último toque fue hace mucho, limpiar
+          if (!food.lastTouchedAt || (currentTime - food.lastTouchedAt) > graceMs) {
+            food.clearTouch();
+            return;
+          }
+
+          if (food.isHeldLongEnough(currentTime)) {
+            const playerIdx = food.selectedBy;
+            food.isActive = false;
+            this.players[playerIdx].collectFood(food.type, this.currentStage);
+            this.createCollectionEffect(food);
+            // limpiar estado por si queda referencia
+            food.clearTouch();
+          }
+        }
+      });
     }
   }
 
@@ -607,11 +630,16 @@ export class GameManager {
         // Verificación de keypoints y solo considera detecciones con alta confianza
         // Detección con toda la mano (dedos y palma)
         const detectedHand = new HandDetector(hand);
+        const now = Date.now();
         this.activeFoods.forEach((food) => {
           if (food.checkCollision(detectedHand)) {
+            /*
             food.isActive = false;
             this.players[playerIndex].collectFood(food.type, this.currentStage);
             this.createCollectionEffect(food);
+            */
+            // Registra que el jugador está manteniendo la mano sobre el alimento
+            food.registerTouch(playerIndex, now);
           }
         });
       }

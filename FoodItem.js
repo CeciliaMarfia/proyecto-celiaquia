@@ -31,6 +31,12 @@ export class FoodItem {
     this.isActive = true;
     this.spawnTime = Date.now();
     this.lifetime = 4000 + Math.random() * 3000; // 4-7 segundos
+    
+    // --- DE PRUEBA ---
+    // Para la selección por mantener la mano encima
+    this.selectedBy = null; // índice del jugador que está tocando (0 o 1)
+    this.selectionStartTime = null; // timestamp cuando empezó a tocar
+    this.lastTouchedAt = null; // último timestamp en que se comprobó el toque
   }
 
   update(currentTime) {
@@ -38,6 +44,32 @@ export class FoodItem {
     if (currentTime - this.spawnTime > this.lifetime) {
       this.isActive = false;
     }
+  }
+
+
+  // --- DE PRUEBA ---
+  // Registra que un jugador mantiene la mano sobre el alimento (se llama cada frame mientras haya colisión)
+  registerTouch(playerIndex, time) {
+    if (this.selectedBy === null ) {
+      // Si nadie lo estaba tocando reinicia el tiempo de selección
+      this.selectedBy = playerIndex;
+      this.selectionStartTime = time;
+    }
+    // Actualiza el último momento en que se detectó el toque
+    this.lastTouchedAt = time;
+  }
+
+  // Limpia el estado de toque
+  clearTouch() {
+    this.selectedBy = null;
+    this.selectionStartTime = null;
+    this.lastTouchedAt = null;
+  }
+
+  // Devuelve true si la mano sostuvo el alimento el tiempo requerido
+  isHeldLongEnough(currentTime) {
+    if (this.selectedBy === null || !this.selectionStartTime) return false;
+    return (currentTime - this.selectionStartTime) >= 1500; // 1.5 segundos de threshold
   }
 
   draw(ctx) {
