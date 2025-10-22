@@ -1102,8 +1102,8 @@ export class GameManager {
   // Zona segura
   drawExclusionZone(ctx, zone) {
     ctx.save();
-    ctx.strokeStyle = "rgba(205, 253, 205, 0.8)"; // borde verde
-    ctx.fillStyle = "rgba(192, 250, 192, 0.2)"; // relleno transparente
+    ctx.strokeStyle = "rgba(89, 241, 89, 0.88)"; // borde verde
+    ctx.fillStyle = "rgba(130, 250, 130, 0.38)"; // relleno transparente
     ctx.lineWidth = 2;
     ctx.fillRect(zone.x, zone.y, zone.width, zone.height);
     ctx.strokeRect(zone.x, zone.y, zone.width, zone.height);
