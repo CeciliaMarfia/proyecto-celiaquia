@@ -1,11 +1,11 @@
-import { Player } from './Player.js';
-import { FoodItem } from './FoodItem.js';
-import { FocusImage } from './FocusImage.js';
-import { QuestionItem } from './QuestionItem.js';
-import { foodImages } from './foodImagesList.js';
-import { HandDetector } from './HandDetector.js';
-import { QuestionsList } from './QuestionsList.js';
-import { CountdownDisplay } from './CountdownDisplay.js';
+import { Player } from "./Player.js";
+import { FoodItem } from "./FoodItem.js";
+import { FocusImage } from "./FocusImage.js";
+import { QuestionItem } from "./QuestionItem.js";
+import { foodImages } from "./foodImagesList.js";
+import { HandDetector } from "./HandDetector.js";
+import { QuestionsList } from "./QuestionsList.js";
+import { CountdownDisplay } from "./CountdownDisplay.js";
 
 export class GameManager {
   constructor(canvas) {
@@ -17,7 +17,7 @@ export class GameManager {
     this.countdownStartTime = 0; // Tiempo de inicio del conteo
 
     this.gameStartTime = 0;
-    this.stageDuration = 120000; // 2min por etapa // si se saca un 0 queda en 12seg
+    this.stageDuration = 6000; // 2min por etapa // si se saca un 0 queda en 12seg
     this.allFoodItems = [];
     this.foodSpawnInterval = 500; // ms entre spawns
     this.lastFoodSpawn = 0;
@@ -51,9 +51,7 @@ export class GameManager {
     this.answeredQuestions = new Set();
     this.selectionStartTime = null;
     this.selectionThreshold = 3000; // 3 segundos para seleccionar
-    this.questions = [
-      ...QuestionsList,
-    ];
+    this.questions = [...QuestionsList];
 
     // Control de imagen de foco en etapa 3
     this.focusImage = new FocusImage(this.canvas);
@@ -61,18 +59,17 @@ export class GameManager {
     this.focusTouchedBy = null; // Índice del jugador que tocó el foco (0 o 1)
 
     // Agregar listener para redimensionamiento
-    window.addEventListener('resize', () => {
+    window.addEventListener("resize", () => {
       this.handleResize();
     });
 
     // Preload stage videos to reduce startup lag when showing them
     this.preloadedStageVideos = {};
     this.preloadStageVideos();
-
   }
 
   handleResize() {
-    const container = document.getElementById('game-container');
+    const container = document.getElementById("game-container");
     const width = container.clientWidth;
     const height = container.clientHeight;
 
@@ -93,7 +90,8 @@ export class GameManager {
   // del alto en el extremo superior del canvas. Se llama en resize y cuando
   // se muestra el canvas.
   updateExclusionZone() {
-    const canvasEl = this.canvas && this.canvas.canvas ? this.canvas.canvas : null;
+    const canvasEl =
+      this.canvas && this.canvas.canvas ? this.canvas.canvas : null;
     if (!canvasEl) return;
     const cw = canvasEl.width;
     const ch = canvasEl.height;
@@ -114,16 +112,16 @@ export class GameManager {
   // Preload video elements for each stage to avoid playback delay
   preloadStageVideos() {
     const mapping = {
-      1: 'videos/VideoClara.mp4',
-      2: 'videos/VideoSantiago.mp4',
-      3: 'videos/VideoStage3.mp4'
+      1: "videos/VideoClara.mp4",
+      2: "videos/VideoSantiago.mp4",
+      3: "videos/VideoStage3.mp4",
     };
 
     Object.keys(mapping).forEach((stageKey) => {
       const src = mapping[stageKey];
       try {
-        const v = document.createElement('video');
-        v.preload = 'auto';
+        const v = document.createElement("video");
+        v.preload = "auto";
         v.muted = true; // allow preload without autoplay restrictions
         v.src = src;
         // start loading
@@ -132,7 +130,7 @@ export class GameManager {
         this.preloadedStageVideos[stageKey] = v;
       } catch (e) {
         // ignore errors, will fallback to creating on demand
-        console.warn('Video preload failed for', src, e);
+        console.warn("Video preload failed for", src, e);
       }
     });
   }
@@ -158,11 +156,11 @@ export class GameManager {
     // Limpia cualquier pregunta o introducción que quede
     this.currentQuestion = [null, null];
     this.blockedByIntro = false;
-    const questionDiv = document.querySelector('.question-container');
+    const questionDiv = document.querySelector(".question-container");
     if (questionDiv) questionDiv.remove();
-    const introDiv = document.querySelector('.stage-introduction');
+    const introDiv = document.querySelector(".stage-introduction");
     if (introDiv) introDiv.remove();
-    const videoDiv = document.querySelector('.stage-video-container');
+    const videoDiv = document.querySelector(".stage-video-container");
     if (videoDiv) videoDiv.remove();
 
     this.gameEnded = true; // Para evitar que se sigan mostrando cosas
@@ -171,7 +169,7 @@ export class GameManager {
     this.countdown.hideStageTimer();
     this.countdown.hideInitialCountdown();
 
-    if (typeof this.camera !== 'undefined') {
+    if (typeof this.camera !== "undefined") {
       this.camera.stop();
     }
 
@@ -179,13 +177,15 @@ export class GameManager {
     this.showFinalMessage();
 
     // Vuelve al estado inicial de los botones
-    document.getElementById('initial-controls').style.display = 'flex';
-    document.getElementById('game-controls').style.display = 'none';
+    document.getElementById("initial-controls").style.display = "flex";
+    document.getElementById("game-controls").style.display = "none";
   }
 
   showFinalMessage() {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'final-message';
+    // Limpiar resultados de etapa si existen
+    this.clearStageResults();
+    const messageDiv = document.createElement("div");
+    messageDiv.className = "final-message";
     messageDiv.innerHTML = `
       <div class="final-content">
         <div class="final-left">
@@ -199,7 +199,7 @@ export class GameManager {
         </div>
       </div>
     `;
-    document.getElementById('game-container').appendChild(messageDiv);
+    document.getElementById("game-container").appendChild(messageDiv);
   }
 
   update(currentTime, hands, handToPlayer) {
@@ -225,7 +225,10 @@ export class GameManager {
     this.handleTimeCounter(currentTime);
 
     // Genera nuevos alimentos solo en etapas 1 y 2
-    if (this.currentStage < 3 && currentTime - this.lastFoodSpawn > this.foodSpawnInterval) {
+    if (
+      this.currentStage < 3 &&
+      currentTime - this.lastFoodSpawn > this.foodSpawnInterval
+    ) {
       this.spawnFood();
       this.lastFoodSpawn = currentTime;
     }
@@ -253,8 +256,8 @@ export class GameManager {
   }
 
   updatePlayersInfo() {
-    const player1Score = document.getElementById('player1-score');
-    const player2Score = document.getElementById('player2-score');
+    const player1Score = document.getElementById("player1-score");
+    const player2Score = document.getElementById("player2-score");
 
     if (player1Score) player1Score.textContent = `${this.players[0].score} pts`;
     if (player2Score) player2Score.textContent = `${this.players[1].score} pts`;
@@ -278,7 +281,10 @@ export class GameManager {
       if (this.currentStage === 3) {
         this.waitingForFocusTouch = true;
         this.focusTouchedBy = null;
-        this.focusImage.activate(this.canvas.canvas.width, this.canvas.canvas.height);
+        this.focusImage.activate(
+          this.canvas.canvas.width,
+          this.canvas.canvas.height
+        );
       }
 
       this.draw(); // Dibuja el estado inicial del juego
@@ -293,8 +299,13 @@ export class GameManager {
     this.countdown.show(remaining);
 
     // Dibuja fondo blanco durante el conteo
-    this.ctx.fillStyle = '#f5f5f5';
-    this.ctx.fillRect(0, 0, this.canvas.canvas.width, this.canvas.canvas.height);
+    this.ctx.fillStyle = "#f5f5f5";
+    this.ctx.fillRect(
+      0,
+      0,
+      this.canvas.canvas.width,
+      this.canvas.canvas.height
+    );
   }
 
   handleTimeCounter(currentTime) {
@@ -315,8 +326,16 @@ export class GameManager {
     if (!hands || hands.length === 0) return;
 
     hands.forEach((hand, i) => {
-      if (hand && hand.keypoints && hand.keypoints.length > 0 && hand.score > 0.7) {
-        const playerIdx = handToPlayer && handToPlayer[i] !== undefined ? handToPlayer[i] : null;
+      if (
+        hand &&
+        hand.keypoints &&
+        hand.keypoints.length > 0 &&
+        hand.score > 0.7
+      ) {
+        const playerIdx =
+          handToPlayer && handToPlayer[i] !== undefined
+            ? handToPlayer[i]
+            : null;
         if (playerIdx === 0 || playerIdx === 1) {
           // Invertir coordenada X por el espejo del canvas
           const handX = this.canvas.canvas.width - hand.keypoints[8].x;
@@ -329,7 +348,7 @@ export class GameManager {
             this.focusImage.deactivate();
 
             // Reproducir sonido de confirmación
-            const sound = new Audio('sounds/good-food.mp3');
+            const sound = new Audio("sounds/good-food.mp3");
             sound.play();
 
             // Crear la pregunta para este jugador específico
@@ -370,9 +389,9 @@ export class GameManager {
     this.clearStageResults();
     this.hidePlayersInfo(); // Acá se ocultarían los contadores
 
-    const resultsDiv = document.createElement('div');
-    resultsDiv.className = 'stage-results';
-    const title = document.createElement('h1');
+    const resultsDiv = document.createElement("div");
+    resultsDiv.className = "stage-results";
+    const title = document.createElement("h1");
     title.textContent = `¡Etapa ${this.currentStage} Completada!`;
 
     // Determina el ganador
@@ -383,37 +402,49 @@ export class GameManager {
     else if (p2 > p1) winnerIndex = 1;
 
     // Contenedor para los jugadores
-    const playersContainer = document.createElement('div');
-    playersContainer.className = 'players-results-container';
+    const playersContainer = document.createElement("div");
+    playersContainer.className = "players-results-container";
 
-    const player1Div = this.createPlayerResult('Jugador Rojo', 0, winnerIndex === 0);
-    const player2Div = this.createPlayerResult('Jugador Azul', 1, winnerIndex === 1);
+    const player1Div = this.createPlayerResult(
+      "Jugador Rojo",
+      0,
+      winnerIndex === 0
+    );
+    const player2Div = this.createPlayerResult(
+      "Jugador Azul",
+      1,
+      winnerIndex === 1
+    );
 
     playersContainer.append(player1Div, player2Div);
 
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'game-message';
+    const messageDiv = document.createElement("div");
+    messageDiv.className = "game-message";
     const stageInfo = this.stageSettings[this.currentStage];
-    const message = document.createElement('p');
+    const message = document.createElement("p");
     message.innerHTML = `<b>${stageInfo.description}</b><br>¡Muy bien! Completaste esta etapa.`;
     messageDiv.appendChild(message);
 
     // Botones de acción
-    const buttonsContainer = document.createElement('div');
-    buttonsContainer.className = 'stage-results-buttons';
+    const buttonsContainer = document.createElement("div");
+    buttonsContainer.className = "stage-results-buttons";
 
-    const repeatButton = document.createElement('button');
-    repeatButton.textContent = 'Repetir Etapa';
-    repeatButton.className = 'btn-primary';
+    const repeatButton = document.createElement("button");
+    repeatButton.textContent = "Repetir Etapa";
+    repeatButton.className = "btn-primary";
     repeatButton.onclick = () => {
       this.repeatCurrentStage();
     };
 
-    const nextButton = document.createElement('button');
-    nextButton.textContent = this.currentStage < 3 ? 'Siguiente Etapa' : 'Finalizar Juego';
-    nextButton.className = 'btn-success';
-    if (nextButton.textContent === 'Finalizar Juego') {
-      nextButton.onclick = () => this.showFinalMessage();
+    const nextButton = document.createElement("button");
+    nextButton.textContent =
+      this.currentStage < 3 ? "Siguiente Etapa" : "Finalizar Juego";
+    nextButton.className = "btn-success";
+    if (nextButton.textContent === "Finalizar Juego") {
+      nextButton.onclick = () => {
+        this.clearStageResults();
+        this.endGame();
+      };
     } else {
       nextButton.onclick = () => {
         this.continueToNextStage();
@@ -425,7 +456,7 @@ export class GameManager {
     // Ensamblar todo
     resultsDiv.append(title, playersContainer, messageDiv, buttonsContainer);
 
-    document.getElementById('game-container').appendChild(resultsDiv);
+    document.getElementById("game-container").appendChild(resultsDiv);
   }
 
   resetStageValues() {
@@ -433,7 +464,7 @@ export class GameManager {
     this.allFoodItems = [];
 
     // Limpiar cache de las preguntas existentes antes de resetear
-    this.currentQuestion.forEach(q => {
+    this.currentQuestion.forEach((q) => {
       if (q) q.clearLayoutCache();
     });
 
@@ -448,7 +479,7 @@ export class GameManager {
 
     // Resetea los jugadores
     this.players.forEach((p) => {
-      p.reset()
+      p.reset();
     });
   }
 
@@ -480,59 +511,63 @@ export class GameManager {
   }
 
   clearStageResults() {
-    const existingResults = document.querySelector('.stage-results');
+    const existingResults = document.querySelector(".stage-results");
     if (existingResults) existingResults.remove();
   }
 
   hideCanvas() {
-    const canvas = this.canvas && this.canvas.canvas ? this.canvas.canvas : null;
-    if (canvas) canvas.style.visibility = 'hidden';
+    const canvas =
+      this.canvas && this.canvas.canvas ? this.canvas.canvas : null;
+    if (canvas) canvas.style.visibility = "hidden";
   }
 
   showCanvas() {
-    const canvas = this.canvas && this.canvas.canvas ? this.canvas.canvas : null;
-    if (canvas) canvas.style.visibility = 'visible';
+    const canvas =
+      this.canvas && this.canvas.canvas ? this.canvas.canvas : null;
+    if (canvas) canvas.style.visibility = "visible";
     // Asegura que la zona de exclusión coincide con el tamaño actual del canvas
     this.updateExclusionZone();
   }
 
   showStageVideo() {
     return new Promise((resolve) => {
-      const videoContainer = document.createElement('div');
-      videoContainer.className = 'stage-video-container';
-      videoContainer.style.transition = 'opacity 0.7s';
+      const videoContainer = document.createElement("div");
+      videoContainer.className = "stage-video-container";
+      videoContainer.style.transition = "opacity 0.7s";
       // Try to use a preloaded video element to avoid startup lag
       let video = null;
-      const pre = this.preloadedStageVideos && this.preloadedStageVideos[this.currentStage];
+      const pre =
+        this.preloadedStageVideos &&
+        this.preloadedStageVideos[this.currentStage];
       if (pre && pre.cloneNode) {
         // clone so event listeners/state won't be shared
         video = pre.cloneNode(true);
-        video.className = 'stage-video';
+        video.className = "stage-video";
         video.muted = false;
         video.playsInline = true;
-        video.setAttribute('autoplay', '');
+        video.setAttribute("autoplay", "");
       } else {
-        video = document.createElement('video');
-        video.className = 'stage-video';
+        video = document.createElement("video");
+        video.className = "stage-video";
         // Selecciona el video según la etapa
-        let videoSrc = '';
+        let videoSrc = "";
         if (this.currentStage === 1) {
-          videoSrc = 'videos/VideoClara.mp4';
+          videoSrc = "videos/VideoClara.mp4";
         } else if (this.currentStage === 2) {
-          videoSrc = 'videos/VideoSantiago.mp4';
+          videoSrc = "videos/VideoSantiago.mp4";
         } else if (this.currentStage === 3) {
-          videoSrc = 'videos/VideoStage3.mp4';
+          videoSrc = "videos/VideoStage3.mp4";
         }
         video.src = videoSrc;
         video.muted = false;
         video.playsInline = true;
-        video.setAttribute('autoplay', '');
-        video.setAttribute('preload', 'auto');
+        video.setAttribute("autoplay", "");
+        video.setAttribute("preload", "auto");
       }
 
       // Agregar controles de video
-      const controls = document.createElement('div');
-      controls.className = 'video-controls';
+      const controls = document.createElement("div");
+      controls.className = "video-controls";
       controls.innerHTML = `
         <button class="skip-button">Saltar</button>
         <button class="mute-button">🔊</button>
@@ -540,26 +575,28 @@ export class GameManager {
 
       videoContainer.appendChild(video);
       videoContainer.appendChild(controls);
-      document.getElementById('game-container').appendChild(videoContainer);
+      document.getElementById("game-container").appendChild(videoContainer);
 
-      setTimeout(() => videoContainer.style.opacity = '1', 10);
+      setTimeout(() => (videoContainer.style.opacity = "1"), 10);
       video.play();
 
-      controls.querySelector('.skip-button').addEventListener('click', () => {
-        videoContainer.style.opacity = '0';
+      controls.querySelector(".skip-button").addEventListener("click", () => {
+        videoContainer.style.opacity = "0";
         setTimeout(() => {
           videoContainer.remove();
           resolve();
         }, 700);
       });
 
-      controls.querySelector('.mute-button').addEventListener('click', () => {
+      controls.querySelector(".mute-button").addEventListener("click", () => {
         video.muted = !video.muted;
-        controls.querySelector('.mute-button').textContent = video.muted ? '🔇' : '🔊';
+        controls.querySelector(".mute-button").textContent = video.muted
+          ? "🔇"
+          : "🔊";
       });
 
-      video.addEventListener('ended', () => {
-        videoContainer.style.opacity = '0';
+      video.addEventListener("ended", () => {
+        videoContainer.style.opacity = "0";
         setTimeout(() => {
           videoContainer.remove();
           resolve();
@@ -570,13 +607,13 @@ export class GameManager {
 
   showStageIntroduction() {
     const stageInfo = this.stageSettings[this.currentStage];
-    const introDiv = document.createElement('div');
-    introDiv.className = 'stage-introduction big-intro';
+    const introDiv = document.createElement("div");
+    introDiv.className = "stage-introduction big-intro";
     introDiv.innerHTML = `
       <h2>Etapa ${this.currentStage}</h2>
       <p>${stageInfo.description}</p>
     `;
-    const container = document.getElementById('game-container');
+    const container = document.getElementById("game-container");
     container.appendChild(introDiv);
 
     this.blockedByIntro = true;
@@ -594,9 +631,9 @@ export class GameManager {
   }
 
   showPlayersInfo() {
-    const playersInfo = document.getElementById('game-center-column');
+    const playersInfo = document.getElementById("game-center-column");
     if (playersInfo) {
-      playersInfo.style.display = 'flex';
+      playersInfo.style.display = "flex";
     }
 
     // Muestra el contador de tiempo
@@ -604,9 +641,9 @@ export class GameManager {
   }
 
   hidePlayersInfo() {
-    const playersInfo = document.getElementById('game-center-column');
+    const playersInfo = document.getElementById("game-center-column");
     if (playersInfo) {
-      playersInfo.style.display = 'none';
+      playersInfo.style.display = "none";
     }
 
     // Oculta el contador de tiempo
@@ -626,7 +663,13 @@ export class GameManager {
       if (hands && hands.length > 0 && handToPlayer) {
         hands.forEach((hand, i) => {
           if (handToPlayer[i] === playerIdx) {
-            if (hand && hand.keypoints && hand.keypoints.length > 0 && hand.score > 0.7 && !q.feedbackActive) {
+            if (
+              hand &&
+              hand.keypoints &&
+              hand.keypoints.length > 0 &&
+              hand.score > 0.7 &&
+              !q.feedbackActive
+            ) {
               const handX = this.canvas.canvas.width - hand.keypoints[8].x;
               const handY = hand.keypoints[8].y;
 
@@ -651,7 +694,10 @@ export class GameManager {
                   // Volver a mostrar la imagen de foco
                   this.waitingForFocusTouch = true;
                   this.focusTouchedBy = null;
-                  this.focusImage.activate(this.canvas.canvas.width, this.canvas.canvas.height);
+                  this.focusImage.activate(
+                    this.canvas.canvas.width,
+                    this.canvas.canvas.height
+                  );
                 }, 1000);
               }
             }
@@ -669,9 +715,14 @@ export class GameManager {
     const x = (this.canvas.canvas.width - 300) / 2; // 300 es el ancho de la pregunta
     const y = (this.canvas.canvas.height - 200) / 2; // 200 es aproximadamente el alto total
 
-    return new QuestionItem(x, y, question.question, question.options, question.correctAnswer);
+    return new QuestionItem(
+      x,
+      y,
+      question.question,
+      question.options,
+      question.correctAnswer
+    );
   }
-
 
   /*
  spawnFood() {
@@ -756,7 +807,7 @@ export class GameManager {
       const y = Math.random() * (this.canvas.canvas.height - 180) + 15;
 
       // Verifica distancia mínima con otras comidas
-      const tooClose = this.activeFoods.some(food => {
+      const tooClose = this.activeFoods.some((food) => {
         const dx = food.x - x;
         const dy = food.y - y;
         return Math.sqrt(dx * dx + dy * dy) < minDistance;
@@ -764,12 +815,11 @@ export class GameManager {
 
       // Verifica que no esté dentro de la zona de exclusión
       const safeSize = 140; // tamaño conservador para evitar solapamiento con la UI superior
-      const insideExclusion = (
+      const insideExclusion =
         x + safeSize > this.exclusionZone.x &&
         x < this.exclusionZone.x + this.exclusionZone.width &&
         y + safeSize > this.exclusionZone.y &&
-        y < this.exclusionZone.y + this.exclusionZone.height
-      );
+        y < this.exclusionZone.y + this.exclusionZone.height;
 
       if (!tooClose && !insideExclusion) {
         position = { x, y };
@@ -782,18 +832,17 @@ export class GameManager {
 
     const imageName = images[Math.floor(Math.random() * images.length)];
     const imagePath = `images/foodImages/${imageName}`;
-    this.allFoodItems.push(new FoodItem(position.x, position.y, randomType, imagePath));
+    this.allFoodItems.push(
+      new FoodItem(position.x, position.y, randomType, imagePath)
+    );
   }
-
-
 
   getAvailableFoodTypes() {
     // tipos: 1 = sin TACC saludable, 2 = sin TACC no saludable, 3 = con TACC
     if (this.currentStage === 1) {
       // Etapa 1: incluye todos los tipos de alimentos
       return [1, 2, 3];
-    }
-    else if (this.currentStage === 2) {
+    } else if (this.currentStage === 2) {
       // Etapa 2: solo sin TACC (saludable y no saludable)
       return [1, 2];
     }
@@ -824,7 +873,12 @@ export class GameManager {
 
     // Asigna cada mano al jugador correcto segun handToPlayer
     hands.forEach((hand, i) => {
-      const playerIdx = handToPlayer && handToPlayer[i] !== undefined ? handToPlayer[i] : (i < 2 ? 0 : 1);
+      const playerIdx =
+        handToPlayer && handToPlayer[i] !== undefined
+          ? handToPlayer[i]
+          : i < 2
+          ? 0
+          : 1;
       if (playerIdx !== null) {
         this.processPlayerHands([hand], playerIdx);
       }
@@ -832,17 +886,17 @@ export class GameManager {
   }
 
   createCollectionEffect(food) {
-    const effect = document.createElement('div');
-    effect.className = 'food-collected';
+    const effect = document.createElement("div");
+    effect.className = "food-collected";
 
     // Reproducir sonido según el tipo de comida
     const sound = new Audio();
     if (food.type === 1) {
-      sound.src = 'sounds/good-food.mp3'; // sonido positivo para comida saludable
+      sound.src = "sounds/good-food.mp3"; // sonido positivo para comida saludable
     } else if (food.type === 2) {
-      sound.src = 'sounds/neutral-food.mp3'; // sonido neutral para comida no saludable
+      sound.src = "sounds/neutral-food.mp3"; // sonido neutral para comida no saludable
     } else {
-      sound.src = 'sounds/bad-food.mp3'; // sonido negativo para comida con gluten
+      sound.src = "sounds/bad-food.mp3"; // sonido negativo para comida con gluten
     }
     sound.play();
 
@@ -857,20 +911,20 @@ export class GameManager {
     }
 
     //  Tamanio del circulo y para el número (y simbolo) adentro
-    effect.style.width = '80px';
-    effect.style.height = '80px';
-    effect.style.lineHeight = '80px';
-    effect.style.fontSize = '2.3rem';
-    effect.style.textAlign = 'center';
+    effect.style.width = "80px";
+    effect.style.height = "80px";
+    effect.style.lineHeight = "80px";
+    effect.style.fontSize = "2.3rem";
+    effect.style.textAlign = "center";
     effect.textContent = points > 0 ? `+${points}` : `${points}`; // falta el -
-    effect.style.color = '#fff';
-    effect.style.fontWeight = 'bold';
+    effect.style.color = "#fff";
+    effect.style.fontWeight = "bold";
 
-    // Como el canvas está espejado con scaleX(-1) invertimos la coordenada X asi el efecto se ve en la posicion correcta   
+    // Como el canvas está espejado con scaleX(-1) invertimos la coordenada X asi el efecto se ve en la posicion correcta
     const coordX = this.canvas.canvas.width - (food.x + food.width / 2);
     const coordY = food.y + food.height / 2;
 
-    const videoContainer = document.querySelector('.video-canvas-container');
+    const videoContainer = document.querySelector(".video-canvas-container");
     if (videoContainer) {
       const rect = videoContainer.getBoundingClientRect();
       const canvasRect = this.canvas.canvas.getBoundingClientRect();
@@ -933,20 +987,35 @@ export class GameManager {
         player.foodsCollected.gluten;
 
       // Porcentajes
-      const healthyPercentage = total > 0 ? Math.round((player.foodsCollected.healthy / total) * 100) : 0;
-      const unhealthyPercentage = total > 0 ? Math.round((player.foodsCollected.unhealthy / total) * 100) : 0;
-      const glutenPercentage = total > 0 ? Math.round((player.foodsCollected.gluten / total) * 100) : 0;
+      const healthyPercentage =
+        total > 0
+          ? Math.round((player.foodsCollected.healthy / total) * 100)
+          : 0;
+      const unhealthyPercentage =
+        total > 0
+          ? Math.round((player.foodsCollected.unhealthy / total) * 100)
+          : 0;
+      const glutenPercentage =
+        total > 0
+          ? Math.round((player.foodsCollected.gluten / total) * 100)
+          : 0;
 
       stats.push(
         this.createFoodStat("healthy", "Saludables", `${healthyPercentage}%`),
-        this.createFoodStat("unhealthy", "No saludables", `${unhealthyPercentage}%`),
+        this.createFoodStat(
+          "unhealthy",
+          "No saludables",
+          `${unhealthyPercentage}%`
+        ),
         this.createFoodStat("gluten", "Con gluten", `${glutenPercentage}%`)
       );
     }
 
     if (this.currentStage === 3) {
-      const correctQuestions = document.createElement('p');
-      correctQuestions.textContent = `Preguntas correctas: ${player.correctQuestions || 0}`;
+      const correctQuestions = document.createElement("p");
+      correctQuestions.textContent = `Preguntas correctas: ${
+        player.correctQuestions || 0
+      }`;
       stats.push(correctQuestions);
     }
 
@@ -955,18 +1024,18 @@ export class GameManager {
 
   // Método auxiliar para crear la sección de cada jugador
   createPlayerResult(playerName, playerIndex, isWinner) {
-    const playerDiv = document.createElement('div');
+    const playerDiv = document.createElement("div");
     playerDiv.className = `player-result player-${playerIndex + 1}`; // playerIndex 0 -> player-1
 
-    const title = document.createElement('h3');
+    const title = document.createElement("h3");
     title.textContent = playerName;
 
-    const score = document.createElement('p');
+    const score = document.createElement("p");
     score.textContent = `Puntuación: ${this.players[playerIndex].score}`;
 
     // Efecto para el ganador
     if (isWinner) {
-      playerDiv.classList.add('winner');
+      playerDiv.classList.add("winner");
     }
 
     playerDiv.append(title, score);
@@ -974,12 +1043,12 @@ export class GameManager {
     // Agrega las estadísticas correspondientes a la etapa
     const stats = this.getStageStatsForPlayer(playerIndex);
     if (this.currentStage === 1 || this.currentStage === 2) {
-      const foodsDiv = document.createElement('div');
-      foodsDiv.className = 'food-stats';
-      stats.forEach(stat => foodsDiv.appendChild(stat));
+      const foodsDiv = document.createElement("div");
+      foodsDiv.className = "food-stats";
+      stats.forEach((stat) => foodsDiv.appendChild(stat));
       playerDiv.appendChild(foodsDiv);
     } else if (this.currentStage === 3) {
-      stats.forEach(stat => playerDiv.appendChild(stat));
+      stats.forEach((stat) => playerDiv.appendChild(stat));
     }
 
     return playerDiv;
@@ -987,13 +1056,13 @@ export class GameManager {
 
   // Método auxiliar para crear cada estadística de comida
   createFoodStat(className, labelText, value) {
-    const statDiv = document.createElement('div');
-    statDiv.className = 'food-stat';
+    const statDiv = document.createElement("div");
+    statDiv.className = "food-stat";
 
-    const legend = document.createElement('span');
+    const legend = document.createElement("span");
     legend.className = `legend ${className}`;
 
-    const label = document.createElement('span');
+    const label = document.createElement("span");
     label.textContent = `${labelText}: ${value}`;
 
     statDiv.append(legend, label);
@@ -1001,8 +1070,8 @@ export class GameManager {
   }
 
   showIntroOverlay() {
-    const introDiv = document.createElement('div');
-    introDiv.className = 'intro-overlay';
+    const introDiv = document.createElement("div");
+    introDiv.className = "intro-overlay";
     introDiv.innerHTML = `
       <div>
         <div class="intro-content">
@@ -1019,8 +1088,8 @@ export class GameManager {
         </div>
       </div>
     `;
-    document.getElementById('game-container').appendChild(introDiv);
-    introDiv.querySelector('.intro-btn').onclick = () => {
+    document.getElementById("game-container").appendChild(introDiv);
+    introDiv.querySelector(".intro-btn").onclick = () => {
       introDiv.remove();
       this.hideCanvas();
       this.showStageVideo().then(() => {
@@ -1034,11 +1103,10 @@ export class GameManager {
   drawExclusionZone(ctx, zone) {
     ctx.save();
     ctx.strokeStyle = "rgba(205, 253, 205, 0.8)"; // borde verde
-    ctx.fillStyle = "rgba(192, 250, 192, 0.2)";   // relleno transparente
+    ctx.fillStyle = "rgba(192, 250, 192, 0.2)"; // relleno transparente
     ctx.lineWidth = 2;
     ctx.fillRect(zone.x, zone.y, zone.width, zone.height);
     ctx.strokeRect(zone.x, zone.y, zone.width, zone.height);
     ctx.restore();
   }
-
 }
