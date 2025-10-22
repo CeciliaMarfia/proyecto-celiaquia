@@ -65,6 +65,10 @@ export class GameManager {
       this.handleResize();
     });
 
+    // Preload stage videos to reduce startup lag when showing them
+    this.preloadedStageVideos = {};
+    this.preloadStageVideos();
+
   }
 
   handleResize() {
@@ -105,6 +109,32 @@ export class GameManager {
     this.exclusionZone.y = 0;
     this.exclusionZone.width = cw;
     this.exclusionZone.height = h;
+  }
+
+  // Preload video elements for each stage to avoid playback delay
+  preloadStageVideos() {
+    const mapping = {
+      1: 'videos/VideoClara.mp4',
+      2: 'videos/VideoSantiago.mp4',
+      3: 'videos/VideoStage3.mp4'
+    };
+
+    Object.keys(mapping).forEach((stageKey) => {
+      const src = mapping[stageKey];
+      try {
+        const v = document.createElement('video');
+        v.preload = 'auto';
+        v.muted = true; // allow preload without autoplay restrictions
+        v.src = src;
+        // start loading
+        v.load();
+        // keep reference
+        this.preloadedStageVideos[stageKey] = v;
+      } catch (e) {
+        // ignore errors, will fallback to creating on demand
+        console.warn('Video preload failed for', src, e);
+      }
+    });
   }
 
   get activeFoods() {
@@ -471,23 +501,34 @@ export class GameManager {
       const videoContainer = document.createElement('div');
       videoContainer.className = 'stage-video-container';
       videoContainer.style.transition = 'opacity 0.7s';
-
-      const video = document.createElement('video');
-      video.className = 'stage-video';
-      // Selecciona el video según la etapa
-      let videoSrc = '';
-      if (this.currentStage === 1) {
-        videoSrc = 'videos/VideoClara.mp4';
-      } else if (this.currentStage === 2) {
-        videoSrc = 'videos/VideoSantiago.mp4';
-      } else if (this.currentStage === 3) {
-        videoSrc = 'videos/VideoStage3.mp4';
+      // Try to use a preloaded video element to avoid startup lag
+      let video = null;
+      const pre = this.preloadedStageVideos && this.preloadedStageVideos[this.currentStage];
+      if (pre && pre.cloneNode) {
+        // clone so event listeners/state won't be shared
+        video = pre.cloneNode(true);
+        video.className = 'stage-video';
+        video.muted = false;
+        video.playsInline = true;
+        video.setAttribute('autoplay', '');
+      } else {
+        video = document.createElement('video');
+        video.className = 'stage-video';
+        // Selecciona el video según la etapa
+        let videoSrc = '';
+        if (this.currentStage === 1) {
+          videoSrc = 'videos/VideoClara.mp4';
+        } else if (this.currentStage === 2) {
+          videoSrc = 'videos/VideoSantiago.mp4';
+        } else if (this.currentStage === 3) {
+          videoSrc = 'videos/VideoStage3.mp4';
+        }
+        video.src = videoSrc;
+        video.muted = false;
+        video.playsInline = true;
+        video.setAttribute('autoplay', '');
+        video.setAttribute('preload', 'auto');
       }
-      video.src = videoSrc;
-      video.muted = false;
-      video.playsInline = true;
-      video.setAttribute('autoplay', '');
-      video.setAttribute('preload', 'auto');
 
       // Agregar controles de video
       const controls = document.createElement('div');
