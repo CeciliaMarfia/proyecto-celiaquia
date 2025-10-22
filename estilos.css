@@ -54,7 +54,7 @@ body {
 }
 
 .game-header h1 {
-  color: #4CAF50; /* softer dark brown for better contrast on beige */
+  color: #3f2f23; /* softer dark brown for better contrast on beige */
   font-size: 2rem;
   color: var(--primary-color);
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
