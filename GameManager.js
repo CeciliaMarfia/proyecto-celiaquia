@@ -17,7 +17,7 @@ export class GameManager {
     this.countdownStartTime = 0; // Tiempo de inicio del conteo
 
     this.gameStartTime = 0;
-    this.stageDuration = 120000; // 2min por etapa // si se saca un 0 queda en 12seg
+    this.stageDuration = 60000; // 1min por etapa // 1200 = 12 seg
     this.allFoodItems = [];
     this.foodSpawnInterval = 500; // ms entre spawns
     this.lastFoodSpawn = 0;
